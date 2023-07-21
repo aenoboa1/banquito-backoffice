@@ -39,7 +39,7 @@
 import CreditCard from "../examples/Icons/CreditCard";
 import GestionPais from "../features/gestion-pais";
 import GestionFeriados from "../features/gestion-feriados";
-import {Business, Folder, PartyMode, Person} from "@mui/icons-material";
+import {Business, Folder, PartyMode, Person, Public} from "@mui/icons-material";
 import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
@@ -50,7 +50,7 @@ const routes = [
         name: "Gestion Paises",
         key: "pais",
         route: "/pais",
-        icon: <CreditCard size="12px"/>,
+        icon: <Public size="12px"/>,
         component: <GestionPais/>,
         noCollapse: true,
     },
