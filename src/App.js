@@ -122,7 +122,7 @@ export default function App() {
               <Sidenav
                   color={sidenavColor}
                   brand={brand}
-                  brandName="BanQuito"
+                  brandName="BanQuito BackOffice"
                   routes={routes}
                   onMouseEnter={handleOnMouseEnter}
                   onMouseLeave={handleOnMouseLeave}
@@ -131,7 +131,7 @@ export default function App() {
         )}
         <Routes>
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/cuentas" />} />
+          <Route path="*" element={<Navigate to="/pais" />} />
         </Routes>
       </ThemeProvider>
   );
