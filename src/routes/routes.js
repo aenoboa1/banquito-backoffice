@@ -39,9 +39,10 @@
 import CreditCard from "../examples/Icons/CreditCard";
 import GestionPais from "../features/gestion-pais";
 import GestionFeriados from "../features/gestion-feriados";
-import {PartyMode, Person} from "@mui/icons-material";
+import {Business, Folder, PartyMode, Person} from "@mui/icons-material";
 import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
+import EntidadBancaria from "../features/entidad-bancaria";
 
 const routes = [
     {
@@ -73,25 +74,36 @@ const routes = [
         component: <GestionFeriados/>,
         noCollapse: true,
     },
-    // TODO: Cambiar mejores rutas
+
     {
         type: "collapse",
-        name: "Gestion Clientes Naturales",
+        name: "Entidad Bancaria",
+        key: "entidad",
+        route: "/entidad",
+        icon: <Folder size="12px"/>,
+        component: <EntidadBancaria/>,
+        noCollapse: true,
+    },
+    {
+        type: "collapse",
+        name: "Gest. Clientes Naturales",
         key: "clientesnaturales",
         route: "/clientesnaturales",
         icon: <Person size="12px"/>,
         component: <ClientesNaturales/>,
         noCollapse: true,
     },
+
     {
         type: "collapse",
-        name: "Gestion Clientes Juridicos",
+        name: "Gest. Clientes Juridicos",
         key: "clientesjuridicos",
         route: "/clientesjuridicos",
-        icon: <Person size="12px"/>,
+        icon: <Business size="12px"/>,
         component: <ClientesJuridicos/>,
         noCollapse: true,
     },
+
 ];
 
 export default routes;
