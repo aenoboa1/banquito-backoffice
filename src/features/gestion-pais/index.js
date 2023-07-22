@@ -9,7 +9,6 @@ function GestionPais() {
         <DashboardLayout>
             <DashboardNavbar/>
             <Country/>
-
         </DashboardLayout>
     );
 }
