@@ -94,7 +94,6 @@ export default function App() {
 
   return direction === "rtl" ? (
       <CacheProvider value={rtlCache}>
-        <ThemeProvider theme={themeRTL}>
           <CssBaseline />
           {layout === "dashboard" && (
               <>
@@ -112,7 +111,6 @@ export default function App() {
             {getRoutes(routes)}
             <Route path="*" element={<Navigate to="/cuentas" />} />
           </Routes>
-        </ThemeProvider>
       </CacheProvider>
   ) : (
       <ThemeProvider theme={theme}>
