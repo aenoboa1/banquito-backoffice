@@ -39,7 +39,7 @@
 import CreditCard from "../examples/Icons/CreditCard";
 import GestionPais from "../features/gestion-pais";
 import GestionFeriados from "../features/gestion-feriados";
-import {Business, Folder, PartyMode, Person, Public} from "@mui/icons-material";
+import {AccountTreeOutlined, Business, Folder, PartyMode, Person, Public} from "@mui/icons-material";
 import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
@@ -54,7 +54,22 @@ const routes = [
         component: <GestionPais/>,
         noCollapse: true,
     },
-
+    {
+        type: "collapse",
+        name: "Estructura Geográfica",
+        key: "geo-structure",
+        route: "/geo-structure",
+        icon: <AccountTreeOutlined size="12px"/>,
+        component: <GestionPais/>,
+        collapse: [
+            {
+                name: "Localidades",
+                key: "localidades",
+                route: "/localidades",
+                component: <GestionPais/>,
+            }
+        ],
+    },
     {
         type: "collapse",
         name: "Gestion Feriados",
