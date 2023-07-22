@@ -26,6 +26,7 @@ const colors = {
 
   text: {
     main: "#67748e",
+    buttonmain: "#FFFFFF",
     focus: "#67748e",
   },
 
