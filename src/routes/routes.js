@@ -43,6 +43,7 @@ import {AccountTreeOutlined, Business, Folder, PartyMode, Person, Public} from "
 import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
+import GestionGeostructure from "../features/gestion-geostructure";
 
 const routes = [
     {
@@ -60,15 +61,7 @@ const routes = [
         key: "geo-structure",
         route: "/geo-structure",
         icon: <AccountTreeOutlined size="12px"/>,
-        component: <GestionPais/>,
-        collapse: [
-            {
-                name: "Localidades",
-                key: "localidades",
-                route: "/localidades",
-                component: <GestionPais/>,
-            }
-        ],
+        component: <GestionGeostructure/>,
     },
     {
         type: "collapse",

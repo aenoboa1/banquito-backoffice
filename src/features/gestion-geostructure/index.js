@@ -1,15 +1,14 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Country from "./components/Country";
 
 
-function GestionPais() {
+function GestionGeoStructure() {
     return (
         <DashboardLayout>
             <DashboardNavbar/>
-            <Country/>
+            <GestionGeoStructure/>
         </DashboardLayout>
     );
 }
 
-export default GestionPais;
+export default GestionGeoStructure;

@@ -1,5 +1,4 @@
-import * as React from 'react';
-import {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState}  from 'react';
 import {DataGrid} from '@mui/x-data-grid';
 import {createFakeServer} from '@mui/x-data-grid-generator';
 import {red} from "@mui/material/colors";
