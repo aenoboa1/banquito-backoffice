@@ -1,13 +1,12 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import BasicCard from "./components/BasicCard";
-
+import HolidayPage from "./components/HolidayPage";
 
 function GestionFeriados() {
     return (
         <DashboardLayout>
-            <DashboardNavbar />
-            <BasicCard/>
+            <DashboardNavbar/>
+            <HolidayPage/>
         </DashboardLayout>
     );
 }
