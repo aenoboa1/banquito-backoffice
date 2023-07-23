@@ -36,6 +36,8 @@
  */
 
 // Soft UI Dashboard React layouts
+
+// Soft UI Dashboard React layouts
 import CreditCard from "../examples/Icons/CreditCard";
 import GestionPais from "../features/gestion-pais";
 import GestionFeriados from "../features/gestion-feriados";
@@ -58,31 +60,30 @@ const routes = [
     {
         type: "collapse",
         name: "Estructura Geográfica",
-        key: "geo-structure",
-        route: "/geo-structure",
+        key: "geostructure",
+        route: "/geostructure",
         icon: <AccountTreeOutlined size="12px"/>,
         component: <GestionGeostructure/>,
     },
     {
-
         type: "collapse",
         name: "Gestion Feriados",
         key: "feriados",
+        route: "/feriados",
         icon: <PartyMode size="12px"/>,
-        children: [
-            {
-                type: "collapse",
-                name: "Gestion Sucursales",
-                key: "sucursales",
-                route: "/sucursales",
-                icon: <CreditCard size="12px"/>,
-                component: <GestionFeriados/>,
-                noCollapse: true,
-            },
-
-        ]
+        component: <GestionFeriados/>,
+        noCollapse: true,
     },
 
+    {
+        type: "collapse",
+        name: "Gestion Sucursales",
+        key: "sucursales",
+        route: "/sucursales",
+        icon: <CreditCard size="12px"/>,
+        component: <GestionFeriados/>,
+        noCollapse: true,
+    },
 
     {
         type: "collapse",
@@ -92,8 +93,6 @@ const routes = [
         icon: <Folder size="12px"/>,
         component: <EntidadBancaria/>,
         noCollapse: true,
-
-
     },
     {
         type: "collapse",
