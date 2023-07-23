@@ -74,7 +74,6 @@ const routes = [
         component: <GestionFeriados/>,
         noCollapse: true,
     },
-
     {
         type: "collapse",
         name: "Gestion Sucursales",
