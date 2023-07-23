@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {TextField, Slider, Switch, FormControlLabel, Button, Box, Select} from '@mui/material';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
 import {yupResolver} from "@hookform/resolvers/yup";
 import MenuItem from "@mui/material/MenuItem";
+import useStateContext from "../../../../context/custom/useStateContext";
 
 const validationSchema = yup.object({
     typeAddress: yup.string().required('Type of Address is required'),
@@ -14,6 +15,9 @@ const validationSchema = yup.object({
 });
 
 const AddressCreationForm = () => {
+
+    const {context, setContext} = useStateContext();
+
     const {
         control,
         handleSubmit,
@@ -31,7 +35,15 @@ const AddressCreationForm = () => {
     });
 
     const onSubmit = (data) => {
-        alert(JSON.stringify(data, null, 2));
+        setContext({
+            typeAddress: data.typeAddress,
+            line1: data.line1,
+            line2: data.line2,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            isDefault: data.isDefault,
+
+        });
     };
 
     const typeAddress = [
