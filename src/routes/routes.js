@@ -36,13 +36,16 @@
  */
 
 // Soft UI Dashboard React layouts
+
+// Soft UI Dashboard React layouts
 import CreditCard from "../examples/Icons/CreditCard";
 import GestionPais from "../features/gestion-pais";
 import GestionFeriados from "../features/gestion-feriados";
-import {Business, Folder, PartyMode, Person, Public} from "@mui/icons-material";
+import {AccountTreeOutlined, Business, Folder, PartyMode, Person, Public} from "@mui/icons-material";
 import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
+import GestionGeostructure from "../features/gestion-geostructure";
 
 const routes = [
     {
@@ -54,7 +57,14 @@ const routes = [
         component: <GestionPais/>,
         noCollapse: true,
     },
-
+    {
+        type: "collapse",
+        name: "Estructura Geográfica",
+        key: "geostructure",
+        route: "/geostructure",
+        icon: <AccountTreeOutlined size="12px"/>,
+        component: <GestionGeostructure/>,
+    },
     {
         type: "collapse",
         name: "Gestion Feriados",

@@ -38,7 +38,7 @@ const baseProperties = {
   fontSizeSM: pxToRem(14),
   fontSizeMD: pxToRem(16),
   fontSizeLG: pxToRem(18),
-  fontSizeXL: pxToRem(20),
+  fontSizeXL: pxToRem(16),
 };
 
 const baseHeadingProperties = {
