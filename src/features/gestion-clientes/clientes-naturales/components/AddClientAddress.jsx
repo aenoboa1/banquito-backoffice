@@ -35,15 +35,15 @@ const AddressCreationForm = () => {
     });
 
     const onSubmit = (data) => {
-        setContext({
-            typeAddress: data.typeAddress,
-            line1: data.line1,
-            line2: data.line2,
-            latitude: data.latitude,
-            longitude: data.longitude,
-            isDefault: data.isDefault,
+        const updatedAddresses = Array.isArray(context.addresses)
+            ? [...context.addresses, data]
+            : [data];
 
-        });
+            setContext({
+                ...context.addresses,
+                addresses: updatedAddresses,
+            });
+
     };
 
     const typeAddress = [
