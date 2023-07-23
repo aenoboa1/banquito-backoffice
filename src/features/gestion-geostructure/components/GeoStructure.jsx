@@ -21,6 +21,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { createAPIEndpoint, ENDPOINTS } from "../../../api";
 import { useNavigate } from 'react-router-dom';
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import axios from 'axios';
 
 export default function GeoStructure() {
@@ -256,17 +257,10 @@ export default function GeoStructure() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                     <Paper elevation={3} sx={{ mx: 'auto', width: 200, p: 1, m: 1, textAlign: 'center' }}>
-                        <Button aria-label="view" size="large" startIcon={<TravelExplore />}>
-                            Buscar
+                        <Button aria-label="view" size="large" startIcon={<AddLocationAltIcon />}>
+                            Crear localidad
                         </Button>
 
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                    <Paper elevation={3} sx={{ mx: 'auto', width: 200, p: 1, m: 1, textAlign: 'center' }}>
-                        <Button aria-label="edit" size="large" startIcon={<AccountTree />}>
-                            Estructura Geográfica
-                        </Button>
                     </Paper>
                 </Grid>
             </Grid>
