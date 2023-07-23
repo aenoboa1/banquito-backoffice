@@ -64,24 +64,25 @@ const routes = [
         component: <GestionGeostructure/>,
     },
     {
+
         type: "collapse",
         name: "Gestion Feriados",
         key: "feriados",
-        route: "/feriados",
         icon: <PartyMode size="12px"/>,
-        component: <GestionFeriados/>,
-        noCollapse: true,
+        children: [
+            {
+                type: "collapse",
+                name: "Gestion Sucursales",
+                key: "sucursales",
+                route: "/sucursales",
+                icon: <CreditCard size="12px"/>,
+                component: <GestionFeriados/>,
+                noCollapse: true,
+            },
+
+        ]
     },
 
-    {
-        type: "collapse",
-        name: "Gestion Sucursales",
-        key: "sucursales",
-        route: "/sucursales",
-        icon: <CreditCard size="12px"/>,
-        component: <GestionFeriados/>,
-        noCollapse: true,
-    },
 
     {
         type: "collapse",
@@ -91,6 +92,8 @@ const routes = [
         icon: <Folder size="12px"/>,
         component: <EntidadBancaria/>,
         noCollapse: true,
+
+
     },
     {
         type: "collapse",

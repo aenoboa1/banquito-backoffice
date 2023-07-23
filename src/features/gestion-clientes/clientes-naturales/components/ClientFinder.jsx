@@ -1,19 +1,9 @@
 import React, {useState} from "react";
 import Grid from "@mui/material/Grid";
-import SoftButton from "../../../../components/SoftButton";
-import IconButton from "@mui/material/IconButton";
-import SearchIcon from "@mui/icons-material/Search";
-import InputBase from "@mui/material/InputBase";
-import Paper from "@mui/material/Paper";
-import Divider from "@mui/material/Divider";
-import SoftInput from "../../../../components/SoftInput";
 import Button from "@mui/material/Button";
-import {DialogTitle, Modal} from "@mui/material";
+import {Modal} from "@mui/material";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import {Close} from "@mui/icons-material";
 import {AddClientForm} from "./AddClientForm";
-
 
 
 export const ClientFinder = () => {
@@ -65,6 +55,7 @@ export const ClientFinder = () => {
                         >
                             {/* Apply styles here: */}
                             <Box sx={style}>
+
                                 <AddClientForm/>
                             </Box>
 

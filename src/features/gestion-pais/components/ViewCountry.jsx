@@ -6,12 +6,27 @@ import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import IconButton from "@mui/material/IconButton";
 import {LocationSearching} from "@mui/icons-material";
+import {createAPIEndpoint, ENDPOINTS} from "../../../api";
 
 export default function ViewCountry() {
     const [searchedCountry, setSearchedCountry] = useState('');
     const handleClickSearchCountry = () => {
         console.log('searchedCountry: ', searchedCountry);
+        submit(searchedCountry);
+
     }
+
+    const submit = (searchedCountry) => {
+        createAPIEndpoint(ENDPOINTS.country,
+        ).fetchById(searchedCountry,{
+
+        }).then( response =>
+            console.log(response.data)
+
+        ).catch(
+            err => console.log(err)
+        )
+    };
     return (
         <Box>
             <Grid container spacing={2} sx={{justifyContent:'center'}}>

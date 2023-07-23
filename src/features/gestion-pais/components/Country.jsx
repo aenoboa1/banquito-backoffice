@@ -14,6 +14,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import {InputLabel} from "@mui/material";
 import ViewCountry from "./ViewCountry";
+import {createAPIEndpoint, ENDPOINTS} from "../../../api";
 
 
 export default function Country() {
@@ -25,6 +26,19 @@ export default function Country() {
     const toggleCountrySearchVisibility = () => {
         setShowCountrySearch(!showCountrySearch);
     }
+
+    const submit = (data) => {
+        createAPIEndpoint(ENDPOINTS.country,
+        ).post(data,{
+
+        }).then( response =>
+            console.log(response.data)
+
+        ).catch(
+            err => console.log(err)
+        )
+    };
+
     const CreateCountryForm = () => {
         return (
             <Formik
@@ -60,7 +74,7 @@ export default function Country() {
                 }}
                 onSubmit={(values, {resetForm}) => {
                     resetForm();
-                    console.log(values);
+                    submit(values)
                     setShowCountryForm(false)
                 }}
             >
