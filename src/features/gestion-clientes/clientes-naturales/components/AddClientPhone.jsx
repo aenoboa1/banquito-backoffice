@@ -44,10 +44,14 @@ const PhoneCreationForm = () => {
     ];
 
     const onSubmit = (data) => {
+
+        const updatedPhones = Array.isArray(context.phones)
+            ? [...context.phones, data]
+            : [data];
+
         setContext({
-            phoneNumber: data.phoneNumber,
-            phoneType: data.phoneType,
-            isDefault: data.isDefault,
+            ...context.phones,
+            phones: updatedPhones,
         });
     };
 

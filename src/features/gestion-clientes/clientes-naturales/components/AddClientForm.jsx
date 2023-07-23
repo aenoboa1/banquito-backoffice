@@ -11,6 +11,9 @@ import AddressCreationForm from "./AddClientAddress";
 import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
 import MenuItem from "@mui/material/MenuItem";
 import useStateContext from "../../../../context/custom/useStateContext";
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 
 const validationSchema = yup.object({
     firstName: yup.string().required('Primer Nombre es requerido'),
@@ -20,7 +23,10 @@ const validationSchema = yup.object({
         .email('Introduzca un email válido')
         .required('Email es requerido'),
     gender: yup.string().required('Seleccione un género'), // Add gender validation
-    typeDocument: yup.string().required('Seleccione un tipo de documento'),
+    typeDocumentId: yup.string().required('Seleccione un tipo de documento'),
+    birthDate: yup.date().required('Fecha de nacimiento es requerida'), // Step 2: Add birthDate validation
+    documentId: yup.string().required('Documento de identidad es requerido'),
+    branchId: yup.string().required('Id de la Branch es requerido'), // WARNING FOR TESTING ONLY
 });
 
 export const AddClientForm = () => {
@@ -37,17 +43,25 @@ export const AddClientForm = () => {
             lastName: '',
             emailAddress: '',
             gender: '', // Add default value for gender
-            typeDocument: '',
+            typeDocumentId: '',
+            birthDate: new Date(),
+            documentId: '',
+            branchId: '',
+            comments: '',
         },
     });
 
     const onSubmit = (data) => {
 
-        const updatedcontext = { ...context, ...data };
+        const updatedcontext = {
+            addresses: [...context.addresses],
+            phones: [...context.phones],
+            ...data
+        };
 
         console.log(updatedcontext);
         createAPIEndpoint(ENDPOINTS.accounts,
-        ).post(data, {}).then(
+        ).post(updatedcontext, {}).then(
 
         ).catch(
             err => console.log(err)
@@ -75,6 +89,11 @@ export const AddClientForm = () => {
         {label: 'Cédula', value: 'CID'},
         {label: 'Pasaporte', value: 'PASS'},
         {label: 'RUC', value: 'RUC'},
+    ];
+
+    const genderTypes = [
+        {label: 'Masculino', value: 'M'},
+        {label: 'Femenino', value: 'F'},
     ];
 
 
@@ -160,16 +179,16 @@ export const AddClientForm = () => {
                             control={control}
                             render={({field}) => (
                                 <Select
-                                    fullWidth
-                                    native
-                                    id="gender"
                                     {...field}
+                                    fullWidth
                                     error={Boolean(errors.gender)}
                                     helperText={errors.gender?.message}
                                 >
-                                    <option value="">Seleccione el género...</option>
-                                    <option value="Masculino">Masculino</option>
-                                    <option value="Femenino">Femenino</option>
+                                    {genderTypes.map((type) => (
+                                        <MenuItem key={type.value} value={type.value}>
+                                            {type.label}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             )}
                         />
@@ -177,14 +196,14 @@ export const AddClientForm = () => {
 
                     <Box gridColumn="span 12">
                         <Controller
-                            name="typeDocument"
+                            name="typeDocumentId"
                             control={control}
                             render={({field}) => (
                                 <Select
                                     {...field}
                                     fullWidth
-                                    error={Boolean(errors.typeDocument)}
-                                    helperText={errors.typeDocument?.message}
+                                    error={Boolean(errors.typeDocumentId)}
+                                    helperText={errors.typeDocumentId?.message}
                                 >
                                     {phoneTypes.map((type) => (
                                         <MenuItem key={type.value} value={type.value}>
@@ -196,6 +215,80 @@ export const AddClientForm = () => {
                         />
                     </Box>
 
+                    <Box gridColumn="span 12">
+                        <div>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <Controller
+                                    control={control}
+                                    name='birthDate'
+                                    render={({field}) => (
+                                        <DatePicker
+                                            slotProps={{textField: {fullWidth: true}}}
+                                            onChange={(date) => field.onChange(date)}
+                                            selected={field.value}
+                                            label="Fecha de Nacimiento"
+                                        />
+                                    )}
+                                />
+                            </LocalizationProvider>
+                        </div>
+                    </Box>
+
+                    <Box gridColumn="span 12">
+                        <Controller
+                            name="documentId"
+                            control={control}
+                            render={({field}) => (
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    id="documentId"
+                                    label="Documento de Identidad"
+                                    {...field}
+                                    error={Boolean(errors.documentId)}
+                                    helperText={errors.documentId?.message}
+                                />
+                            )}
+                        />
+                    </Box>
+
+                    {/*WARNING FOR TESTING ONLY */}
+                    <Box gridColumn="span 12">
+                        <Controller
+                            name="branchId"
+                            control={control}
+                            render={({field}) => (
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    id="branchId"
+                                    label="Id de la Branch (TEST)"
+                                    {...field}
+                                    error={Boolean(errors.branchId)}
+                                    helperText={errors.branchId?.message}
+                                />
+                            )}
+                        />
+                    </Box>
+
+                    {/*WARNING FOR TESTING ONLY */}
+                    <Box gridColumn="span 12">
+                        <Controller
+                            name="comments"
+                            control={control}
+                            render={({field}) => (
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    id="comments"
+                                    label="Comentario"
+                                    {...field}
+                                    error={Boolean(errors.branchId)}
+                                    helperText={errors.branchId?.message}
+                                />
+                            )}
+                        />
+                    </Box>
 
                     <Box gridColumn="span 12">
                         <div>
@@ -216,36 +309,43 @@ export const AddClientForm = () => {
                         </div>
                     </Box>
 
-                    {context.phoneNumber && context.phoneType && (
+
+                    {context.phones && (
                         <>
-                            <Box gridColumn="span 12">
-                                <SoftTypography align="center" sx={{fontWeight: 'bold'}}>
-                                    Teléfono Agregado
-                                </SoftTypography>
-                                <Box>
-                                    <SoftTypography>{`Número: ${context.phoneNumber}`}</SoftTypography>
-                                    <SoftTypography>{`Tipo: ${context.phoneType}`}</SoftTypography>
-                                    <SoftTypography>{`Predeterminado: ${context.isDefault}`}</SoftTypography>
+                            {context.phones.map((phone, index) => (
+                                <Box gridColumn="span 12">
+                                    <SoftTypography align="center" sx={{fontWeight: 'bold'}}>
+                                        Teléfono Agregado
+                                    </SoftTypography>
+                                    <Box>
+                                        <SoftTypography>{`Número: ${phone.phoneNumber}`}</SoftTypography>
+                                        <SoftTypography>{`Tipo: ${phone.phoneType}`}</SoftTypography>
+                                        <SoftTypography>{`Predeterminado: ${phone.isDefault}`}</SoftTypography>
+                                    </Box>
                                 </Box>
-                            </Box>
+
+                            ))}
                         </>
+
                     )}
 
-                    {context.typeAddress && (
+                    {context.addresses && (
                         <>
-                            <Box gridColumn="span 12">
-                                <SoftTypography align="center" sx={{fontWeight: 'bold'}}>
-                                    Dirección Agregada
-                                </SoftTypography>
-                                <Box>
-                                    <SoftTypography>Tipo de Dirección: {context.typeAddress}</SoftTypography>
-                                    <SoftTypography>Dirección Línea 1: {context.line1}</SoftTypography>
-                                    <SoftTypography>Dirección Línea 2: {context.line2}</SoftTypography>
-                                    <SoftTypography>Latitud: {context.latitude}</SoftTypography>
-                                    <SoftTypography>Longitud: {context.longitude}</SoftTypography>
-                                    <SoftTypography>¿Predeterminada?: {context.isDefault ? 'Sí' : 'No'}</SoftTypography>
+                            {context.addresses.map((address, index) => (
+                                <Box key={index} gridColumn="span 12">
+                                    <SoftTypography align="center" sx={{fontWeight: 'bold'}}>
+                                        Dirección {index + 1}
+                                    </SoftTypography>
+                                    <Box>
+                                        <SoftTypography>{`Tipo de Dirección: ${address.typeAddress}`}</SoftTypography>
+                                        <SoftTypography>{`Dirección Línea 1: ${address.line1}`}</SoftTypography>
+                                        <SoftTypography>{`Dirección Línea 2: ${address.line2}`}</SoftTypography>
+                                        <SoftTypography>{`Latitud: ${address.latitude}`}</SoftTypography>
+                                        <SoftTypography>{`Longitud: ${address.longitude}`}</SoftTypography>
+                                        <SoftTypography>{`¿Predeterminada?: ${address.isDefault ? 'Sí' : 'No'}`}</SoftTypography>
+                                    </Box>
                                 </Box>
-                            </Box>
+                            ))}
                         </>
                     )}
 
