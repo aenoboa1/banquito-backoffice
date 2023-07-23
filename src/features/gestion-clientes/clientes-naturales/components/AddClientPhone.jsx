@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
 import {yupResolver} from "@hookform/resolvers/yup";
+import useStateContext from "../../../../context/custom/useStateContext";
 
 const validationSchema = yup.object({
     phoneNumber: yup
@@ -19,6 +20,9 @@ const validationSchema = yup.object({
 });
 
 const PhoneCreationForm = () => {
+
+    const {context, setContext} = useStateContext();
+
     const {
         control,
         handleSubmit,
@@ -40,7 +44,11 @@ const PhoneCreationForm = () => {
     ];
 
     const onSubmit = (data) => {
-        alert(JSON.stringify(data, null, 2));
+        setContext({
+            phoneNumber: data.phoneNumber,
+            phoneType: data.phoneType,
+            isDefault: data.isDefault,
+        });
     };
 
     return (
