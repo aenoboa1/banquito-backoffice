@@ -20,7 +20,7 @@ export const createAPIEndpoint = endpoint => {
         put: (id, updatedRecord, token) => axios.put(url + id, updatedRecord, token),
         delete: id => axios.delete(url + id),
         fetchById: (id, token) => axios.get(url + id, token),
-        fetchByCode: (code, token) => axios.get(url + code, token),
+        fetchByName: (name, token) => axios.get(url + "countries/"+name,token)
     }
 }
 

@@ -3,8 +3,9 @@ import Box from '@mui/material/Box';
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Divider from '@mui/material/Divider';
-import {AccountTree, AddLocationSharp, TravelExplore} from "@mui/icons-material";
+import {AccountTree, AddLocationSharp, Delete, Edit, LocationSearching, TravelExplore} from "@mui/icons-material";
 import Button from "@mui/material/Button";
+import IconButton from '@mui/material/IconButton';
 import {Formik, ErrorMessage, Form} from 'formik';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -12,19 +13,61 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import {InputLabel} from "@mui/material";
-import ViewCountry from "./ViewCountry";
+import {InputAdornment, InputLabel} from "@mui/material";
+import Alert from '@mui/material/Alert';
+import Collapse from '@mui/material/Collapse';
+import CloseIcon from '@mui/icons-material/Close';
 import {createAPIEndpoint, ENDPOINTS} from "../../../api";
+import CardActions from "@mui/material/CardActions";
 
 
 export default function Country() {
+    const [searchedCountry, setSearchedCountry] = useState('');
+    const [countryInfo, setCountryInfo] = useState(null);
     const [showCountryForm, setShowCountryForm] = useState(false);
     const [showCountrySearch, setShowCountrySearch] = useState(false);
+    const [isCreated, setIsCreated] = useState(false);
+
+
+
     const toggleCountryFormVisibility = () => {
-        setShowCountryForm(true);
+        setShowCountryForm(!showCountryForm);
     }
     const toggleCountrySearchVisibility = () => {
         setShowCountrySearch(!showCountrySearch);
+    }
+
+    const handleClickSearchCountry = () => {
+        console.log('searchedCountry: ', searchedCountry);
+        getCountry(searchedCountry);
+
+    }
+
+    const handlerChangeCountry = (event) => {
+        setSearchedCountry(event.target.value);
+    }
+
+    const getCountry = (searchedCountry) => {
+        createAPIEndpoint(ENDPOINTS.country,
+        ).fetchByName(searchedCountry,{
+
+        }).then( response =>
+            response.status.valueOf() === 200 ? setCountryInfo(response.data) : setCountryInfo(null)
+        ).catch(
+            err => console.log(err)
+        )
+    };
+
+    const deleteCountry = (id) => {
+        createAPIEndpoint(ENDPOINTS.country,
+        ).delete(id,{
+
+        }).then( response =>
+            console.log(response)
+        ).catch(
+            err => console.log(err)
+        )
+
     }
 
     const submit = (data) => {
@@ -32,12 +75,101 @@ export default function Country() {
         ).post(data,{
 
         }).then( response =>
-            console.log(response.data)
+            response.status.valueOf() === 200 ? setIsCreated(true) : setIsCreated(false)
 
         ).catch(
             err => console.log(err)
         )
     };
+
+    const CountryCard = () => {
+        return (
+            <Box >
+                <Grid container  sx={{justifyContent: 'center'}}>
+                    <Card sx={{width: '50%'}}>
+                        <CardContent sx={{p:1,m:1}}>
+                            <Typography variant="h5" component="div">
+                                País: {countryInfo.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Código de pías: {countryInfo.code}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Código de teléfono: {countryInfo.phoneCode}
+                            </Typography>
+                        </CardContent>
+                        <CardActions sx={{p:1,m:1}}>
+                            <IconButton size="Normal">
+                                <Edit/>
+                            </IconButton>
+                            <IconButton onClick={deleteCountry(countryInfo.code)} size="Normal">
+                                <Delete/>
+                            </IconButton>
+                        </CardActions>
+                    </Card>
+                </Grid>
+
+            </Box>
+        )
+    }
+
+    const ViewCountry = () => {
+        return (
+            <Box>
+                <Grid container spacing={2} sx={{justifyContent:'center'}}>
+                    <FormControl sx={{ m: 1, p:1, width:'50%' }} variant="outlined">
+                        <InputLabel htmlFor="name">País</InputLabel>
+                        <OutlinedInput
+                            fullWidth
+                            id="name"
+                            endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton variant="contained"
+                                        onClick={handleClickSearchCountry}
+                                        edge="end"
+                                    >
+                                        <LocationSearching/>
+                                    </IconButton>
+                                </InputAdornment>
+                            }
+                            label="Buscar País"
+                            value={searchedCountry}
+                            onChange={handlerChangeCountry}
+                        />
+                    </FormControl>
+                </Grid>
+                <Divider></Divider>
+                {countryInfo && <CountryCard/>}
+            </Box>
+        )
+    }
+
+    const AlertCountryCreated = () => {
+        return (
+            <Collapse in={isCreated}>
+                <Alert
+                    action={
+                        <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                setIsCreated(false);
+                                setShowCountryForm(false);
+                            }}
+                        >
+                            <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                    }
+                    sx={{ mb: 2 }}
+                >
+                    País creado con éxito!
+                </Alert>
+            </Collapse>
+
+        )
+    }
+
 
     const CreateCountryForm = () => {
         return (
@@ -67,15 +199,14 @@ export default function Country() {
                     if (!values.phoneCode) {
                         errors.phoneCode = 'Código de teléfono requerido!';
                     }
-                    else if (values.phoneCode.length !== 4) {
-                        errors.phoneCode = 'El código debe tener 4 caracteres!';
+                    else if (values.phoneCode.length > 4) {
+                        errors.phoneCode = 'El código debe tener hasta 4 caracteres!';
                     }
                     return errors;
                 }}
                 onSubmit={(values, {resetForm}) => {
                     resetForm();
                     submit(values)
-                    setShowCountryForm(false)
                 }}
             >
                 {({ errors,values,handleChange   }) => (
@@ -118,6 +249,7 @@ export default function Country() {
 
     return (
         <Box>
+            {isCreated && <AlertCountryCreated/>}
             <Grid container spacing={6} sx={{justifyContent: 'center'}}>
                 <Grid item xs={12} sm={6} md={4}>
                     <Paper elevation={3} sx={{mx: 'auto', width: 200, p: 1, m: 1, textAlign: 'center'}}>
