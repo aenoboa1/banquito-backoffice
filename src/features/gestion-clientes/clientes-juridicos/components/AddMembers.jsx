@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Select, TextField, Switch, FormControlLabel, InputLabel } from '@mui/material';
+import { Alert, Portal, Snackbar, TextField, } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -10,17 +10,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import useStateContext from "../../../../context/custom/useStateContext";
 
 const validationSchema = yup.object({
-    phoneNumber: yup
-        .string()
-        .matches(/^\d+$/, 'Phone number should only contain digits')
-        .min(10, 'Phone number should be at least 10 digits long')
-        .required('Phone Number is required'),
-    phoneType: yup.string().required('Phone Type is required'),
-    isDefault: yup.boolean().required('Please select whether it is default or not'),
+    clientList: yup.string().required('El cliente es necesario'),
+    roleType: yup.string().required('El rol es necesario'),
 });
 
-const AddMemberForm = () => {
-
+const AddMemberForm = ({ setIsActive }) => {
+    const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
     const { context, setContext } = useStateContext();
 
     const {
@@ -30,42 +25,56 @@ const AddMemberForm = () => {
     } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
-            phoneNumber: '',
-            phoneType: '',
-            isDefault: false,
+            roleType: '',
+            clientList: '',
         },
     });
 
-    const clientList = [
-        { label: 'Seleccione un cliente', value: '' },
+    const clientsList = [
         { label: 'Cliente 1', value: 'CID1' },
         { label: 'Cliente 2', value: 'CID2' },
         { label: 'Cliente 3', value: 'CID3' },
     ];
 
-    const roleType = [
-        { label: 'Seleccione un rol...', value: '' },
+    const rolesType = [
         { label: 'Representante legal', value: 'RL' },
         { label: 'Accionista', value: 'ACC' },
         { label: 'Apoderado', value: 'APO' },
     ];
 
-    const onSubmit = (data) => {
-
-        const updatedPhones = Array.isArray(context.phones)
-            ? [...context.phones, data]
-            : [data];
-
-        setContext({
-            ...context.phones,
-            phones: updatedPhones,
-        });
+    const onSubmit = (data, event) => {
+        if (context.members && Array.isArray(context.members)) {
+            const membersExists = context.members.some(
+                (member) => member.roleType && member.roleType === data.roleType
+            );
+            if (membersExists) {
+                setShowErrorSnackbar(true);
+                return; // Exit the function if the phone number already exists
+            } else {
+                const updatedMembers = Array.isArray(context.members)
+                    ? [...context.members, data]
+                    : [data];
+                setContext({
+                    ...context.members,
+                    members: updatedMembers,
+                });
+            }
+        } else {
+            setContext({
+                ...context.members,
+                members: [data],
+            });
+        }
     };
+
+    const handleOpen = () => {
+        setIsActive(false);
+    }
 
     return (
         <div>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
+                <Box display="grid" gridTemplateColumns="repeat(12, 2fr)" gap={4}>
                     <Box gridColumn="span 12">
                         <SoftTypography align="center" sx={{ fontWeight: 'bold' }}>
                             Agregar
@@ -73,56 +82,72 @@ const AddMemberForm = () => {
                     </Box>
 
                     <Box gridColumn="span 6">
-                        <InputLabel style={{ marginBottom: '5px' }}>Clientes</InputLabel>
                         <Controller
-                            name="phoneType"
+                            name="clientList"
                             control={control}
                             render={({ field }) => (
-                                <Select
+                                <TextField
                                     {...field}
                                     fullWidth
-                                    error={Boolean(errors.phoneType)}
-                                    helperText={errors.phoneType?.message}
+                                    select // tell TextField to render select
+                                    label="Lista de Clientes"
+                                    error={Boolean(errors.clientList)}
+                                    helperText={errors.clientList?.message}
                                 >
-                                    {clientList.map((type) => (
-                                        <MenuItem key={type.value} value={type.value}>
+                                    {clientsList.map((type) => (
+                                        <MenuItem key={type.value} value={type.label}>
                                             {type.label}
                                         </MenuItem>
                                     ))}
-                                </Select>
+                                </TextField>
                             )}
                         />
                     </Box>
 
                     <Box gridColumn="span 6">
-                        <InputLabel style={{ marginBottom: '5px' }}>Roles</InputLabel>
                         <Controller
                             name="roleType"
                             control={control}
                             render={({ field }) => (
-                                <Select
+                                <TextField
                                     {...field}
                                     fullWidth
+                                    select // tell TextField to render select
+                                    label="Tipo de roles"
                                     error={Boolean(errors.roleType)}
                                     helperText={errors.roleType?.message}
                                 >
-                                    {roleType.map((type) => (
-                                        <MenuItem key={type.value} value={type.value}>
+                                    {rolesType.map((type) => (
+                                        <MenuItem key={type.value} value={type.label}>
                                             {type.label}
                                         </MenuItem>
                                     ))}
-                                </Select>
+                                </TextField>
                             )}
                         />
                     </Box>
 
                     <Box gridColumn="span 12">
-                        <Button color="primary" variant="contained" fullWidth type="submit">
+                        <Button color="primary" variant="contained" fullWidth type="submit"
+                            onClick={handleOpen}>
                             Agregar Miembro
                         </Button>
                     </Box>
                 </Box>
             </form>
+            {showErrorSnackbar && (
+                <Portal>
+                    <Snackbar
+                        open={showErrorSnackbar}
+                        autoHideDuration={6000}
+                        onClose={() => setShowErrorSnackbar(false)}
+                    >
+                        <Alert onClose={() => setShowErrorSnackbar(false)} severity="error">
+                            El rol ya fue asignado.
+                        </Alert>
+                    </Snackbar>
+                </Portal>
+            )}
         </div>
     );
 };

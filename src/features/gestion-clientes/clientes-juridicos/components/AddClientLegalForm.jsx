@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Modal, TextField } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, ButtonGroup, Grid, IconButton, InputAdornment, Modal, TextField } from '@mui/material';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import SoftTypography from '../../../../components/SoftTypography';
@@ -9,6 +9,11 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
 import AddMemberForm from './AddMembers';
+import {
+    AddCircleOutline, Email, ContactPhone, Comment, LocalPhone, Group, AddLocation, ExpandMore,
+} from '@mui/icons-material';
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 const validationSchema = yup.object({
     groupName: yup.string().required('Primer Nombre es requerido'),
@@ -55,17 +60,17 @@ export const AddClientLegalForm = () => {
     const onSubmit = (data) => {
 
         const updatedcontext = {
-            members: [...context.members],
+            members: Array.isArray(context.members) ? [...context.members] : [],
             ...data
         };
 
         console.log(updatedcontext);
-        createAPIEndpoint(ENDPOINTS.accounts,
-        ).post(updatedcontext, {}).then(
+        // createAPIEndpoint(ENDPOINTS.accounts,
+        // ).post(updatedcontext, {}).then(
 
-        ).catch(
-            err => console.log(err)
-        )
+        // ).catch(
+        //     err => console.log(err)
+        // )
     };
 
     function handleSearch(e) {
@@ -84,35 +89,21 @@ export const AddClientLegalForm = () => {
         p: 4
     };
 
-    const roleType = [
-        { label: 'Seleccione un rol...', value: '' },
-        { label: 'Representante legal', value: 'CID' },
-        { label: 'Accionista', value: 'PASS' },
-        { label: 'Apoderado', value: 'RUC' },
-    ];
-
-    const clientList = [
-        { label: 'Seleccione un cliente', value: '' },
-        { label: 'Cliente 1', value: 'CID' },
-    ];
-
-    const [openAddress, setOpenAddress] = React.useState(false);
-    const handleOpenAddress = () => setOpenAddress(true);
-
-
-    const handleCloseAddress = () => setOpenAddress(false);
-
     const [open, setOpen] = React.useState(false);
-    const ha = () => {
-
-    }
     const handleOpen = () => {
-        setIsActive(false);
         setOpen(true);
+        setIsActive(true);
     }
     const handleClose = () => setOpen(false);
 
-    // Function to add a new phone number field
+    const handleDeleteMember = (index) => {
+        const updatedMembers = context.members.filter((_, i) => i !== index);
+        const updatedContext = {
+            ...context,
+            members: updatedMembers,
+        };
+        setContext(updatedContext);
+    };
 
     return (
         <div>
@@ -175,6 +166,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.groupName)}
                                     helperText={errors.groupName?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Group />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -193,6 +191,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.emailAddress)}
                                     helperText={errors.emailAddress?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Email />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -211,6 +216,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.phoneNumber)}
                                     helperText={errors.phoneNumber?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <ContactPhone />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -229,6 +241,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.line1)}
                                     helperText={errors.line1?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LocalPhone />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -247,6 +266,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.line2)}
                                     helperText={errors.line2?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LocalPhone />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -265,6 +291,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.latitude)}
                                     helperText={errors.latitude?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <AddLocation />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -283,6 +316,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.longitude)}
                                     helperText={errors.longitude?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <AddLocation />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -302,6 +342,13 @@ export const AddClientLegalForm = () => {
                                     {...field}
                                     error={Boolean(errors.branchId)}
                                     helperText={errors.branchId?.message}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Comment />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             )}
                         />
@@ -309,7 +356,8 @@ export const AddClientLegalForm = () => {
 
                     <Box gridColumn="span 12">
                         <div>
-                            <Button onClick={handleOpen} variant="contained">
+                            <Button onClick={handleOpen} variant="contained"
+                                startIcon={<AddCircleOutline />}>
                                 Agregar miembros
                             </Button>
                             <Modal
@@ -320,30 +368,88 @@ export const AddClientLegalForm = () => {
                                 style={{ backdropFilter: "blur(5px)" }}
                             >
                                 <Box sx={style}>
-                                    <AddMemberForm />
+                                    <AddMemberForm setIsActive={setIsActive} />
                                 </Box>
                             </Modal>
                         </div>
                     </Box>
 
-                    {
+                    {/* {
                         context.members && (
                             <>
-                                {context.members.map((phone, index) => (
+                                {context.members.map((member, index) => (
                                     <Box gridColumn="span 12">
                                         <SoftTypography align="center" sx={{ fontWeight: 'bold' }}>
-                                            Miembro Agregado
+                                            Miembro(s) Agregado
                                         </SoftTypography>
                                         <Box>
-                                            <SoftTypography>{`Número: ${phone.phoneNumber}`}</SoftTypography>
-                                            <SoftTypography>{`Tipo: ${phone.phoneType}`}</SoftTypography>
-                                            <SoftTypography>{`Predeterminado: ${phone.isDefault}`}</SoftTypography>
+                                            <SoftTypography>{`Cliente: ${member.clientList}`}</SoftTypography>
+                                            <SoftTypography>{`Rol: ${member.roleType}`}</SoftTypography>
                                         </Box>
                                     </Box>
                                 ))}
                             </>
                         )
-                    }
+                    } */}
+                    <Box gridColumn="span 12">
+                        {context.members && (
+                            <>
+                                {context.members.map((member, index) => (
+                                    <Box gridColumn="span 6">
+                                        <div>
+                                            <Accordion key={index}>
+                                                <AccordionSummary
+                                                    expandIcon={<ExpandMore />}
+                                                    aria-controls="panel1a-content"
+                                                    id="panel1a-header"
+                                                >
+                                                    <Box sx={{
+                                                        display: 'grid',
+                                                        gridTemplateColumns: 'repeat(12, 1fr)',
+                                                        gap: 4
+                                                    }}>
+                                                        <Box gridColumn="span 6"
+                                                            sx={{ position: 'relative' }}>
+                                                            <SoftTypography align="center"
+                                                                sx={{ fontWeight: 'bold' }}>
+                                                                Miembro {index + 1}
+                                                            </SoftTypography>
+                                                        </Box>
+                                                    </Box>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <Box>
+                                                        <SoftTypography>
+                                                            {`Cliente: ${member.clientList}`}
+                                                        </SoftTypography>
+                                                        <SoftTypography>
+                                                            {`Rol: ${member.roleType}`}
+                                                        </SoftTypography>
+                                                    </Box>
+                                                    <Box sx={{ position: 'absolute', bottom: 0, right: 0 }}>
+
+                                                        <ButtonGroup variant="outlined"
+                                                            aria-label="outlined button group">
+
+                                                            <IconButton aria-label="delete"
+                                                                onClick={() => handleDeleteMember(index)}>
+                                                                <DeleteIcon fontSize="small" />
+                                                            </IconButton>
+
+                                                            <IconButton aria-label="edit">
+                                                                <EditIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </ButtonGroup>
+                                                    </Box>
+                                                    {/* Optionally add more details here */}
+                                                </AccordionDetails>
+                                            </Accordion>
+                                        </div>
+                                    </Box>
+                                ))}
+                            </>
+                        )}
+                    </Box>
 
                     <Box gridColumn="span 12">
                         <Button color="primary" variant="contained" fullWidth type="submit"
