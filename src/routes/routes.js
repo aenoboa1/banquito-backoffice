@@ -48,9 +48,19 @@ import EntidadBancaria from "../features/entidad-bancaria";
 import GestionGeostructure from "../features/gestion-geostructure";
 import GestionGeolocation from "features/geolocation";
 import GestionCuentas from "features/gestion-cuentas";
+import GestionSucursales from "../features/gestion-sucursales";
 
 
 const routes = [
+    {
+        type: "collapse",
+        name: "Entidad Bancaria",
+        key: "entidadBancaria",
+        route: "/entidadBancaria",
+        icon: <CreditCard size="12px"/>,
+        component: <EntidadBancaria/>,
+        noCollapse: true,
+    },
     {
         type: "collapse",
         name: "Gestion Paises",
@@ -91,7 +101,7 @@ const routes = [
         key: "sucursales",
         route: "/sucursales",
         icon: <CreditCard size="12px"/>,
-        component: <GestionFeriados/>,
+        component: <GestionSucursales/>,
         noCollapse: true,
     },
 
