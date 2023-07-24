@@ -45,6 +45,7 @@ const PhoneCreationForm = () => {
         { label: 'Otro', value: 'OTH' },
     ];
 
+
     const onSubmit = (data,event) => {
 
         if (context.phones && Array.isArray(context.phones)) {
@@ -104,9 +105,12 @@ const PhoneCreationForm = () => {
                             name="phoneType"
                             control={control}
                             render={({ field }) => (
-                                <Select
+
+                                <TextField
                                     {...field}
                                     fullWidth
+                                    label="Tipo de Teléfono"
+                                    select
                                     error={Boolean(errors.phoneType)}
                                     helperText={errors.phoneType?.message}
                                 >
@@ -115,7 +119,7 @@ const PhoneCreationForm = () => {
                                             {type.label}
                                         </MenuItem>
                                     ))}
-                                </Select>
+                                </TextField>
                             )}
                         />
                     </Box>
