@@ -78,7 +78,6 @@ export default function HolidayGenerate({ isOpen, onClose, onSubmit }) {
                                     name="month"
                                     as="select"
                                     onChange={handleChange}
-                                    fullWidth
                                     style={selectStyle}
                                 >
                                     <option value="" >Seleccione un mes</option>
@@ -131,7 +130,6 @@ export default function HolidayGenerate({ isOpen, onClose, onSubmit }) {
                                     as="select"
                                     onChange={handleChange}
                                     value={values.daysOfWeek}
-                                    fullWidth
                                     style={selectStyle}
                                 >
                                     <option value="" >Seleccione dias</option>
