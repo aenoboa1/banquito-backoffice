@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Divider from '@mui/material/Divider';
-import { AccountTree, AddLocationSharp, Delete, Edit, LocationSearching, TravelExplore } from "@mui/icons-material";
+import { AddLocationSharp } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import IconButton from '@mui/material/IconButton';
 import { Formik, ErrorMessage, Form } from 'formik';
@@ -13,7 +13,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { InputAdornment, InputLabel } from "@mui/material";
+import { InputLabel } from "@mui/material";
 import Alert from '@mui/material/Alert';
 import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
@@ -32,19 +32,33 @@ export default function GeoStructure() {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [country, setCountry] = useState('');
     const [location, setLocation] = useState('');
+    const [province, setProvince] = useState('');
+    const [canton, setCanton] = useState('');
     const [countries, setCountries] = useState([]);
+    const [provinces, setProvinces] = useState([]);
+    const [cantons, setCantons] = useState([]);
     const [showLocationForm, setShowLocationForm] = useState(false);
     const [isResponse, setIsResponse] = useState(false);
+    const [locationParent, setLocationParent] = useState('');
 
     const locations = [
-        {name: 'Provincia', code: 1,},
-        {name: 'Cantón', code: 2,},
-        {name: 'Parroquia', code: 3}
+        { name: 'Provincia', code: 1, },
+        { name: 'Cantón', code: 2, },
+        { name: 'Parroquia', code: 3 }
     ]
 
     useEffect(() => {
         getAllCountries();
     }, []);
+
+    useEffect(() => {
+        getProvinces();
+    }, []);
+
+    useEffect(() => {
+        getCantons();
+    },[])
+
 
     const navigate = useNavigate();
 
@@ -56,6 +70,16 @@ export default function GeoStructure() {
         setLocation(event.target.value);
     }
 
+    const handleProvinceChange = (event) => {
+        setProvince(event.target.value);
+        setLocationParent(event.target.value);
+    }
+
+    const handleCantonChange = (event) => {
+        setCanton(event.target.value);
+        setLocationParent(event.target.value);
+    }
+
     const toggleLocationFormVisibility = () => {
         setShowLocationForm(!showLocationForm);
     }
@@ -64,9 +88,6 @@ export default function GeoStructure() {
         setShowGeoStructureForm(!showGeoStructureForm);
     }
 
-    const toggleGeoStructureSearchVisibility = () => {
-        setShowGeoStructureSearch(!showGeoStructureSearch);
-    }
 
     const getAllCountries = () => {
         createAPIEndpoint(ENDPOINTS.country,
@@ -79,16 +100,28 @@ export default function GeoStructure() {
         )
     }
 
-    const getGeoStructure = (searchedGeostructure) => {
-        createAPIEndpoint(ENDPOINTS.geoStructure,
-        ).fetchBy(searchedGeostructure, {
 
-        }).then(response =>
-            response.status.valueOf() === 200 ? setGeoStructureInfo(response.data) : setGeoStructureInfo(null)
-        ).catch(
-            err => console.log(err)
-        )
-    };
+    const getProvinces = () => {
+        axios.get('http://localhost:8080/api/v1/geo-structure/locations/ECU', { params: { levelCode: 1 } })
+            .then(response => {
+                if (response.status.valueOf() === 200) {
+                    setProvinces(response.data.locations);
+                }
+            })
+            .catch(err => console.log(err))
+    }
+
+    const getCantons = () => {
+        axios.get('http://localhost:8080/api/v1/geo-structure/locations/ECU', { params: {levelCode: 2 } })
+            .then(response => {
+                if (response.status.valueOf() === 200) {
+                    setCantons(response.data.locations);
+                }
+            })
+            .catch(err => console.log(err))
+    }
+
+
 
 
     const submitGeo = (data, code) => {
@@ -102,6 +135,7 @@ export default function GeoStructure() {
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setIsResponse(true);
+                    toggleGeoStructureFormVisibility();
                 }
 
             }).catch((error) => {
@@ -109,6 +143,20 @@ export default function GeoStructure() {
 
             });
     };
+
+    const createLocation = (data) => {
+        axios.post('http://localhost:8080/api/v1/geo-location', data)
+            .then(response => {
+                if (response.status.valueOf() === 200) {
+                    setIsResponse(true);
+                    toggleLocationFormVisibility();
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+
+            })
+    }
 
     const AlertCreated = () => {
         return (
@@ -121,7 +169,7 @@ export default function GeoStructure() {
                             size="small"
                             onClick={() => {
                                 setIsResponse(false);
-                                setShowGeoStructureForm(false);
+                                
                             }}
                         >
                             <CloseIcon fontSize="inherit" />
@@ -129,7 +177,7 @@ export default function GeoStructure() {
                     }
                     sx={{ mb: 2 }}
                 >
-                    Estructura geográfica creada con éxito!
+                    Registro creado con éxito!
                 </Alert>
             </Collapse>
 
@@ -163,7 +211,6 @@ export default function GeoStructure() {
                 }}
                 onSubmit={(values, { resetForm }) => {
                     resetForm();
-                    console.log(values, country);
                     submitGeo(values, country);
                 }}
             >
@@ -223,19 +270,19 @@ export default function GeoStructure() {
             <Formik
                 initialValues={{
                     name: '',
-                    areaCode: '',
+                    areaPhoneCode: '',
                     zipCode: '',
-                    locationParent: '',
+                    locationParent: locationParent,
 
                 }}
                 validate={(values) => {
                     let errors = {};
                     if (!values.name) {
                         errors.name = 'nombre requerido!';
-                    }else if (!/^[A-Za-z]+$/.test(values.name)) {
+                    } else if (!/^[A-Za-z]+$/.test(values.name)) {
                         errors.name = 'El nombre debe contener solo letras!';
                     }
-                    if (values.areaCode > 4) {
+                    if (values.areaPhoneCode > 4) {
                         errors.code = 'El código debe tener un dígito entre 1 y 3!';
                     }
                     if (!values.zipCode) {
@@ -247,6 +294,7 @@ export default function GeoStructure() {
                 onSubmit={(values, { resetForm }) => {
                     resetForm();
                     console.log(values);
+                    createLocation(values);
                 }}
             >
                 {({ errors, values, handleChange }) => (
@@ -262,48 +310,73 @@ export default function GeoStructure() {
                                             <FormControl sx={{ p: 1, m: 1, display: 'block' }} >
                                                 <InputLabel id="locationLbl">Localidad</InputLabel>
                                                 <Select fullWidth
-                                                        labelId="locationLbl"
-                                                        id='location'
-                                                        name="location"
-                                                        value={location}
-                                                        label="País"
-                                                        onChange={handleLocationChange}
+                                                    labelId="locationLbl"
+                                                    id='location'
+                                                    name="location"
+                                                    value={location}
+                                                    label="País"
+                                                    onChange={handleLocationChange}
                                                 >
-                                                    {locations.map((location   ) => (
+                                                    {locations.map((location) => (
                                                         <MenuItem key={location.code} value={location.code}>{location.name}</MenuItem>
                                                     ))}
 
                                                 </Select>
                                             </FormControl>
+                                            {location === 2 && (
+                                                <FormControl sx={{ p: 1, m: 1, display: 'block' }} >
+                                                    <InputLabel id="provinceLbl">Provincia</InputLabel>
+                                                    <Select fullWidth
+                                                        labelId="provinceLbl"
+                                                        id='locationParent'
+                                                        name="locationParent"
+                                                        value={province}
+                                                        label="Provincia"
+                                                        onChange={handleProvinceChange}
+                                                    >
+                                                        {provinces.map((province) => (
+                                                            <MenuItem key={province.id} value={province.id}>{province.name}</MenuItem>
+                                                        ))}
+
+                                                    </Select>
+                                                </FormControl>
+                                            )
+                                            }
+                                            {location === 3 && (
+                                                <FormControl sx={{ p: 1, m: 1, display: 'block' }} >
+                                                    <InputLabel id="cantonLbl">Cantón</InputLabel>
+                                                    <Select fullWidth
+                                                        labelId="provinceLbl"
+                                                        id='locationParent'
+                                                        name="locationParent"
+                                                        value={canton}
+                                                        label="Canton"
+                                                        onChange={handleCantonChange}
+                                                    >
+                                                        {cantons.map((canton) => (
+                                                            <MenuItem key={canton.id} value={canton.id}>{canton.name}</MenuItem>
+                                                        ))}
+
+                                                    </Select>
+                                                </FormControl>
+
+                                            )}
                                             <FormControl sx={{ p: 1, m: 1, display: 'block' }}>
                                                 <InputLabel htmlFor="name" size="small">Nombre</InputLabel>
                                                 <OutlinedInput fullWidth id="name" name="name" onChange={handleChange} value={values.name} />
                                                 <ErrorMessage name="name" component={() => (<FormHelperText id="component-error-text">{errors.name}</FormHelperText>)} />
                                             </FormControl>
                                             <FormControl sx={{ p: 1, m: 1, display: 'block' }}>
-                                                <InputLabel htmlFor="areaCode" size="small">Código de área</InputLabel>
-                                                <OutlinedInput fullWidth id="areaCode" name="areaCode" onChange={handleChange} value={values.areaCode} />
-                                                <ErrorMessage name="areaCode" component={() => (<FormHelperText id="component-error-text">{errors.areaCode}</FormHelperText>)} />
+                                                <InputLabel htmlFor="areaPhoneCode" size="small">Código de área</InputLabel>
+                                                <OutlinedInput fullWidth id="areaPhoneCode" name="areaPhoneCode" onChange={handleChange} value={values.areaPhoneCode} />
+                                                <ErrorMessage name="areaPhoneCode" component={() => (<FormHelperText id="component-error-text">{errors.areaPhoneCode}</FormHelperText>)} />
                                             </FormControl>
                                             <FormControl sx={{ p: 1, m: 1, display: 'block' }}>
                                                 <InputLabel htmlFor="zipCode" size="small">Código postal</InputLabel>
                                                 <OutlinedInput fullWidth id="zipCode" name="zipCode" onChange={handleChange} value={values.zipCode} />
                                                 <ErrorMessage name="zipCode" component={() => (<FormHelperText id="component-error-text">{errors.zipCode}</FormHelperText>)} />
                                             </FormControl>
-                                            {location === 2 && (
-                                                <FormControl sx={{ p: 1, m: 1, display: 'block' }}>
-                                                    <InputLabel htmlFor="locationParent" size="small">Provincia</InputLabel>
-                                                    <OutlinedInput fullWidth id="locationParent" name="locationParent" onChange={handleChange} value={values.locationParent} />
-                                                </FormControl>
-                                            )
-                                            }
-                                            {location === 3 && (
-                                                <FormControl sx={{ p: 1, m: 1, display: 'block' }}>
-                                                    <InputLabel htmlFor="locationParent" size="small">Cantón</InputLabel>
-                                                    <OutlinedInput fullWidth id="locationParent" name="locationParent" onChange={handleChange} value={values.locationParent} />
-                                                </FormControl>
 
-                                            )}
 
                                             <Button type="submit" variant="filled" color="primary">Crear</Button>
                                         </Form>
