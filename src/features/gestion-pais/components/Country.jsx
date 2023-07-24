@@ -19,25 +19,11 @@ import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import Backdrop from '@mui/material/Backdrop';
-import Modal from '@mui/material/Modal';
-import Fade from '@mui/material/Fade';
 import { createAPIEndpoint, ENDPOINTS } from "../../../api";
 import CardActions from "@mui/material/CardActions";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
 
 
 export default function Country() {
@@ -58,6 +44,8 @@ export default function Country() {
     }, []);
 
     const navigate = useNavigate();
+
+
 
     const handleCountryChange = (event) => {
         setSearchedCountry(event.target.value);
