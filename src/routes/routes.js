@@ -47,6 +47,8 @@ import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
 import GestionGeostructure from "../features/gestion-geostructure";
 import GestionGeolocation from "features/geolocation";
+import GestionCuentas from "features/gestion-cuentas";
+
 
 const routes = [
     {
@@ -121,6 +123,15 @@ const routes = [
         component: <ClientesJuridicos/>,
         noCollapse: true,
     },
+    {
+        type: "collapse",
+        name: "Gestion Cuentas",
+        key: "cuentas",
+        route: "/cuentas",
+        icon: <Folder size="12px"/>,
+        component: <GestionCuentas/>,
+        noCollapse: true,
+    },
 
 ];
 
