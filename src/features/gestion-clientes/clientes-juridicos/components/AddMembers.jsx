@@ -41,9 +41,8 @@ const AddMemberForm = ({ setIsActive }) => {
                 createAPIEndpoint(ENDPOINTS.groupRole).fetchAll()
                     .then(
                         (res) => {
-
-                            console.log("---> ",res.data)
-                            console.log("EndPoint> ",ENDPOINTS.groupRole)
+                            // console.log("---> ",res.data)
+                            // console.log("EndPoint> ",ENDPOINTS.groupRole)
                             setOptions(res.data)
                         }).then(
                             err => console.log(err)

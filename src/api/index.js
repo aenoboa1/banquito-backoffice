@@ -9,16 +9,17 @@ export const ENDPOINTS = {
     geoStructure: 'geo-structure',
     geolocation: 'geo-location',
     country: 'country',
-    holiday : 'holiday',
+    holiday: 'holiday',
     bankEntity: 'bankEntity',
     groupRole: 'group-role',
+    groupCompany: 'group-company',
 
 }
 
 export const createAPIEndpoint = endpoint => {
 
     let url = BASE_URL + endpoint + '/';
-    let posturl = BASE_URL + endpoint ;
+    let posturl = BASE_URL + endpoint;
     let adminurl = BASE_ADMIN_URL + endpoint + '/';
 
     let getAllUrl = BASE_URL + endpoint;
@@ -40,11 +41,11 @@ export const createAPIEndpoint = endpoint => {
         put: (id, updatedRecord, token) => axios.put(url + id, updatedRecord, token),
         delete: id => axios.delete(url + id),
         fetchById: (id, token) => axios.get(url + id, token),
-        fetchByName: (name, token) => axios.get(url + "countries/"+name,token),
-        fetchBranches: (id,token) => axios.get(adminurl + 'branch-list/' + id, token),
-        fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
-        fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
-        fetchByCode: (code, token) => axios.get(url + code,token),
+        fetchByName: (name, token) => axios.get(url + "countries/" + name, token),
+        fetchBranches: (id, token) => axios.get(adminurl + 'branch-list/' + id, token),
+        fetchProvinceByCountry: (id, levelcode, token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' + levelcode, token),
+        fetchByStatusOrDocumentOrBranch: (status, documentId, branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
+        fetchByCode: (code, token) => axios.get(url + code, token),
         fetchAll: (token) => axios.get(getAllUrl, token),
         // Holiday
         fetchHolidayBetweenDates: (startDate, endDate, token) => axios.get(urlHolidayGet, {
@@ -55,8 +56,8 @@ export const createAPIEndpoint = endpoint => {
             token: token
         }),
         postHoliday: (newHoliday, token) => axios.post(urlHolidayPost, newHoliday),
-        deleteHoliday:id => axios.delete(urlHolidayDelete+id),
-        fectchHoliday:(id, token) => axios.get(urlHolidayUnique + id, token),
+        deleteHoliday: id => axios.delete(urlHolidayDelete + id),
+        fectchHoliday: (id, token) => axios.get(urlHolidayUnique + id, token),
         putHoliday: (updatedHoliday, token) => axios.put(urlHolidayPut, updatedHoliday, token),
         postHolidayGenerate: (year, month, saturday, sunday, codeCountry, idLocation, token) => {
             const params = {
