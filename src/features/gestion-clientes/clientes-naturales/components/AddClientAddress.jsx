@@ -1,22 +1,22 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import {TextField, Slider, Switch, FormControlLabel, Button, Box, Select} from '@mui/material';
+import { TextField, Slider, Switch, FormControlLabel, Button, Box, Select } from '@mui/material';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
-import {yupResolver} from "@hookform/resolvers/yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import MenuItem from "@mui/material/MenuItem";
 import useStateContext from "../../../../context/custom/useStateContext";
 
 const validationSchema = yup.object({
-    typeAddress: yup.string().required('Type of Address is required'),
-    line1: yup.string().required('Address Line 1 is required'),
-    latitude: yup.number().required('Latitude is required'),
-    longitude: yup.number().required('Longitude is required'),
+    typeAddress: yup.string().required('Tipo de dirección requerido'),
+    line1: yup.string().required('Dirección línea 1 requerida'),
+    latitude: yup.number().required('Latitud requerida'),
+    longitude: yup.number().required('Longitud requerida'),
 });
 
 const AddressCreationForm = () => {
 
-    const {context, setContext} = useStateContext();
+    const { context, setContext } = useStateContext();
 
     const {
         control,
@@ -39,11 +39,10 @@ const AddressCreationForm = () => {
             ? [...context.addresses, data]
             : [data];
 
-            setContext({
-                ...context.addresses,
-                addresses: updatedAddresses,
-            });
-
+        setContext({
+            ...context.addresses,
+            addresses: updatedAddresses,
+        });
     };
 
     const typeAddress = [
@@ -58,10 +57,9 @@ const AddressCreationForm = () => {
                 <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
                     <Box gridColumn="span 12">
                         <SoftTypography align="center" sx={{ fontWeight: 'bold' }}>
-                            Address Creation
+                            Creación de Dirección
                         </SoftTypography>
                     </Box>
-
 
                     <Box gridColumn="span 12">
                         <Controller
@@ -93,7 +91,7 @@ const AddressCreationForm = () => {
                                     fullWidth
                                     type="text"
                                     id="line1"
-                                    label="Address Line 1"
+                                    label="Dirección Línea 1"
                                     {...field}
                                     error={Boolean(errors.line1)}
                                     helperText={errors.line1?.message}
@@ -111,7 +109,7 @@ const AddressCreationForm = () => {
                                     fullWidth
                                     type="text"
                                     id="line2"
-                                    label="Address Line 2"
+                                    label="Dirección Línea 2"
                                     {...field}
                                 />
                             )}
@@ -127,7 +125,7 @@ const AddressCreationForm = () => {
                                     fullWidth
                                     type="number"
                                     id="latitude"
-                                    label="Latitude"
+                                    label="Latitud"
                                     {...field}
                                     error={Boolean(errors.latitude)}
                                     helperText={errors.latitude?.message}
@@ -145,7 +143,7 @@ const AddressCreationForm = () => {
                                     fullWidth
                                     type="number"
                                     id="longitude"
-                                    label="Longitude"
+                                    label="Longitud"
                                     {...field}
                                     error={Boolean(errors.longitude)}
                                     helperText={errors.longitude?.message}
@@ -161,7 +159,7 @@ const AddressCreationForm = () => {
                             render={({ field }) => (
                                 <FormControlLabel
                                     control={<Switch {...field} color="primary" />}
-                                    label="Is Default?"
+                                    label="¿Es la predeterminada?"
                                 />
                             )}
                         />
@@ -169,7 +167,7 @@ const AddressCreationForm = () => {
 
                     <Box gridColumn="span 12">
                         <Button color="primary" variant="contained" fullWidth type="submit">
-                            Create Address
+                            Crear Dirección
                         </Button>
                     </Box>
                 </Box>

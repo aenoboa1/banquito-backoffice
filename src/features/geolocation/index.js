@@ -1,20 +1,15 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import {ClientFinder} from "./components/ClientFinder";
-import Box from "@mui/material/Box";
+import GeoLocation from "./components/GeoLocation";
 
 
-function GestionNaturales() {
+function GestionGeolocation() {
     return (
         <DashboardLayout>
-
             <DashboardNavbar/>
-                    <ClientFinder/>
-
-
-
+            <GeoLocation/>
         </DashboardLayout>
     );
 }
 
-export default GestionNaturales;
+export default GestionGeolocation;

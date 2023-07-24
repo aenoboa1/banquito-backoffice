@@ -46,6 +46,7 @@ import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
 import GestionGeostructure from "../features/gestion-geostructure";
+import GestionGeolocation from "features/geolocation";
 
 const routes = [
     {
@@ -58,6 +59,13 @@ const routes = [
         noCollapse: true,
     },
     {
+        name: "Locaciones",
+        key: "geoLocation",
+        route: "/geolocation",
+        icon: <AccountTreeOutlined size="12px"/>,
+        component: <GestionGeolocation/>,
+    },
+    {
         type: "collapse",
         name: "Estructura Geográfica",
         key: "geostructure",
@@ -65,6 +73,7 @@ const routes = [
         icon: <AccountTreeOutlined size="12px"/>,
         component: <GestionGeostructure/>,
     },
+    
     {
         type: "collapse",
         name: "Gestion Feriados",
