@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {DataGrid} from '@mui/x-data-grid';
-import {useLocation} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import DashboardNavbar from '../../../../examples/Navbars/DashboardNavbar';
 import DashboardLayout from '../../../../examples/LayoutContainers/DashboardLayout';
 import EditIcon from "@mui/icons-material/Edit";
@@ -9,6 +9,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
+import {Modal} from "@mui/material";
+import {UpdateClientForm} from "./UpdateClientForm";
+import useStateContext from "../../../../context/custom/useStateContext";
 
 const stateOptions = [
     {value: 'ACT', label: 'Activo'},
@@ -47,6 +50,17 @@ const StyledGridOverlay = styled('div')(({theme}) => ({
     },
 }));
 
+const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 900,
+    bgcolor: "#f7f8f9", // Color
+    boxShadow: 24,
+    borderRadius: '3px',
+    p: 4
+};
 function CustomNoRowsOverlay() {
     return (
         <StyledGridOverlay>
@@ -99,14 +113,27 @@ export const CustomerDataGrid = ({data}) => {
     console.log(state.data);
 
 
+    const navigate = useNavigate();
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const {context, setContext} = useStateContext();
+    const [customerData, setCustomerData] = useState();
     const handleEdit = (rowId) => {
         // Implement your edit logic here using the rowId
-        console.log('Edit row with ID:', rowId);
 
+        setSelectedCustomer(rowId);
+        setIsEditModalOpen(true);
+
+        setContext({
+            addresses: null,
+            phones: null,
+        });
         createAPIEndpoint(ENDPOINTS.accounts).fetchById(
             rowId
         ).then(res => {
-            console.log(res.data);
+
+            navigate("/clientesnaturales/results/edit", { state: { data: res.data } });
 
         }).catch(err => console.log(err)
         )
@@ -188,13 +215,6 @@ export const CustomerDataGrid = ({data}) => {
                         >
                             <EditIcon/>
                         </IconButton>
-                        <IconButton
-                            onClick={() => handleDelete(rowId)} // Add your delete function here
-                            size="small"
-                            color="secondary"
-                        >
-                            <DeleteIcon/>
-                        </IconButton>
                     </div>
                 );
             },
@@ -202,19 +222,22 @@ export const CustomerDataGrid = ({data}) => {
     ];
 
     return (
-        <div style={{height: 400, width: '100%'}}>
-            <DataGrid
-                rows={state.data}
-                columns={columns}
-                pageSize={5}
-                slots={{
-                    noRowsOverlay: CustomNoRowsOverlay,
-                }}
-                getRowHeight={() => 'auto'}
-                rowsPerPageOptions={[5, 10, 20]}
-                disableRowSelectionOnClick
-            />
-        </div>
+        <>
+            <div style={{height: 400, width: '100%'}}>
+                <DataGrid
+                    rows={state.data}
+                    columns={columns}
+                    pageSize={5}
+                    slots={{
+                        noRowsOverlay: CustomNoRowsOverlay,
+                    }}
+                    getRowHeight={() => 'auto'}
+                    rowsPerPageOptions={[5, 10, 20]}
+                    disableRowSelectionOnClick
+                />
+            </div>
+
+        </>
     );
 };
 

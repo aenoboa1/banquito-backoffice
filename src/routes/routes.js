@@ -50,6 +50,8 @@ import GestionGeolocation from "features/geolocation";
 import GestionCuentas from "features/gestion-cuentas";
 import GestionSucursales from "../features/gestion-sucursales";
 
+import SearchTable from "../features/gestion-clientes/clientes-naturales/components/SearchTable";
+import {UpdateClientForm} from "../features/gestion-clientes/clientes-naturales/components/UpdateClientForm";
 
 const routes = [
     {
@@ -140,8 +142,14 @@ const routes = [
         route: "/cuentas",
         icon: <Folder size="12px"/>,
         component: <GestionCuentas/>,
-        noCollapse: true,
-    },
+        noCollapse: true,
+    },
+    {
+        name: "ClientResults",
+        key: "clientResults",
+        route: "/clientesnaturales/results",
+        component: <SearchTable/>
+    }
 
 ];
 

@@ -4,19 +4,12 @@ import Stack from '@mui/material/Stack';
 import SearchIcon from '@mui/icons-material/Search';
 import {Modal} from "@mui/material";
 import Box from "@mui/material/Box";
-import AddressCreationForm from "./AddClientAddress";
-import colors from "../../../../assets/theme/base/colors";
-import borders from "../../../../assets/theme/base/borders";
-import {ClientFinder} from "./ClientFinder";
 import {SearchClientForm} from "./SearchClientForm";
 
 export default function ClickableAndDeletableChips() {
     const [openChip, setOpenAddress] = React.useState(false);
-
     const handleOpenChip = () => setOpenAddress(true);
-
     const handleCloseChip = () => setOpenAddress(false);
-
     const style = {
         position: "absolute",
         top: "50%",
@@ -36,7 +29,7 @@ export default function ClickableAndDeletableChips() {
                 size="medium"
                 color='primary'
                 variant='outlined'
-                icon={<SearchIcon />}
+                icon={<SearchIcon/>}
             />
 
             <Modal
