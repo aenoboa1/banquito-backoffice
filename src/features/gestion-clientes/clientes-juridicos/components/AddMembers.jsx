@@ -80,12 +80,6 @@ const AddMemberForm = ({ setIsActive }) => {
         { label: 'Cliente 3', value: 'CID3' },
     ];
 
-    const rolesType = [
-        { label: 'Representante legal', value: 'RL' },
-        { label: 'Accionista', value: 'ACC' },
-        { label: 'Apoderado', value: 'APO' },
-    ];
-
     const onSubmit = (data, event) => {
         if (context.members && Array.isArray(context.members)) {
             const membersExists = context.members.some(

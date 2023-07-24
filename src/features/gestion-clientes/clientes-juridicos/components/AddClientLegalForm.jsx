@@ -107,15 +107,11 @@ export const AddClientLegalForm = () => {
     }, [openBranches]);
 
     const onSubmit = (data) => {
-
         const updatedcontext = {
             members: Array.isArray(context.members) ? [...context.members] : [],
             ...data
         };
-
         console.log(updatedcontext);
-        // alert(updatedcontext);
-
         createAPIEndpoint(ENDPOINTS.accounts,
         ).post(updatedcontext, {}).then(
 
