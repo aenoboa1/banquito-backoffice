@@ -16,9 +16,7 @@ export const LegalClientFinder = () => {
         setIsFormVisible((prev) => !prev);
 
         setContext({
-            phoneNumber: null,
-            phoneType: null,
-            isDefault: null,
+            members: null,
         });
     };
 

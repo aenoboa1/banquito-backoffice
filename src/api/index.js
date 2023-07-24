@@ -10,6 +10,7 @@ export const ENDPOINTS = {
     geolocation: 'geo-location',
     country: 'country',
     bankEntity: 'bankEntity',
+    groupRole: 'group-role',
 
 }
 

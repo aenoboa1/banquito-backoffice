@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Accordion, AccordionDetails, AccordionSummary, ButtonGroup, Grid, IconButton, InputAdornment, Modal, TextField } from '@mui/material';
+import {
+    Accordion, AccordionDetails, AccordionSummary, Autocomplete, ButtonGroup,
+    IconButton, InputAdornment, Modal, TextField
+} from '@mui/material';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import SoftTypography from '../../../../components/SoftTypography';
@@ -10,8 +13,9 @@ import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
 import AddMemberForm from './AddMembers';
 import {
-    AddCircleOutline, Email, ContactPhone, Comment, LocalPhone, Group, AddLocation, ExpandMore,
+    AddCircleOutline, Email, ContactPhone, Comment, LocalPhone, Group, AddLocation, ExpandMore, Business,
 } from '@mui/icons-material';
+import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -35,6 +39,11 @@ const validationSchema = yup.object({
 export const AddClientLegalForm = () => {
     const [isActive, setIsActive] = useState(true);
     const { context, setContext } = useStateContext();
+
+    const [openBranches, setOpenBranches] = useState(false);
+    const [options, setOptions] = useState([]);
+    const loading = openBranches && options.length === 0;
+
     const {
         control,
         handleSubmit,
@@ -57,6 +66,46 @@ export const AddClientLegalForm = () => {
         },
     });
 
+    function sleep(delay = 0) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, delay);
+        });
+    }
+
+    useEffect(() => {
+        let active = true;
+
+        if (!loading) {
+            return undefined;
+        }
+
+        (async () => {
+            await sleep(1e3); // For demo purposes.
+            if (active) {
+                createAPIEndpoint(ENDPOINTS.bankEntity).fetchBranches('64b1892b9c2c3b03c33a736f'
+                    ,
+                    {}
+                ).then(
+                    res => {
+                        console.log("BRANCH",res.data);
+                        setOptions(res.data);
+                    }).then(
+                        err => console.log(err)
+                    )
+            }
+        })();
+
+        return () => {
+            active = false;
+        };
+    }, [loading]);
+
+    useEffect(() => {
+        if (!openBranches) {
+            setOptions([]);
+        }
+    }, [openBranches]);
+
     const onSubmit = (data) => {
 
         const updatedcontext = {
@@ -65,12 +114,14 @@ export const AddClientLegalForm = () => {
         };
 
         console.log(updatedcontext);
-        // createAPIEndpoint(ENDPOINTS.accounts,
-        // ).post(updatedcontext, {}).then(
+        // alert(updatedcontext);
 
-        // ).catch(
-        //     err => console.log(err)
-        // )
+        createAPIEndpoint(ENDPOINTS.accounts,
+        ).post(updatedcontext, {}).then(
+
+        ).catch(
+            err => console.log(err)
+        )
     };
 
     function handleSearch(e) {
@@ -115,20 +166,53 @@ export const AddClientLegalForm = () => {
                         </SoftTypography>
                     </Box>
 
-                    {/*WARNING FOR TESTING ONLY */}
                     <Box gridColumn="span 6">
                         <Controller
                             name="branchId"
                             control={control}
                             render={({ field }) => (
-                                <TextField
-                                    fullWidth
-                                    type="text"
+                                <Autocomplete
                                     id="branchId"
-                                    label="Id de la Branch (TEST)"
-                                    {...field}
-                                    error={Boolean(errors.branchId)}
-                                    helperText={errors.branchId?.message}
+                                    open={openBranches}
+                                    onOpen={() => {
+                                        setOpenBranches(true);
+                                    }}
+                                    onClose={() => {
+                                        setOpenBranches(false);
+                                    }}
+                                    getOptionSelected={(option, value) =>
+                                        value === undefined || value === "" || option.uniqueKey === value.uniqueKey
+                                    }
+                                    isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
+                                    getOptionLabel={(option) => option.name || ''}
+                                    fullWidth
+                                    options={options}
+                                    loading={loading}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Seleccione una Sucursal"
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                endAdornment: (
+                                                    <Fragment>
+                                                        {loading ?
+                                                            <CircularProgress color="inherit"
+                                                                size={20} /> : null}
+                                                        {params.InputProps.endAdornment}
+                                                    </Fragment>
+                                                ),
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <Business />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                            error={Boolean(errors.branchId)}
+                                            helperText={errors.branchId?.message}
+                                        />
+                                    )}
+                                    onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
                                 />
                             )}
                         />
@@ -328,7 +412,6 @@ export const AddClientLegalForm = () => {
                         />
                     </Box>
 
-                    {/*WARNING FOR TESTING ONLY */}
                     <Box gridColumn="span 12">
                         <Controller
                             name="comments"
@@ -374,23 +457,6 @@ export const AddClientLegalForm = () => {
                         </div>
                     </Box>
 
-                    {/* {
-                        context.members && (
-                            <>
-                                {context.members.map((member, index) => (
-                                    <Box gridColumn="span 12">
-                                        <SoftTypography align="center" sx={{ fontWeight: 'bold' }}>
-                                            Miembro(s) Agregado
-                                        </SoftTypography>
-                                        <Box>
-                                            <SoftTypography>{`Cliente: ${member.clientList}`}</SoftTypography>
-                                            <SoftTypography>{`Rol: ${member.roleType}`}</SoftTypography>
-                                        </Box>
-                                    </Box>
-                                ))}
-                            </>
-                        )
-                    } */}
                     <Box gridColumn="span 12">
                         {context.members && (
                             <>
