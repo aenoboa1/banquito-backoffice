@@ -50,8 +50,25 @@ const validationSchema = yup.object({
     comments: yup.string().required('Comentario es requerido'),
 });
 
-export const AddClientForm = () => {
+export const AddClientForm = ({ customerData, onClose }) => {
 
+    const {context, setContext} = useStateContext();
+
+    const { control, handleSubmit, formState: { errors }, reset } = useForm({
+        resolver: yupResolver(validationSchema),
+        defaultValues: {
+            firstName: customerData?.firstName || '',
+            lastName: customerData?.lastName || '',
+            emailAddress: customerData?.emailAddress || '',
+            gender: customerData?.gender || '',
+            typeDocumentId: customerData?.typeDocumentId || '',
+            birthDate: customerData?.birthDate ? new Date(customerData.birthDate) : new Date(),
+            documentId: customerData?.documentId || '',
+            branchId: customerData?.branchId || '',
+            comments: customerData?.comments || '',
+            // Add more fields with default values here...
+        },
+    });
     function sleep(delay = 0) {
         return new Promise((resolve) => {
             setTimeout(resolve, delay);
@@ -100,25 +117,6 @@ export const AddClientForm = () => {
     }, [openBranches]);
 
 
-    const {context, setContext} = useStateContext();
-    const {
-        control,
-        handleSubmit,
-        formState: {errors},
-    } = useForm({
-        resolver: yupResolver(validationSchema),
-        defaultValues: {
-            firstName: '',
-            lastName: '',
-            emailAddress: '',
-            gender: '', // Add default value for gender
-            typeDocumentId: '',
-            birthDate: new Date(),
-            documentId: '',
-            branchId: '',
-            comments: '',
-        },
-    });
 
     const onSubmit = (data) => {
 
