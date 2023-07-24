@@ -51,11 +51,7 @@ const AddressCreationForm = () => {
                     '2'
                 ).then(
                     (res) => {
-                        
-                        console.log(res.data.locations)
-
                         setOptions(res.data.locations)
-
                     }).then(
                         err => console.log(err)
                     )

@@ -7,12 +7,8 @@ import Box from "@mui/material/Box";
 function GestionNaturales() {
     return (
         <DashboardLayout>
-
             <DashboardNavbar/>
                     <ClientFinder/>
-
-
-
         </DashboardLayout>
     );
 }

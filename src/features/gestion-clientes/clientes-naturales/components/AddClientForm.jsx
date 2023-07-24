@@ -209,9 +209,7 @@ export const AddClientForm = () => {
     // Function to add a new phone number field
 
     return (
-
         <Stack gap={5}>
-
             <Stack spacing={2} alignItems="center">
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Grid container rowSpacing={3} columnSpacing={{xs: 1, sm: 2, md: 3}}>
@@ -615,7 +613,6 @@ export const AddClientForm = () => {
                                 Crear Cliente
                             </SoftButton>
                         </Grid>
-
                     </Grid>
                 </form>
 
