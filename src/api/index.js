@@ -9,7 +9,7 @@ export const ENDPOINTS = {
     geoStructure: 'geo-structure',
     geolocation: 'geo-location',
     country: 'country',
-    holiday: 'holiday',
+    holiday : 'holiday',
     bankEntity: 'bankEntity',
     groupRole: 'group-role',
     groupCompany: 'group-company',
@@ -19,7 +19,9 @@ export const ENDPOINTS = {
 export const createAPIEndpoint = endpoint => {
 
     let url = BASE_URL + endpoint + '/';
-    let posturl = BASE_URL + endpoint;
+    let customerPUTurl = BASE_URL + endpoint ;
+    let groupRolesUrl = BASE_URL + endpoint ;
+    let posturl = BASE_URL + endpoint ;
     let adminurl = BASE_ADMIN_URL + endpoint + '/';
 
     let getAllUrl = BASE_URL + endpoint;
@@ -41,11 +43,14 @@ export const createAPIEndpoint = endpoint => {
         put: (id, updatedRecord, token) => axios.put(url + id, updatedRecord, token),
         delete: id => axios.delete(url + id),
         fetchById: (id, token) => axios.get(url + id, token),
-        fetchByName: (name, token) => axios.get(url + "countries/" + name, token),
-        fetchBranches: (id, token) => axios.get(adminurl + 'branch-list/' + id, token),
-        fetchProvinceByCountry: (id, levelcode, token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' + levelcode, token),
-        fetchByStatusOrDocumentOrBranch: (status, documentId, branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
-        fetchByCode: (code, token) => axios.get(url + code, token),
+        fetchGroupCompany: (token) => axios.get(url + 'all', token),
+        fetchByName: (name, token) => axios.get(url + "countries/"+name,token),
+        fetchBranches: (id,token) => axios.get(adminurl + 'branch-list/' + id, token),
+        fetchGroupRoles : (token) => axios.get( groupRolesUrl, token),
+        fetchByTypeDocumentAndDocumentId: (typeDocument, documentId, token) => axios.get(url + 'typeanddocument?typeDocument=' + typeDocument + '&document=' + documentId, token),
+        fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
+        fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
+        fetchByCode: (code, token) => axios.get(url + code,token),
         fetchAll: (token) => axios.get(getAllUrl, token),
         // Holiday
         fetchHolidayBetweenDates: (startDate, endDate, token) => axios.get(urlHolidayGet, {
