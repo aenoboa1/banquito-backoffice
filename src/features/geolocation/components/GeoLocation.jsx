@@ -76,7 +76,7 @@ export default function GeoLocation() {
     }
 
     const getProvinces = (country) => {
-        axios.get('http://localhost:8080/api/v1/geo-structure/locations/'+country, { params: { levelCode: levelCode } })
+        axios.get('https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/geo-structure/locations/'+country, { params: { levelCode: levelCode } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setProvinces(response.data.locations);
