@@ -9,13 +9,8 @@ function GestionNaturales() {
         <DashboardLayout>
 
             <DashboardNavbar/>
-            <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={3}>
-                <Box gridColumn="span 12">
                     <ClientFinder/>
-                </Box>
-                <Box gridColumn="span 12">
-                </Box>
-            </Box>
+
 
 
         </DashboardLayout>
