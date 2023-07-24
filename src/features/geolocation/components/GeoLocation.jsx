@@ -109,10 +109,10 @@ export default function GeoLocation() {
         }
     ));
 
-    const ProvincesTable = () => {
+    const DatagridTable = () => {
         return (
             <Box sx={{ height: 350, width: '100%' }}>
-                <DataGrid
+                <DataGrid sx={{ m: 2, p: 2}}
                     rows={rows}
                     columns={columns}
                     initialState={{
@@ -157,7 +157,7 @@ export default function GeoLocation() {
                     </IconButton>
                 </Grid>
                 <Divider></Divider>
-                {provinces.length > 0 ? (<ProvincesTable />) : (<></>)}
+                {provinces.length > 0 ? (<DatagridTable />) : (<></>)}
 
             </Box>
 
