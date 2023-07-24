@@ -19,8 +19,6 @@ export const createAPIEndpoint = endpoint => {
     let posturl = BASE_URL + endpoint ;
     let adminurl = BASE_ADMIN_URL + endpoint + '/';
 
-
-
     let getAllUrl = BASE_URL + endpoint;
     return {
         fetch: (token) => axios.get(url, token),
@@ -30,7 +28,7 @@ export const createAPIEndpoint = endpoint => {
         fetchById: (id, token) => axios.get(url + id, token),
         fetchByName: (name, token) => axios.get(url + "countries/"+name,token),
         fetchBranches: (id,token) => axios.get(adminurl + 'branch-list/' + id, token),
-        fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'provinces/' + id + '?levelCode=' +levelcode, token),
+        fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
         fetchByCode: (code, token) => axios.get(url + code,token),
         fetchAll: (token) => axios.get(getAllUrl, token)
     }
