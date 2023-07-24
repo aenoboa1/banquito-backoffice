@@ -1,13 +1,13 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import BasicCard from "./components/BasicCard";
+import BankEntityList from "../entidad-bancaria/components/BankEntityList";
 
 
 function GestionEntidades() {
     return (
         <DashboardLayout>
             <DashboardNavbar />
-            <BasicCard/>
+            <BankEntityList/>
         </DashboardLayout>
     );
 }

@@ -2,8 +2,8 @@ import axios from 'axios'
 
 
 // URL LOCAL
-export const BASE_URL = 'http://localhost:8080/api/v1/';
-export const BASE_ADMIN_URL = 'http://localhost:8081/api/v1/';
+export const BASE_URL = 'https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/';
+export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/';
 export const ENDPOINTS = {
     accounts: 'customers',
     geoStructure: 'geo-structure',
@@ -26,16 +26,21 @@ export const createAPIEndpoint = endpoint => {
 
     let getAllUrl = BASE_URL + endpoint;
 
-    //Holiday
+    let urlBankEntityGet = BASE_URL + endpoint + '/';
+    let urlBranchPutCreate = BASE_URL + endpoint + '/branch-create/';
+    let urlBranchPutUpdate = BASE_URL + endpoint + '/branch-update/';
+    let urlBranchDelete = BASE_URL + endpoint + '/branch-delete/';
+    let urlBranchUnique = BASE_URL + endpoint + '/branch-unique/';
+
     let urlHolidayGet = BASE_URL + endpoint + '/holiday-list-between-dates';
     let urlHolidayPost = BASE_URL + endpoint + '/holiday-create';
     let urlHolidayDelete = BASE_URL + endpoint + '/holiday-delete/';
     let urlHolidayUnique = BASE_URL + endpoint + '/holiday-get/';
     let urlHolidayPut = BASE_URL + endpoint + '/holiday-update';
     let urlHolidayGenerate = BASE_URL + endpoint + '/holiday-generate'
-    //Holiday - Location
+
     let urlLocationGet = BASE_URL + endpoint + '/';
-    //Holiday - Country
+
     let urlCountryGet = BASE_URL + endpoint;
     return {
         fetch: (token) => axios.get(url, token),
@@ -52,7 +57,7 @@ export const createAPIEndpoint = endpoint => {
         fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
         fetchByCode: (code, token) => axios.get(url + code,token),
         fetchAll: (token) => axios.get(getAllUrl, token),
-        // Holiday
+
         fetchHolidayBetweenDates: (startDate, endDate, token) => axios.get(urlHolidayGet, {
             params: {
                 start: startDate.toISOString(),
@@ -79,6 +84,17 @@ export const createAPIEndpoint = endpoint => {
             });
         },
         fetchCountry: (token) => axios.get(urlCountryGet, token),
+
+
+        fetchByPK: (id, internationalCode, token) => axios.get(urlBankEntityGet + id + '/' + internationalCode, token),
+
+        putBranchCreate: (newBranch, token) => axios.put(urlBranchPutCreate + '64b1892b9c2c3b03c33a736F', newBranch, token),
+
+        putBranchUpdate: (uniqueKey, updatedBranch, token) =>
+            axios.put(urlBranchPutUpdate + '64b1892b9c2c3b03c33a736F' + '/' + uniqueKey, updatedBranch, token),
+
+        deleteBranch:id => axios.delete(urlBranchDelete + '64b1892b9c2c3b03c33a736F' + '/' + id),
+        fetchBranch:(id, token) => axios.get(urlBranchUnique + id, token),
     }
 }
 
