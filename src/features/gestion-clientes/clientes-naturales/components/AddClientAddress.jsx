@@ -1,22 +1,78 @@
 import React, { useContext } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { TextField, Slider, Switch, FormControlLabel, Button, Box, Select } from '@mui/material';
+import { TextField, Slider, Switch, FormControlLabel, Button, Box, Select, InputAdornment } from '@mui/material';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
 import { yupResolver } from "@hookform/resolvers/yup";
 import MenuItem from "@mui/material/MenuItem";
 import useStateContext from "../../../../context/custom/useStateContext";
+import Grid from "@mui/material/Grid";
+import Autocomplete from "@mui/material/Autocomplete";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Business } from "@mui/icons-material";
+import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
 
 const validationSchema = yup.object({
-    typeAddress: yup.string().required('Tipo de dirección requerido'),
-    line1: yup.string().required('Dirección línea 1 requerida'),
-    latitude: yup.number().required('Latitud requerida'),
-    longitude: yup.number().required('Longitud requerida'),
+    typeAddress: yup.string().optional('Tipo de dirección requerido'),
+    line1: yup.string().optional('Dirección línea 1 requerida'),
+    latitude: yup.number().optional('Latitud requerida'),
+    longitude: yup.number().optional('Longitud requerida'),
+    locationId: yup.string().required('Provincia requerida'),
 });
 
 const AddressCreationForm = () => {
 
     const { context, setContext } = useStateContext();
+
+
+    function sleep(delay = 0) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, delay);
+        });
+    }
+
+    const [openLocations, setOpenLocations] = React.useState(false);
+    const [options, setOptions] = React.useState([]);
+    const loading = openLocations && options.length === 0;
+
+    React.useEffect(() => {
+        let active = true;
+
+        if (!loading) {
+            return undefined;
+        }
+
+        (async () => {
+            await sleep(1e3); // For demo purposes.
+
+            if (active) {
+                createAPIEndpoint(ENDPOINTS.geoStructure).fetchProvinceByCountry(
+                    'ECU',
+                    '2'
+                ).then(
+                    (res) => {
+                        
+                        console.log(res.data.locations)
+
+                        setOptions(res.data.locations)
+
+                    }).then(
+                        err => console.log(err)
+                    )
+            }
+        })();
+
+        return () => {
+            active = false;
+        };
+    }, [loading]);
+
+    React.useEffect(() => {
+        if (!openLocations) {
+            setOptions([]);
+            
+        }
+    }, [openLocations]);
 
     const {
         control,
@@ -30,9 +86,11 @@ const AddressCreationForm = () => {
             line2: '',
             latitude: 0,
             longitude: 0,
+            locationId: '',
             isDefault: false,
         },
     });
+
 
     const onSubmit = (data) => {
         const updatedAddresses = Array.isArray(context.addresses)
@@ -66,9 +124,12 @@ const AddressCreationForm = () => {
                             name="typeAddress"
                             control={control}
                             render={({ field }) => (
-                                <Select
+
+                                <TextField
                                     {...field}
                                     fullWidth
+                                    label="Tipo de Dirección"
+                                    select
                                     error={Boolean(errors.typeAddress)}
                                     helperText={errors.typeAddress?.message}
                                 >
@@ -77,10 +138,66 @@ const AddressCreationForm = () => {
                                             {type.label}
                                         </MenuItem>
                                     ))}
-                                </Select>
+                                </TextField>
                             )}
                         />
                     </Box>
+
+                    <Box gridColumn="span 12">
+                        <Grid item xs={12}>
+                            {/* Branch */}
+                            <Controller
+                                name="locationId"
+                                control={control}
+                                render={({ field }) => (
+                                    <Autocomplete
+                                        id="locationId"
+                                        open={openLocations}
+                                        onOpen={() => {
+                                            setOpenLocations(true);
+                                        }}
+                                        onClose={() => {
+                                            setOpenLocations(false);
+                                        }}
+
+                                        isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                        getOptionLabel={(option) => option.name || ''} 
+                                        groupBy={(option) => option.firstLetter}
+
+                                        fullWidth
+                                        options={options}
+                                        loading={loading}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Selecciona un cantón"
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                        <React.Fragment>
+                                                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                            {params.InputProps.endAdornment}
+                                                        </React.Fragment>
+                                                    ),
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                error={Boolean(errors.locationId)}
+                                                helperText={errors.locationId?.message}
+                                            />
+                                        )}
+                                        onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                    />
+                                )}
+                            />
+                        </Grid>
+                    </Box>
+
+
+
 
                     <Box gridColumn="span 12">
                         <Controller

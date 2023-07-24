@@ -5,9 +5,9 @@ import {
     AccordionDetails,
     AccordionSummary,
     ButtonGroup,
-    InputAdornment, InputLabel,
+    InputAdornment,
     Modal,
-    Select, Stack,
+    Stack,
     TextField
 } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -30,8 +30,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {AccountCircle, AddCircleOutline, Business, ChatBubble, Email, ExpandMore} from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import Grid from "@mui/material/Grid";
-import SoftBox from "../../../../components/SoftBox";
-import Card from "@mui/material/Card";
 
 import colors from "assets/theme/base/colors";
 import borders from "assets/theme/base/borders";
@@ -181,6 +179,20 @@ export const AddClientForm = () => {
         {label: 'Femenino', value: 'F'},
     ];
 
+    const getPhoneTypeLabel = (value) => {
+        switch (value) {
+            case 'HOM':
+                return 'Casa';
+            case 'MOB':
+                return 'Móvil';
+            case 'OFF':
+                return 'Oficina';
+            case 'OTH':
+                return 'Otro';
+            default:
+                return 'Desconocido';
+        }
+    };
 
     const [openAddress, setOpenAddress] = React.useState(false);
     const handleOpenAddress = () => setOpenAddress(true);
@@ -402,9 +414,9 @@ export const AddClientForm = () => {
                                             setOpenBranches(false);
                                         }}
                                         getOptionSelected={(option, value) =>
-                                            value === undefined || value === "" || option.code === value.code
+                                            value === undefined || value === "" || option.uniqueKey === value.uniqueKey
                                         }
-                                        isOptionEqualToValue={(option, value) => option.code === value?.code}
+                                        isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
                                         getOptionLabel={(option) => option.name || ''}
                                         fullWidth
                                         options={options}
@@ -433,7 +445,7 @@ export const AddClientForm = () => {
                                                 helperText={errors.branchId?.message}
                                             />
                                         )}
-                                        onChange={(_event, data) => field.onChange(data?.code ?? '')}
+                                        onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
                                     />
                                 )}
                             />
@@ -441,18 +453,19 @@ export const AddClientForm = () => {
 
 
                         <Grid item xs={6}>
-                            <Button onClick={handleOpen} variant="contained" startIcon={<AddCircleOutline />}>
-                                Añadir Teléfono {/* Assuming "Teléfono" is the correct spelling for "phone" in your language */}
+                            <Button onClick={handleOpen} variant="contained" startIcon={<AddCircleOutline/>}>
+                                Añadir
+                                Teléfono {/* Assuming "Teléfono" is the correct spelling for "phone" in your language */}
                             </Button>
                             <Modal
                                 open={open}
                                 onClose={handleClose}
                                 aria-labelledby="modal-modal-title"
                                 aria-describedby="modal-modal-description"
-                                style={{ backdropFilter: "blur(5px)" }}
+                                style={{backdropFilter: "blur(5px)"}}
                             >
                                 <Box sx={style}>
-                                    <PhoneCreationForm />
+                                    <PhoneCreationForm/>
                                 </Box>
                             </Modal>
                         </Grid>
@@ -487,8 +500,8 @@ export const AddClientForm = () => {
                                                     <AccordionDetails>
                                                         <Box>
                                                             <SoftTypography>{`Número: ${phone.phoneNumber}`}</SoftTypography>
-                                                            <SoftTypography>{`Tipo: ${phone.phoneType}`}</SoftTypography>
-                                                            <SoftTypography>{`Predeterminado: ${phone.isDefault}`}</SoftTypography>
+                                                            <SoftTypography>{`Tipo: ${getPhoneTypeLabel(phone.phoneType)}`}</SoftTypography>
+                                                            <SoftTypography>{`¿Predeterminado?: ${phone.isDefault ? 'Sí' : 'No'}`}</SoftTypography>
                                                         </Box>
                                                         <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
 
@@ -519,7 +532,7 @@ export const AddClientForm = () => {
                         <Grid item xs={6}>
                             <div>
 
-                                    <Button onClick={handleOpenAddress} variant="contained" startIcon={<AddCircleOutline />}>
+                                <Button onClick={handleOpenAddress} variant="contained" startIcon={<AddCircleOutline/>}>
                                     Añadir Dirección
                                 </Button>
                                 <Modal
@@ -602,6 +615,7 @@ export const AddClientForm = () => {
                                 Crear Cliente
                             </SoftButton>
                         </Grid>
+
                     </Grid>
                 </form>
 
