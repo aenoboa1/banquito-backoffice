@@ -36,12 +36,17 @@
  */
 
 // Soft UI Dashboard React layouts
+
+// Soft UI Dashboard React layouts
 import CreditCard from "../examples/Icons/CreditCard";
 import GestionPais from "../features/gestion-pais";
 import GestionFeriados from "../features/gestion-feriados";
-import {PartyMode, Person} from "@mui/icons-material";
+import {AccountTreeOutlined, Business, Folder, PartyMode, Person, Public} from "@mui/icons-material";
 import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
+import EntidadBancaria from "../features/entidad-bancaria";
+import GestionGeostructure from "../features/gestion-geostructure";
+import GestionGeolocation from "features/geolocation";
 
 const routes = [
     {
@@ -49,11 +54,26 @@ const routes = [
         name: "Gestion Paises",
         key: "pais",
         route: "/pais",
-        icon: <CreditCard size="12px"/>,
+        icon: <Public size="12px"/>,
         component: <GestionPais/>,
         noCollapse: true,
     },
-
+    {
+        name: "Locaciones",
+        key: "geoLocation",
+        route: "/geolocation",
+        icon: <AccountTreeOutlined size="12px"/>,
+        component: <GestionGeolocation/>,
+    },
+    {
+        type: "collapse",
+        name: "Estructura Geográfica",
+        key: "geostructure",
+        route: "/geostructure",
+        icon: <AccountTreeOutlined size="12px"/>,
+        component: <GestionGeostructure/>,
+    },
+    
     {
         type: "collapse",
         name: "Gestion Feriados",
@@ -63,7 +83,6 @@ const routes = [
         component: <GestionFeriados/>,
         noCollapse: true,
     },
-
     {
         type: "collapse",
         name: "Gestion Sucursales",
@@ -73,25 +92,36 @@ const routes = [
         component: <GestionFeriados/>,
         noCollapse: true,
     },
-    // TODO: Cambiar mejores rutas
+
     {
         type: "collapse",
-        name: "Gestion Clientes Naturales",
+        name: "Entidad Bancaria",
+        key: "entidad",
+        route: "/entidad",
+        icon: <Folder size="12px"/>,
+        component: <EntidadBancaria/>,
+        noCollapse: true,
+    },
+    {
+        type: "collapse",
+        name: "Gest. Clientes Naturales",
         key: "clientesnaturales",
         route: "/clientesnaturales",
         icon: <Person size="12px"/>,
         component: <ClientesNaturales/>,
         noCollapse: true,
     },
+
     {
         type: "collapse",
-        name: "Gestion Clientes Juridicos",
+        name: "Gest. Clientes Juridicos",
         key: "clientesjuridicos",
         route: "/clientesjuridicos",
-        icon: <Person size="12px"/>,
+        icon: <Business size="12px"/>,
         component: <ClientesJuridicos/>,
         noCollapse: true,
     },
+
 ];
 
 export default routes;

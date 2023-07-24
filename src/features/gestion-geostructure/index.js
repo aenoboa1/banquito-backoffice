@@ -1,14 +1,15 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import HolidayPage from "./components/HolidayPage";
+import GeoStructure from "./components/GeoStructure";
 
-function GestionFeriados() {
+
+function GestionGeoStructure() {
     return (
         <DashboardLayout>
             <DashboardNavbar/>
-            <HolidayPage/>
+            <GeoStructure/>
         </DashboardLayout>
     );
 }
 
-export default GestionFeriados;
+export default GestionGeoStructure;

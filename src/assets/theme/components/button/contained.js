@@ -29,7 +29,7 @@ const contained = {
   base: {
     backgroundColor: white.main,
     minHeight: pxToRem(40),
-    color: text.main,
+    color: text.buttonmain,
     boxShadow: buttonBoxShadow.main,
     padding: `${pxToRem(12)} ${pxToRem(24)}`,
 
