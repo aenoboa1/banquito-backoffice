@@ -47,7 +47,8 @@ import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
 import GestionGeostructure from "../features/gestion-geostructure";
 import GestionGeolocation from "features/geolocation";
-import SearchTable from "../features/gestion-clientes/clientes-naturales/components/SearchTable";
+import GestionCuentas from "features/gestion-cuentas";
+
 
 const routes = [
     {
@@ -123,11 +124,14 @@ const routes = [
         noCollapse: true,
     },
     {
-        name: "ClientResults",
-        key: "clientResults",
-        route: "/clientesnaturales/results",
-        component: <SearchTable/>
-    }
+        type: "collapse",
+        name: "Gestion Cuentas",
+        key: "cuentas",
+        route: "/cuentas",
+        icon: <Folder size="12px"/>,
+        component: <GestionCuentas/>,
+        noCollapse: true,
+    },
 
 ];
 
