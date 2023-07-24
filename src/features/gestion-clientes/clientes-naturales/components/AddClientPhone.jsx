@@ -1,12 +1,14 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Select, TextField, Switch, FormControlLabel } from '@mui/material';
+import {Select, TextField, Switch, FormControlLabel, Snackbar, Portal} from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
 import {yupResolver} from "@hookform/resolvers/yup";
+import useStateContext from "../../../../context/custom/useStateContext";
+import Alert from "@mui/material/Alert";
 
 const validationSchema = yup.object({
     phoneNumber: yup
@@ -19,6 +21,10 @@ const validationSchema = yup.object({
 });
 
 const PhoneCreationForm = () => {
+
+    const { context, setContext } = useStateContext();
+    const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+
     const {
         control,
         handleSubmit,
@@ -39,8 +45,31 @@ const PhoneCreationForm = () => {
         { label: 'Otro', value: 'OTH' },
     ];
 
-    const onSubmit = (data) => {
-        alert(JSON.stringify(data, null, 2));
+
+    const onSubmit = (data,event) => {
+
+        if (context.phones && Array.isArray(context.phones)) {
+        const phoneNumberExists = context.phones.some(
+            (phone) => phone.phoneNumber && phone.phoneNumber === data.phoneNumber
+        );
+        if (phoneNumberExists) {
+            setShowErrorSnackbar(true);
+            return; // Exit the function if the phone number already exists
+        }else {
+            const updatedPhones = Array.isArray(context.phones)
+                ? [...context.phones, data]
+                : [data];
+
+            setContext({
+                ...context.phones,
+                phones: updatedPhones,
+            });
+        }}else {
+            setContext({
+                ...context.phones,
+                phones: [data],
+            });
+        }
     };
 
     return (
@@ -76,9 +105,12 @@ const PhoneCreationForm = () => {
                             name="phoneType"
                             control={control}
                             render={({ field }) => (
-                                <Select
+
+                                <TextField
                                     {...field}
                                     fullWidth
+                                    label="Tipo de Teléfono"
+                                    select
                                     error={Boolean(errors.phoneType)}
                                     helperText={errors.phoneType?.message}
                                 >
@@ -87,7 +119,7 @@ const PhoneCreationForm = () => {
                                             {type.label}
                                         </MenuItem>
                                     ))}
-                                </Select>
+                                </TextField>
                             )}
                         />
                     </Box>
@@ -119,6 +151,20 @@ const PhoneCreationForm = () => {
                     </Box>
                 </Box>
             </form>
+            {/* Snackbar for displaying error */}
+            {showErrorSnackbar && (
+                <Portal>
+                <Snackbar
+                    open={showErrorSnackbar}
+                    autoHideDuration={6000}
+                    onClose={() => setShowErrorSnackbar(false)}
+                >
+                    <Alert onClose={() => setShowErrorSnackbar(false)} severity="error">
+                        El número de teléfono ya existe
+                    </Alert>
+                </Snackbar>
+                </Portal>
+            )}
         </div>
     );
 };
