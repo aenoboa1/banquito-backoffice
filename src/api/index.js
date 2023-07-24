@@ -42,7 +42,7 @@ export const createAPIEndpoint = endpoint => {
         fetchByName: (name, token) => axios.get(url + "countries/"+name,token),
         fetchBranches: (id,token) => axios.get(adminurl + 'branch-list/' + id, token),
         fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
-        fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'search?status=' + status + '&documentId=' + documentId + '&branchId=' + branch, token),
+        fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
         fetchByCode: (code, token) => axios.get(url + code,token),
         fetchAll: (token) => axios.get(getAllUrl, token),
         // Holiday

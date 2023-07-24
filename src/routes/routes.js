@@ -47,6 +47,7 @@ import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
 import GestionGeostructure from "../features/gestion-geostructure";
 import GestionGeolocation from "features/geolocation";
+import SearchTable from "../features/gestion-clientes/clientes-naturales/components/SearchTable";
 
 const routes = [
     {
@@ -121,6 +122,12 @@ const routes = [
         component: <ClientesJuridicos/>,
         noCollapse: true,
     },
+    {
+        name: "ClientResults",
+        key: "clientResults",
+        route: "/clientesnaturales/results",
+        component: <SearchTable/>
+    }
 
 ];
 
