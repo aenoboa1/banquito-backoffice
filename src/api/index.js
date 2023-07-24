@@ -11,6 +11,7 @@ export const ENDPOINTS = {
     country: 'country',
     holiday : 'holiday',
     bankEntity: 'bankEntity',
+
 }
 
 export const createAPIEndpoint = endpoint => {
@@ -18,7 +19,6 @@ export const createAPIEndpoint = endpoint => {
     let url = BASE_URL + endpoint + '/';
     let posturl = BASE_URL + endpoint ;
     let adminurl = BASE_ADMIN_URL + endpoint + '/';
-
 
     let getAllUrl = BASE_URL + endpoint;
 
@@ -41,7 +41,8 @@ export const createAPIEndpoint = endpoint => {
         fetchById: (id, token) => axios.get(url + id, token),
         fetchByName: (name, token) => axios.get(url + "countries/"+name,token),
         fetchBranches: (id,token) => axios.get(adminurl + 'branch-list/' + id, token),
-        fetchProvinceByCountry: (id,levelcode,token) => axios.get(urlLocationGet + 'provinces/' + id + '?levelCode=' +levelcode, token),
+        fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
+        fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'search?status=' + status + '&documentId=' + documentId + '&branchId=' + branch, token),
         fetchByCode: (code, token) => axios.get(url + code,token),
         fetchAll: (token) => axios.get(getAllUrl, token),
         // Holiday
