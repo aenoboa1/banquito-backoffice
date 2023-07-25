@@ -1,16 +1,16 @@
-import React, { useContext } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { TextField, Slider, Switch, FormControlLabel, Button, Box, Select, InputAdornment } from '@mui/material';
+import React from 'react';
+import {Controller, useForm} from 'react-hook-form';
+import {Box, Button, FormControlLabel, InputAdornment, Switch, TextField} from '@mui/material';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
-import { yupResolver } from "@hookform/resolvers/yup";
+import {yupResolver} from "@hookform/resolvers/yup";
 import MenuItem from "@mui/material/MenuItem";
 import useStateContext from "../../../../context/custom/useStateContext";
 import Grid from "@mui/material/Grid";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Business } from "@mui/icons-material";
-import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
+import {Business} from "@mui/icons-material";
+import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
 
 const validationSchema = yup.object({
     typeAddress: yup.string().optional('Tipo de dirección requerido'),
@@ -22,7 +22,7 @@ const validationSchema = yup.object({
 
 const AddressCreationForm = () => {
 
-    const { context, setContext } = useStateContext();
+    const {context, setContext} = useStateContext();
 
 
     function sleep(delay = 0) {
@@ -53,8 +53,8 @@ const AddressCreationForm = () => {
                     (res) => {
                         setOptions(res.data.locations)
                     }).then(
-                        err => console.log(err)
-                    )
+                    err => console.log(err)
+                )
             }
         })();
 
@@ -66,14 +66,14 @@ const AddressCreationForm = () => {
     React.useEffect(() => {
         if (!openLocations) {
             setOptions([]);
-            
+
         }
     }, [openLocations]);
 
     const {
         control,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
@@ -100,9 +100,9 @@ const AddressCreationForm = () => {
     };
 
     const typeAddress = [
-        { label: 'Casa', value: 'HOM' },
-        { label: 'Oficina', value: 'OFF' },
-        { label: 'Otro', value: 'OTH' },
+        {label: 'Casa', value: 'HOM'},
+        {label: 'Oficina', value: 'OFF'},
+        {label: 'Otro', value: 'OTH'},
     ];
 
     return (
@@ -110,7 +110,7 @@ const AddressCreationForm = () => {
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
                     <Box gridColumn="span 12">
-                        <SoftTypography align="center" sx={{ fontWeight: 'bold' }}>
+                        <SoftTypography align="center" sx={{fontWeight: 'bold'}}>
                             Creación de Dirección
                         </SoftTypography>
                     </Box>
@@ -119,7 +119,7 @@ const AddressCreationForm = () => {
                         <Controller
                             name="typeAddress"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
 
                                 <TextField
                                     {...field}
@@ -145,7 +145,7 @@ const AddressCreationForm = () => {
                             <Controller
                                 name="locationId"
                                 control={control}
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <Autocomplete
                                         id="locationId"
                                         open={openLocations}
@@ -157,7 +157,7 @@ const AddressCreationForm = () => {
                                         }}
 
                                         isOptionEqualToValue={(option, value) => option.id === value?.id}
-                                        getOptionLabel={(option) => option.name || ''} 
+                                        getOptionLabel={(option) => option.name || ''}
                                         groupBy={(option) => option.firstLetter}
 
                                         fullWidth
@@ -171,13 +171,14 @@ const AddressCreationForm = () => {
                                                     ...params.InputProps,
                                                     endAdornment: (
                                                         <React.Fragment>
-                                                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                            {loading ?
+                                                                <CircularProgress color="inherit" size={20}/> : null}
                                                             {params.InputProps.endAdornment}
                                                         </React.Fragment>
                                                     ),
                                                     startAdornment: (
                                                         <InputAdornment position="start">
-                                                            <Business />
+                                                            <Business/>
                                                         </InputAdornment>
                                                     ),
                                                 }}
@@ -193,13 +194,11 @@ const AddressCreationForm = () => {
                     </Box>
 
 
-
-
                     <Box gridColumn="span 12">
                         <Controller
                             name="line1"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <TextField
                                     fullWidth
                                     type="text"
@@ -217,7 +216,7 @@ const AddressCreationForm = () => {
                         <Controller
                             name="line2"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <TextField
                                     fullWidth
                                     type="text"
@@ -233,7 +232,7 @@ const AddressCreationForm = () => {
                         <Controller
                             name="latitude"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <TextField
                                     fullWidth
                                     type="number"
@@ -251,7 +250,7 @@ const AddressCreationForm = () => {
                         <Controller
                             name="longitude"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <TextField
                                     fullWidth
                                     type="number"
@@ -269,9 +268,9 @@ const AddressCreationForm = () => {
                         <Controller
                             name="isDefault"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormControlLabel
-                                    control={<Switch {...field} color="primary" />}
+                                    control={<Switch {...field} color="primary"/>}
                                     label="¿Es la predeterminada?"
                                 />
                             )}

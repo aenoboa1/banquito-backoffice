@@ -4,6 +4,8 @@ import axios from 'axios'
 // URL LOCAL
 export const BASE_URL = 'https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/';
 export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/';
+
+export const CLIENTS_URL = 'https://banquito-ws-clientes-production.up.railway.app/api/v1/';
 export const ENDPOINTS = {
     accounts: 'customers',
     geoStructure: 'geo-structure',
@@ -20,6 +22,11 @@ export const createAPIEndpoint = endpoint => {
 
     let url = BASE_URL + endpoint + '/';
     let customerPUTurl = BASE_URL + endpoint ;
+
+    let clientUrl = CLIENTS_URL + endpoint + '/' ;
+    let businessurl = CLIENTS_URL + endpoint + '/' ;
+    let businessRouteurl = CLIENTS_URL + endpoint  ;
+    let clientPostUrl = CLIENTS_URL + endpoint  ;
     let groupRolesUrl = BASE_URL + endpoint ;
     let posturl = BASE_URL + endpoint ;
     let adminurl = BASE_ADMIN_URL + endpoint + '/';
@@ -45,14 +52,15 @@ export const createAPIEndpoint = endpoint => {
     return {
         fetch: (token) => axios.get(url, token),
         post: (newRecord, token) => axios.post(posturl, newRecord, token),
+        postClient: (newRecord, token) => axios.post(clientPostUrl  , newRecord, token),
         put: (id, updatedRecord, token) => axios.put(url + id, updatedRecord, token),
         delete: id => axios.delete(url + id),
         fetchById: (id, token) => axios.get(url + id, token),
-        fetchGroupCompany: (token) => axios.get(url + 'all', token),
+        fetchGroupCompany: (token) => axios.get(businessurl + 'all', token),
         fetchByName: (name, token) => axios.get(url + "countries/"+name,token),
         fetchBranches: (id,token) => axios.get(adminurl + 'branch-list/' + id, token),
-        fetchGroupRoles : (token) => axios.get( groupRolesUrl, token),
-        fetchByTypeDocumentAndDocumentId: (typeDocument, documentId, token) => axios.get(url + 'typeanddocument?typeDocument=' + typeDocument + '&document=' + documentId, token),
+        fetchGroupRoles : (token) => axios.get( businessRouteurl, token),
+        fetchByTypeDocumentAndDocumentId: (typeDocument, documentId, token) => axios.get(clientUrl + 'typeanddocument?typeDocument=' + typeDocument + '&document=' + documentId, token),
         fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
         fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
         fetchByCode: (code, token) => axios.get(url + code,token),
