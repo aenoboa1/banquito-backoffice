@@ -20,9 +20,14 @@ const validationSchema = yup.object({
 const AddMemberForm = ({ setIsActive }) => {
     const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
     const { context, setContext } = useStateContext();
+
     const [openRoles, setOpenRoles] = useState(false);
     const [options, setOptions] = useState([]);
     const loading = openRoles && options.length === 0;
+
+    const [openListClient, setOpenListClient] = useState(false);
+    const [optionsClient, setOptionsClient] = useState([]);
+    const loadingClient = openListClient && optionsClient.length === 0;
 
     function sleep(delay = 0) {
         return new Promise((resolve) => {
@@ -41,8 +46,6 @@ const AddMemberForm = ({ setIsActive }) => {
                 createAPIEndpoint(ENDPOINTS.groupRole).fetchAll()
                     .then(
                         (res) => {
-                            // console.log("---> ",res.data)
-                            // console.log("EndPoint> ",ENDPOINTS.groupRole)
                             setOptions(res.data)
                         }).then(
                             err => console.log(err)
@@ -55,11 +58,40 @@ const AddMemberForm = ({ setIsActive }) => {
     }, [loading]);
 
     useEffect(() => {
+        let active = true;
+        if (!loadingClient) {
+            return undefined;
+        }
+        (async () => {
+            await sleep(1e3);
+            if (active) {
+                createAPIEndpoint(ENDPOINTS.accounts).fetchAllCustomers()
+                    .then(
+                        (res) => {
+                            setOptionsClient(res.data)
+                        }).then(
+                            err => console.log(err)
+                        )
+            }
+        })();
+        return () => {
+            active = false;
+        };
+    }, [loadingClient]);
+
+    useEffect(() => {
         if (!openRoles) {
             setOptions([]);
 
         }
     }, [openRoles]);
+
+    useEffect(() => {
+        if (!openListClient) {
+            setOptionsClient([]);
+
+        }
+    }, [openListClient]);
 
     const {
         control,
@@ -72,12 +104,6 @@ const AddMemberForm = ({ setIsActive }) => {
             clientList: '',
         },
     });
-
-    const clientsList = [
-        { label: 'Cliente 1', value: 'CID1' },
-        { label: 'Cliente 2', value: 'CID2' },
-        { label: 'Cliente 3', value: 'CID3' },
-    ];
 
     const onSubmit = (data, event) => {
         if (context.members && Array.isArray(context.members)) {
@@ -119,31 +145,60 @@ const AddMemberForm = ({ setIsActive }) => {
                     </Box>
 
                     <Box gridColumn="span 12">
-                        <Controller
-                            name="clientList"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    select // tell TextField to render select
-                                    label="Clientes"
-                                    error={Boolean(errors.clientList)}
-                                    helperText={errors.clientList?.message}
-                                >
-                                    {clientsList.map((type) => (
-                                        <MenuItem key={type.value} value={type.label}>
-                                            {type.label}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            )}
-                        />
+                        <Grid item xs={12}>
+                            <Controller
+                                name="clientList"
+                                control={control}
+                                render={({ field }) => (
+                                    <Autocomplete
+                                        id="clientList"
+                                        open={openListClient}
+                                        onOpen={() => {
+                                            setOpenListClient(true);
+                                        }}
+                                        onClose={() => {
+                                            setOpenListClient(false);
+                                        }}
+
+                                        isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                        getOptionLabel={(option) => {
+                                            return option.firstName + ' ' + option.lastName || '';
+                                        }}
+                                        groupBy={(option) => option.firstLetter}
+                                        fullWidth
+                                        options={optionsClient}
+                                        loading={loadingClient}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Selecciona un cliente"
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                        <Fragment>
+                                                            {loadingClient ? <CircularProgress color="inherit" size={20} /> : null}
+                                                            {params.InputProps.endAdornment}
+                                                        </Fragment>
+                                                    ),
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                error={Boolean(errors.clientList)}
+                                                helperText={errors.clientList?.message}
+                                            />
+                                        )}
+                                        onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                    />
+                                )}
+                            />
+                        </Grid>
                     </Box>
 
                     <Box gridColumn="span 12">
                         <Grid item xs={12}>
-                            {/* Branch */}
                             <Controller
                                 name="roleType"
                                 control={control}

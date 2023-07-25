@@ -197,10 +197,7 @@ export const AddClientLegalForm = () => {
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
-                <Box gridColumn="span 12">
-
-                </Box>
-
+                <Box gridColumn="span 12"></Box>
                 <Box gridColumn="span 6">
                     <Controller
                         name="branchId"

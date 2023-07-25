@@ -2,8 +2,8 @@ import axios from 'axios'
 
 
 // URL LOCAL
-export const BASE_URL = 'http://localhost:8080/api/v1/';
-export const BASE_ADMIN_URL = 'http://localhost:8081/api/v1/';
+export const BASE_URL = 'https://banquito-ws-clientes-production.up.railway.app/api/v1/';
+export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/';
 export const ENDPOINTS = {
     accounts: 'customers',
     geoStructure: 'geo-structure',
@@ -13,7 +13,6 @@ export const ENDPOINTS = {
     bankEntity: 'bankEntity',
     groupRole: 'group-role',
     groupCompany: 'group-company',
-
 }
 
 export const createAPIEndpoint = endpoint => {
@@ -47,6 +46,7 @@ export const createAPIEndpoint = endpoint => {
         fetchByStatusOrDocumentOrBranch: (status, documentId, branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
         fetchByCode: (code, token) => axios.get(url + code, token),
         fetchAll: (token) => axios.get(getAllUrl, token),
+        fetchAllCustomers: (token) => axios.get(getAllUrl + '/all', token),
         // Holiday
         fetchHolidayBetweenDates: (startDate, endDate, token) => axios.get(urlHolidayGet, {
             params: {
