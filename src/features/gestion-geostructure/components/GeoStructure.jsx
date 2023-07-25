@@ -102,7 +102,7 @@ export default function GeoStructure() {
 
 
     const getProvinces = () => {
-        axios.get('http://localhost:8080/api/v1/geo-structure/locations/ECU', { params: { levelCode: 1 } })
+        axios.get('https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/geo-structure/locations/ECU', { params: { levelCode: 1 } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setProvinces(response.data.locations);
@@ -112,7 +112,7 @@ export default function GeoStructure() {
     }
 
     const getCantons = () => {
-        axios.get('http://localhost:8080/api/v1/geo-structure/locations/ECU', { params: {levelCode: 2 } })
+        axios.get('https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/geo-structure/locations/ECU', { params: {levelCode: 2 } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setCantons(response.data.locations);
@@ -131,7 +131,7 @@ export default function GeoStructure() {
             levelCode: levelCode,
             name: name,
         };
-        axios.post('http://localhost:8080/api/v1/geo-structure', geoStructure, { params: { countryCode: countryCode } })
+        axios.post('https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/geo-structure', geoStructure, { params: { countryCode: countryCode } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setIsResponse(true);
@@ -145,7 +145,7 @@ export default function GeoStructure() {
     };
 
     const createLocation = (data) => {
-        axios.post('http://localhost:8080/api/v1/geo-location', data)
+        axios.post('https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/geo-location', data)
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setIsResponse(true);

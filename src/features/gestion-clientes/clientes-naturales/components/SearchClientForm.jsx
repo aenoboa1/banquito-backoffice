@@ -67,6 +67,12 @@ export const SearchClientForm = () => {
     const [options, setOptions] = React.useState([]);
     const loading = openBranches && options.length === 0;
 
+
+    const documentTypes = [
+        {label: 'Cédula', value: 'CID'},
+        {label: 'Pasaporte', value: 'PASS'},
+        {label: 'RUC', value: 'RUC'},
+    ];
     React.useEffect(() => {
         let active = true;
 
@@ -112,7 +118,7 @@ export const SearchClientForm = () => {
 
     const onSubmit = (data) => {
         createAPIEndpoint(ENDPOINTS.accounts)
-            .fetchByStatusOrDocumentOrBranch(data.state, data.documentId,'6')
+            .fetchByTypeDocumentAndDocumentId(data.typeDocumentId, data.documentId)
             .then((res) => {
                 navigate("/clientesnaturales/results", { state: { data: res.data } });
             })
@@ -136,25 +142,24 @@ export const SearchClientForm = () => {
                             Busqueda de Clientes <SearchIcon />
                         </SoftTypography>
                     </Box>
+
                     <Box gridColumn="span 12">
+                        {/* Type of Document */}
                         <Controller
-                            name="state"
+                            name="typeDocumentId"
                             control={control}
-                            defaultValue=""
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <TextField
-                                    select
-                                    fullWidth
-                                    label="Estado"
-                                    variant="outlined"
-                                    disabled={!isStateFieldEnabled}
                                     {...field}
-                                    error={!!errors.state}
-                                    helperText={errors.state?.message}
+                                    fullWidth
+                                    select // tell TextField to render select
+                                    label="Tipo de Documento"
+                                    error={Boolean(errors.typeDocumentId)}
+                                    helperText={errors.typeDocumentId?.message}
                                 >
-                                    {stateOptions.map((option) => (
-                                        <MenuItem key={option.value} value={option.value}>
-                                            {option.label}
+                                    {documentTypes.map((type) => (
+                                        <MenuItem key={type.value} value={type.value}>
+                                            {type.label}
                                         </MenuItem>
                                     ))}
                                 </TextField>
@@ -178,86 +183,6 @@ export const SearchClientForm = () => {
                                 />
                             )}
                         />
-                    </Box>
-
-                    <Box gridColumn="span 12" sx={{ textAlign: 'center' }}>
-                        {/* Branch */}
-                        <Controller
-                            name="branchId"
-                            control={control}
-                            render={({field}) => (
-                                <Autocomplete
-                                    id="branchId"
-                                    open={openBranches}
-                                    onOpen={() => {
-                                        setOpenBranches(true);
-                                    }}
-                                    onClose={() => {
-                                        setOpenBranches(false);
-                                    }}
-                                    getOptionSelected={(option, value) =>
-                                        value === undefined || value === "" || option.uniqueKey === value.uniqueKey
-                                    }
-                                    isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
-                                    getOptionLabel={(option) => option.name || ''}
-                                    fullWidth
-                                    options={options}
-                                    loading={loading}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Seleccione una Sucursal"
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                endAdornment: (
-                                                    <React.Fragment>
-                                                        {loading ?
-                                                            <CircularProgress color="inherit"
-                                                                              size={20}/> : null}
-                                                        {params.InputProps.endAdornment}
-                                                    </React.Fragment>
-                                                ),
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <Business/>
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            error={Boolean(errors.branchId)}
-                                            helperText={errors.branchId?.message}
-                                        />
-                                    )}
-                                    onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
-                                />
-                            )}
-                        />
-                    </Box>
-                    <Box gridColumn="span 12" sx={{ textAlign: 'center' }}>
-                        <IconButton onClick={handleClick}>
-                            <SettingsIcon />
-                        </IconButton>
-                        <Popover
-                            open={Boolean(anchorEl)}
-                            anchorEl={anchorEl}
-                            onClose={handleClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                        >
-                            <Box p={2}>
-                                <IconButton onClick={handleStateFieldToggle}>
-                                    <SettingsIcon /> Habilitar/Deshabilitar Estado
-                                </IconButton>
-                                <IconButton onClick={handleDocumentIdFieldToggle}>
-                                    <SettingsIcon /> Habilitar/Deshabilitar Documento de Identidad
-                                </IconButton>
-                            </Box>
-                        </Popover>
                     </Box>
 
 

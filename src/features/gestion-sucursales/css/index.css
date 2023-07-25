@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
+.contenedor {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.formulario {
+    min-width: 600px;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+/* .formulario > div {
+	margin-bottom: 20px;
+}*/
+
+.formulario label {
+    margin-top: 1px;
+    display: inline-block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f1f1f;
+    margin-right: 20px;
+}
+
+.formulario input{
+    width: 100%;
+    border-radius: 5px;
+    /* border: 2px solid #e2e2e2; */
+    font-size: 16px;
+    /* padding: 10px; */
+    /* margin-left: 15px; */
+    color: #212529;
+}
+
+.formulario input:focus {
+    outline: none;
+    border: 2px solid #0085FF;
+}
+
+.formulario .error {
+    color: #e92b2d;
+    font-weight: 600;
+    font-size: 12px;
+    margin-left: 23rem;
+}
+
+.formulario button[type="submit"] {
+    /* display: flex; */
+    /* background: #0085FF; */
+    font-weight: 400;
+    font-family: 'Open Sans', sans-serif;
+    /* border: none; */
+    cursor: pointer;
+    /* width: 25%; */
+    padding: 10px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 16px;
+    transition: .3s ease all;
+}
+
+.formulario button[type="submit"]:hover {
+    background: #0051ff;
+}
+
+.formulario .exito {
+    text-align: center;
+    font-size: 14px;
+    padding-top: 20px;
+    color: #02a802;
+}
+
+.formulario input[type="radio"] {
+    width: auto;
+}

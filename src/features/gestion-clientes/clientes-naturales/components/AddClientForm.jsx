@@ -1,10 +1,13 @@
-import React from 'react';
+import React, {ReactNode, useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
     ButtonGroup,
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
     InputAdornment,
     Modal,
     Stack,
@@ -34,6 +37,7 @@ import Grid from "@mui/material/Grid";
 import colors from "assets/theme/base/colors";
 import borders from "assets/theme/base/borders";
 import SoftButton from "../../../../components/SoftButton";
+import FormControl from "@mui/material/FormControl";
 
 const validationSchema = yup.object({
     firstName: yup.string().required('Primer Nombre es requerido'),
@@ -48,9 +52,16 @@ const validationSchema = yup.object({
     documentId: yup.string().required('Documento de identidad es requerido'),
     branchId: yup.string().required('Seleccione una sucursal'),
     comments: yup.string().required('Comentario es requerido'),
+    groupRoleId: yup.string().optional(),
+    groupCompanyId: yup.string().optional(),
 });
 
+function MuiAlert(props: { severity: string, children: ReactNode }) {
+    return null;
+}
+
 export const AddClientForm = () => {
+    const [groupMember, setGroupMember] = useState([]);
 
     function sleep(delay = 0) {
         return new Promise((resolve) => {
@@ -58,9 +69,11 @@ export const AddClientForm = () => {
         });
     }
 
+
     const [openBranches, setOpenBranches] = React.useState(false);
     const [options, setOptions] = React.useState([]);
     const loading = openBranches && options.length === 0;
+
 
     React.useEffect(() => {
         let active = true;
@@ -100,11 +113,93 @@ export const AddClientForm = () => {
     }, [openBranches]);
 
 
+    const [openGroupRole, setOpenGroupRole] = React.useState(false);
+    const [optionsGroupRole, setOptionsGroupRole] = React.useState([]);
+    const loadingGroupRole = openGroupRole && options.length === 0;
+
+    React.useEffect(() => {
+        let active = true;
+
+        if (!loadingGroupRole) {
+            return undefined;
+        }
+
+        (async () => {
+            await sleep(1e3); // For demo purposes.
+
+            if (active) {
+
+                createAPIEndpoint(ENDPOINTS.groupRole).fetchGroupRoles(
+                    {}
+                ).then(
+                    res => {
+                        console.log(res.data);
+                        setOptionsGroupRole(res.data);
+
+                    }).then(
+                    err => console.log(err)
+                )
+            }
+        })();
+
+        return () => {
+            active = false;
+        };
+    }, [loadingGroupRole]);
+
+    React.useEffect(() => {
+        if (!openGroupRole) {
+            setOptionsGroupRole([]);
+        }
+    }, [openGroupRole]);
+
+
+    const [openGroupCompany, setOpenGroupCompany] = React.useState(false);
+    const [optionsGroupCompany, setOptionsGroupCompany] = React.useState([]);
+    const loadingGroup = openGroupCompany && options.length === 0;
+
+    React.useEffect(() => {
+        let active = true;
+
+        if (!loadingGroup) {
+            return undefined;
+        }
+
+        (async () => {
+            await sleep(1e3); // For demo purposes.
+
+            if (active) {
+
+                createAPIEndpoint(ENDPOINTS.groupCompany).fetchGroupCompany(
+                    {}
+                ).then(
+                    res => {
+                        console.log(res.data);
+                        setOptionsGroupCompany(res.data);
+
+                    }).then(
+                    err => console.log(err)
+                )
+            }
+        })();
+
+        return () => {
+            active = false;
+        };
+    }, [loadingGroup]);
+
+    React.useEffect(() => {
+        if (!openGroupCompany) {
+            setOptionsGroupCompany([]);
+        }
+    }, [openGroupCompany]);
+
+
     const {context, setContext} = useStateContext();
     const {
         control,
         handleSubmit,
-        formState: {errors},
+        formState: {errors, isValid},
     } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
@@ -125,11 +220,21 @@ export const AddClientForm = () => {
         const updatedcontext = {
             addresses: Array.isArray(context.addresses) ? [...context.addresses] : [],
             phones: Array.isArray(context.phones) ? [...context.phones] : [],
-            ...data
+            ...data,
+            groupMember: includeGroupCompany
+                ? [
+                    {
+                        groupRoleId: data.groupRoleId,
+                        groupCompanyId: data.groupCompanyId,
+                    },
+                    ...groupMember,
+                ]
+                : groupMember,
         };
 
+
         createAPIEndpoint(ENDPOINTS.accounts,
-        ).post(updatedcontext, {}).then(
+        ).postClient(updatedcontext, {}).then(
 
         ).catch(
             err => console.log(err)
@@ -168,7 +273,7 @@ export const AddClientForm = () => {
         };
         setContext(updatedContext);
     };
-    const phoneTypes = [
+    const documentTypes = [
         {label: 'Cédula', value: 'CID'},
         {label: 'Pasaporte', value: 'PASS'},
         {label: 'RUC', value: 'RUC'},
@@ -194,6 +299,16 @@ export const AddClientForm = () => {
         }
     };
 
+    const getAddressTypeLabel = (value) => {
+        switch (value) {
+            case 'HOM':
+                return 'Casa';
+            case 'OFF':
+                return 'Oficina';
+            case 'OTH':
+                return 'Otro';
+        }
+    };
     const [openAddress, setOpenAddress] = React.useState(false);
     const handleOpenAddress = () => setOpenAddress(true);
 
@@ -205,8 +320,22 @@ export const AddClientForm = () => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const [deleteIndex, setDeleteIndex] = useState(null);
+
+    const handleDeleteConfirmation = () => {
+        // Perform the delete operation here using the deleteIndex
+        const updatedAddresses = context.addresses.filter((_, i) => i !== deleteIndex);
+        const updatedContext = {
+            ...context,
+            addresses: updatedAddresses,
+        };
+        setContext(updatedContext);
+        setDeleteIndex(null); // Clear deleteIndex after successful deletion
+    };
 
     // Function to add a new phone number field
+
+    const [includeGroupCompany, setIncludeGroupCompany] = useState(false);
 
     return (
         <Stack gap={5}>
@@ -316,7 +445,7 @@ export const AddClientForm = () => {
                                         error={Boolean(errors.typeDocumentId)}
                                         helperText={errors.typeDocumentId?.message}
                                     >
-                                        {phoneTypes.map((type) => (
+                                        {documentTypes.map((type) => (
                                             <MenuItem key={type.value} value={type.value}>
                                                 {type.label}
                                             </MenuItem>
@@ -549,57 +678,183 @@ export const AddClientForm = () => {
 
                         {context.addresses && (
                             <>
-                                <Grid item xs={6}>
-                                    {context.addresses.map((address, index) => (
+                                {context.addresses.map((address, index) => (
 
-                                        <Box gridColumn="span 12">
-                                            <div>
-                                                <Accordion key={index}>
-                                                    <AccordionSummary
-                                                        expandIcon={<ExpandMore/>}
-                                                        aria-controls="panel1a-content"
-                                                        id="panel1a-header"
-                                                    >
-                                                        <Box sx={{
-                                                            display: 'grid',
-                                                            gridTemplateColumns: 'repeat(12, 1fr)',
-                                                            gap: 4
-                                                        }}>
-                                                            <Box gridColumn="span 12"
-                                                                 sx={{position: 'relative'}}>
-                                                                <SoftTypography align="center"
-                                                                                sx={{fontWeight: 'bold'}}>
-                                                                    Dirección {index + 1}
-                                                                </SoftTypography>
-                                                            </Box>
+                                    <Box gridColumn="span 12">
+                                        <div>
+                                            <Accordion key={index}>
+                                                <AccordionSummary
+                                                    expandIcon={<ExpandMore/>}
+                                                    aria-controls="panel1a-content"
+                                                    id="panel1a-header"
+                                                >
+                                                    <Box sx={{
+                                                        display: 'grid',
+                                                        gridTemplateColumns: 'repeat(12, 1fr)',
+                                                        gap: 4
+                                                    }}>
+                                                        <Box gridColumn="span 12"
+                                                             sx={{position: 'relative'}}>
+                                                            <SoftTypography align="center"
+                                                                            sx={{fontWeight: 'bold'}}>
+                                                                Dirección {index + 1}
+                                                            </SoftTypography>
                                                         </Box>
-                                                    </AccordionSummary>
-                                                    <AccordionDetails sx={{position: 'relative'}}>
-                                                        <Box>
-                                                            <SoftTypography>{`Tipo de Dirección: ${address.typeAddress}`}</SoftTypography>
-                                                            <SoftTypography>{`Dirección Línea 1: ${address.line1}`}</SoftTypography>
-                                                            <SoftTypography>{`Dirección Línea 2: ${address.line2}`}</SoftTypography>
-                                                            <SoftTypography>{`Latitud: ${address.latitude}`}</SoftTypography>
-                                                            <SoftTypography>{`Longitud: ${address.longitude}`}</SoftTypography>
-                                                            <SoftTypography>{`¿Predeterminada?: ${address.isDefault ? 'Sí' : 'No'}`}</SoftTypography>
-                                                        </Box>
-                                                        <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
-                                                            <IconButton aria-label="delete"
-                                                                        onClick={() => handleDeleteAddress(index)}>
-                                                                <DeleteIcon fontSize="small"/>
-                                                            </IconButton>
-                                                        </Box>
-                                                        {/* Optionally add more details here */}
-                                                    </AccordionDetails>
-                                                </Accordion>
-                                            </div>
-                                        </Box>
-                                    ))}
+                                                    </Box>
+                                                </AccordionSummary>
+                                                <AccordionDetails sx={{position: 'relative'}}>
+                                                    <Box>
+                                                        <SoftTypography>{`Tipo de Dirección: ${getAddressTypeLabel(address.typeAddress)}`}</SoftTypography>
+                                                        <SoftTypography>{`Dirección Línea 1: ${address.line1}`}</SoftTypography>
+                                                        <SoftTypography>{`Dirección Línea 2: ${address.line2}`}</SoftTypography>
+                                                        <SoftTypography>{`Latitud: ${address.latitude}`}</SoftTypography>
+                                                        <SoftTypography>{`Longitud: ${address.longitude}`}</SoftTypography>
+                                                        <SoftTypography>{`¿Predeterminada?: ${address.isDefault ? 'Sí' : 'No'}`}</SoftTypography>
+                                                    </Box>
+                                                    <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
+                                                        <IconButton aria-label="delete"
+                                                                    onClick={() => handleDeleteAddress(index)}>
+                                                            <DeleteIcon fontSize="small"/>
+                                                        </IconButton>
+                                                    </Box>
+                                                    {/* Optionally add more details here */}
+                                                </AccordionDetails>
+                                            </Accordion>
+                                        </div>
+                                    </Box>
+                                ))}
 
-                                </Grid>
 
                             </>
                         )}
+
+                        <FormControl component="fieldset">
+                            <FormGroup>
+                                {/* Checkbox for including groupCompanyId in form submission */}
+
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={includeGroupCompany}
+                                            onChange={(e) => setIncludeGroupCompany(e.target.checked)}
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Es representante de una empresa?"
+                                />
+                                {/* Input field for groupCompanyId */}
+                                {includeGroupCompany && (
+                                    <>
+
+                                        <Controller
+                                            name="groupCompanyId"
+                                            control={control}
+                                            render={({field}) => (
+                                                <Autocomplete
+                                                    id="groupCompanyId"
+                                                    open={openGroupCompany}
+                                                    onOpen={() => {
+                                                        setOpenGroupCompany(true);
+                                                    }}
+                                                    onClose={() => {
+                                                        setOpenGroupCompany(false);
+                                                    }}
+                                                    getOptionSelected={(option, value) =>
+                                                        value === undefined || value === "" || option.id === value.id
+                                                    }
+                                                    isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                    getOptionLabel={(option) => option.groupName || ''}
+                                                    fullWidth
+                                                    options={optionsGroupCompany}
+                                                    loading={loadingGroup}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Seleccione una Empresa"
+                                                            fullWidth
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                endAdornment: (
+                                                                    <React.Fragment>
+                                                                        {loadingGroup ?
+                                                                            <CircularProgress color="inherit"
+                                                                                              size={20}/> : null}
+                                                                        {params.InputProps.endAdornment}
+                                                                    </React.Fragment>
+                                                                ),
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <Business/>
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            error={Boolean(errors.groupcompanyId)}
+                                                            helperText={errors.groupcompanyId?.message}
+                                                        />
+                                                    )}
+                                                    onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                                />
+                                            )}
+                                        />
+
+                                        <Controller
+                                            name="groupRoleId"
+                                            control={control}
+                                            render={({field}) => (
+                                                <Autocomplete
+                                                    id="groupRoleId"
+                                                    open={openGroupRole}
+                                                    onOpen={() => {
+                                                        setOpenGroupRole(true);
+                                                    }}
+                                                    onClose={() => {
+                                                        setOpenGroupRole(false);
+                                                    }}
+                                                    getOptionSelected={(option, value) =>
+                                                        value === undefined || value === "" || option.id === value.id
+                                                    }
+                                                    isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                    getOptionLabel={(option) => option.groupRoleName || ''}
+                                                    fullWidth
+                                                    options={optionsGroupRole}
+                                                    loading={loadingGroupRole}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Seleccione su Rol "
+                                                            fullWidth
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                endAdornment: (
+                                                                    <React.Fragment>
+                                                                        {loadingGroupRole ?
+                                                                            <CircularProgress color="inherit"
+                                                                                              size={20}/> : null}
+                                                                        {params.InputProps.endAdornment}
+                                                                    </React.Fragment>
+                                                                ),
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <Business/>
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            error={Boolean(errors.groupRoleId)}
+                                                            helperText={errors.groupRoleId?.message}
+                                                        />
+                                                    )}
+                                                    onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                                />
+                                            )}
+                                        />
+
+
+                                    </>
+                                )
+
+                                }
+                            </FormGroup>
+                        </FormControl>
 
 
                         <Grid item xs={12}>
@@ -608,6 +863,7 @@ export const AddClientForm = () => {
                                 type={"submit"}
                                 variant={"gradient"}
                                 color={"primary"}
+                                disabled={!isValid} // Disable the button if the form is not valid
                             >
 
                                 Crear Cliente

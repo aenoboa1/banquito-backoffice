@@ -43,7 +43,7 @@ const AddMemberForm = ({ setIsActive }) => {
         (async () => {
             await sleep(1e3);
             if (active) {
-                createAPIEndpoint(ENDPOINTS.groupRole).fetchAll()
+                createAPIEndpoint(ENDPOINTS.groupRole).fetchAllRoles()
                     .then(
                         (res) => {
                             setOptions(res.data)

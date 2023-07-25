@@ -41,48 +41,60 @@
 import CreditCard from "../examples/Icons/CreditCard";
 import GestionPais from "../features/gestion-pais";
 import GestionFeriados from "../features/gestion-feriados";
-import { AccountTreeOutlined, Business, Folder, PartyMode, Person, Public } from "@mui/icons-material";
+import {AccountTreeOutlined, Business, Folder, PartyMode, Person, Public} from "@mui/icons-material";
 import ClientesNaturales from "../features/gestion-clientes/clientes-naturales";
 import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
 import GestionGeostructure from "../features/gestion-geostructure";
 import GestionGeolocation from "features/geolocation";
 import GestionCuentas from "features/gestion-cuentas";
+import GestionSucursales from "../features/gestion-sucursales";
 
+import SearchTable from "../features/gestion-clientes/clientes-naturales/components/SearchTable";
+import {UpdateClientForm} from "../features/gestion-clientes/clientes-naturales/components/UpdateClientForm";
 
 const routes = [
+    {
+        type: "collapse",
+        name: "Entidad Bancaria",
+        key: "entidadBancaria",
+        route: "/entidadBancaria",
+        icon: <CreditCard size="12px"/>,
+        component: <EntidadBancaria/>,
+        noCollapse: true,
+    },
     {
         type: "collapse",
         name: "Gestion Paises",
         key: "pais",
         route: "/pais",
-        icon: <Public size="12px" />,
-        component: <GestionPais />,
+        icon: <Public size="12px"/>,
+        component: <GestionPais/>,
         noCollapse: true,
     },
     {
         name: "Locaciones",
         key: "geoLocation",
         route: "/geolocation",
-        icon: <AccountTreeOutlined size="12px" />,
-        component: <GestionGeolocation />,
+        icon: <AccountTreeOutlined size="12px"/>,
+        component: <GestionGeolocation/>,
     },
     {
         type: "collapse",
         name: "Estructura Geográfica",
         key: "geostructure",
         route: "/geostructure",
-        icon: <AccountTreeOutlined size="12px" />,
-        component: <GestionGeostructure />,
+        icon: <AccountTreeOutlined size="12px"/>,
+        component: <GestionGeostructure/>,
     },
-
+    
     {
         type: "collapse",
         name: "Gestion Feriados",
         key: "feriados",
         route: "/feriados",
-        icon: <PartyMode size="12px" />,
-        component: <GestionFeriados />,
+        icon: <PartyMode size="12px"/>,
+        component: <GestionFeriados/>,
         noCollapse: true,
     },
     {
@@ -90,8 +102,8 @@ const routes = [
         name: "Gestion Sucursales",
         key: "sucursales",
         route: "/sucursales",
-        icon: <CreditCard size="12px" />,
-        component: <GestionFeriados />,
+        icon: <CreditCard size="12px"/>,
+        component: <GestionSucursales/>,
         noCollapse: true,
     },
 
@@ -100,8 +112,8 @@ const routes = [
         name: "Entidad Bancaria",
         key: "entidad",
         route: "/entidad",
-        icon: <Folder size="12px" />,
-        component: <EntidadBancaria />,
+        icon: <Folder size="12px"/>,
+        component: <EntidadBancaria/>,
         noCollapse: true,
     },
     {
@@ -109,8 +121,8 @@ const routes = [
         name: "Gest. Clientes Naturales",
         key: "clientesnaturales",
         route: "/clientesnaturales",
-        icon: <Person size="12px" />,
-        component: <ClientesNaturales />,
+        icon: <Person size="12px"/>,
+        component: <ClientesNaturales/>,
         noCollapse: true,
     },
 
@@ -119,8 +131,8 @@ const routes = [
         name: "Gest. Clientes Juridicos",
         key: "clientesjuridicos",
         route: "/clientesjuridicos",
-        icon: <Business size="12px" />,
-        component: <ClientesJuridicos />,
+        icon: <Business size="12px"/>,
+        component: <ClientesJuridicos/>,
         noCollapse: true,
     },
     {
@@ -128,10 +140,16 @@ const routes = [
         name: "Gestion Cuentas",
         key: "cuentas",
         route: "/cuentas",
-        icon: <Folder size="12px" />,
-        component: <GestionCuentas />,
+        icon: <Folder size="12px"/>,
+        component: <GestionCuentas/>,
         noCollapse: true,
     },
+    {
+        name: "ClientResults",
+        key: "clientResults",
+        route: "/clientesnaturales/results",
+        component: <SearchTable/>
+    }
 
 ];
 

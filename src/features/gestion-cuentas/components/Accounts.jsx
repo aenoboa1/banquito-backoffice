@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import {
-    Box, Button, Card, CardContent, Divider, Grid, MenuItem, Modal, TextField, Typography,
+    Autocomplete,
+    Box, Button, Card, CardContent, Divider, Grid, InputAdornment, MenuItem, Modal, TextField, Typography,
 } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
-
+import { createAPIEndpoint, ENDPOINTS } from "../../../api";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Business } from "@mui/icons-material";
 
 const validationSchema = yup.object({
-    
-    listClient: yup.string().required('Cliente es requerido'),
+    clientList: yup.string().required('El cliente es necesario'),
+    // typeAccount: yup.string().required('El tipo de cuenta es necesario'),
 });
 
 const Accounts = () => {
@@ -21,6 +24,16 @@ const Accounts = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+    const [openListClient, setOpenListClient] = useState(false);
+    const [optionsClient, setOptionsClient] = useState([]);
+    const loadingClient = openListClient && optionsClient.length === 0;
+
+    function sleep(delay = 0) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, delay);
+        });
+    }
+
     const {
         control,
         handleSubmit,
@@ -29,7 +42,7 @@ const Accounts = () => {
         resolver: yupResolver(validationSchema),
         defaultValues: {
             typeAccount: '',
-            listClient: '',
+            clientList: '',
         },
     });
 
@@ -39,11 +52,34 @@ const Accounts = () => {
         { label: 'Programado', value: 'SCH' },
     ];
 
-    const clientsList = [
-        { label: 'Cliente 1', value: 'CID1' },
-        { label: 'Cliente 2', value: 'CID2' },
-        { label: 'Cliente 3', value: 'CID3' },
-    ];
+    useEffect(() => {
+        let active = true;
+        if (!loadingClient) {
+            return undefined;
+        }
+        (async () => {
+            await sleep(1e3);
+            if (active) {
+                createAPIEndpoint(ENDPOINTS.accounts).fetchAllCustomers()
+                    .then(
+                        (res) => {
+                            setOptionsClient(res.data)
+                        }).then(
+                            err => console.log(err)
+                        )
+            }
+        })();
+        return () => {
+            active = false;
+        };
+    }, [loadingClient]);
+
+    useEffect(() => {
+        if (!openListClient) {
+            setOptionsClient([]);
+
+        }
+    }, [openListClient]);
 
     const onSubmit = (data, event) => {
         handleOpen();
@@ -78,26 +114,56 @@ const Accounts = () => {
                         <Box sx={style}>
                             <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
                                 <Box gridColumn="span 6">
-                                    <Controller
-                                        name="listClient"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Clientes"
-                                                select
-                                                error={Boolean(errors.listClient)}
-                                                helperText={errors.listClient?.message}
-                                            >
-                                                {clientsList.map((type) => (
-                                                    <MenuItem key={type.value} value={type.value}>
-                                                        {type.label}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        )}
-                                    />
+                                    <Grid item xs={12}>
+                                        <Controller
+                                            name="clientList"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Autocomplete
+                                                    id="clientList"
+                                                    open={openListClient}
+                                                    onOpen={() => {
+                                                        setOpenListClient(true);
+                                                    }}
+                                                    onClose={() => {
+                                                        setOpenListClient(false);
+                                                    }}
+
+                                                    isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                    getOptionLabel={(option) => {
+                                                        return option.firstName + ' ' + option.lastName || '';
+                                                    }}
+                                                    groupBy={(option) => option.firstLetter}
+                                                    fullWidth
+                                                    options={optionsClient}
+                                                    loading={loadingClient}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Selecciona un cliente"
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                endAdornment: (
+                                                                    <Fragment>
+                                                                        {loadingClient ? <CircularProgress color="inherit" size={20} /> : null}
+                                                                        {params.InputProps.endAdornment}
+                                                                    </Fragment>
+                                                                ),
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <Business />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            error={Boolean(errors.clientList)}
+                                                            helperText={errors.clientList?.message}
+                                                        />
+                                                    )}
+                                                    onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
                                 </Box>
 
                                 <Box gridColumn="span 6">
@@ -107,7 +173,7 @@ const Accounts = () => {
                                         select
                                         onChange={(e) => setAccountType(e.target.value)}
                                         value={accountType}
-                                        
+
                                     >
                                         {accountTypes.map((type) => (
                                             <MenuItem key={type.value} value={type.value}>

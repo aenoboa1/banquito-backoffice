@@ -128,7 +128,7 @@ export default function Country() {
     };
 
     const update = (data) => {
-        axios.put(`http://localhost:8080/api/v1/country`, data)
+        axios.put(`https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/country`, data)
         .then(response =>{
             response.status.valueOf() === 200 ? setEditMode(false) : setEditMode(true)
         }).catch(
