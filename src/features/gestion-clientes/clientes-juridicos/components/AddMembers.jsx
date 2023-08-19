@@ -43,9 +43,10 @@ const AddMemberForm = ({ setIsActive }) => {
         (async () => {
             await sleep(1e3);
             if (active) {
-                createAPIEndpoint(ENDPOINTS.groupRole).fetchAllRoles()
+                createAPIEndpoint(ENDPOINTS.groupRole).fetchAllRoles({})
                     .then(
                         (res) => {
+                            console.log(res.data);
                             setOptions(res.data)
                         }).then(
                             err => console.log(err)
@@ -68,10 +69,13 @@ const AddMemberForm = ({ setIsActive }) => {
                 createAPIEndpoint(ENDPOINTS.accounts).fetchAllCustomers()
                     .then(
                         (res) => {
-                            setOptionsClient(res.data)
-                        }).then(
-                            err => console.log(err)
-                        )
+                            if (res.data.length > 0) {
+                                setOptionsClient(res.data);
+                            } else {
+                                console.log("No se encontraron clientes.");
+                            }
+                        })
+                    .catch(err => console.log(err));
             }
         })();
         return () => {
@@ -82,14 +86,12 @@ const AddMemberForm = ({ setIsActive }) => {
     useEffect(() => {
         if (!openRoles) {
             setOptions([]);
-
         }
     }, [openRoles]);
 
     useEffect(() => {
         if (!openListClient) {
             setOptionsClient([]);
-
         }
     }, [openListClient]);
 
@@ -168,6 +170,7 @@ const AddMemberForm = ({ setIsActive }) => {
                                         fullWidth
                                         options={optionsClient}
                                         loading={loadingClient}
+                                        loadingText={"Cargando Clientes..."}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
@@ -216,10 +219,10 @@ const AddMemberForm = ({ setIsActive }) => {
                                         isOptionEqualToValue={(option, value) => option.id === value?.id}
                                         getOptionLabel={(option) => option.groupRoleName || ''}
                                         groupBy={(option) => option.firstLetter}
-
                                         fullWidth
                                         options={options}
                                         loading={loading}
+                                        loadingText={"Cargando roles..."}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}

@@ -5,7 +5,8 @@ import axios from 'axios'
 export const BASE_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
 export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
 
-export const CLIENTS_URL = 'https://banquito-ws-clientes-production.up.railway.app/api/v1/';
+// export const CLIENTS_URL = 'https://banquito-ws-clientes-production.up.railway.app/api/v1/';
+export const CLIENTS_URL = 'http://localhost:8080/api/v1/';
 export const ENDPOINTS = {
     accounts: 'customers',
     geoStructure: 'geo-structure',
@@ -62,6 +63,7 @@ export const createAPIEndpoint = endpoint => {
         fetchByTypeDocumentAndDocumentId: (typeDocument, documentId, token) => axios.get(clientUrl + 'typeanddocument?typeDocument=' + typeDocument + '&document=' + documentId, token),
         fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
         fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
+        fetchByBranchandLocationandState: (branch, location, status,  token) => axios.get(businessurl + 'branchandlocationandstate?branch=' + branch + '&location=' + location + '&status=' + status, token),
         fetchByCode: (code, token) => axios.get(url + code,token),
         fetchAll: (token) => axios.get(getAllUrl, token),
         fetchAllRoles: (token) => axios.get(groupRolesUrl, token),

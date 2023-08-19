@@ -13,7 +13,8 @@ import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
 import AddMemberForm from './AddMembers';
 import {
-    AddCircleOutline, Email, ContactPhone, Comment, LocalPhone, Group, AddLocation, ExpandMore, Business,
+    AddCircleOutline, Email, ContactPhone, Comment, Group, AddLocation, ExpandMore,
+    Business, LocationOn, GpsFixed,
 } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -26,8 +27,8 @@ const validationSchema = yup.object({
         .string()
         .email('Introduzca un email válido')
         .required('Email es requerido'),
-    branchId: yup.string().required('Seleccione una sucursal'), // WARNING FOR TESTING ONLY
-    locationId: yup.string().required('Seleccione un cantón'), // WARNING FOR TESTING ONLY
+    branchId: yup.string().required('Seleccione una sucursal'),
+    locationId: yup.string().required('Seleccione un cantón'),
     phoneNumber: yup.string().required('Número telefónico requerido'),
     line1: yup.string().required('Línea 1 es requerido'),
     line2: yup.string().required('Línea 2 es requerido'),
@@ -49,28 +50,6 @@ export const AddClientLegalForm = () => {
     const [openLocations, setOpenLocations] = useState(false);
     const [options, setOptions] = useState([]);
     const loading = openLocations && options.length === 0;
-
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm({
-        resolver: yupResolver(validationSchema),
-        defaultValues: {
-            branchId: '',
-            locationId: '',
-            groupName: '',
-            emailAddress: '',
-            phoneNumber: '',
-            line1: '',
-            line2: '',
-            latitude: '',
-            longitude: '',
-            comments: '',
-            roleType: '',
-            clientId: '',
-        },
-    });
 
     function sleep(delay = 0) {
         return new Promise((resolve) => {
@@ -139,6 +118,28 @@ export const AddClientLegalForm = () => {
         }
     }, [openLocations]);
 
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        resolver: yupResolver(validationSchema),
+        defaultValues: {
+            branchId: '',
+            locationId: '',
+            groupName: '',
+            emailAddress: '',
+            phoneNumber: '',
+            line1: '',
+            line2: '',
+            latitude: '',
+            longitude: '',
+            comments: '',
+            roleType: '',
+            clientId: '',
+        },
+    });
+
     const onSubmit = (data) => {
         console.log("DATA --> ", data);
         const updatedcontext = {
@@ -178,7 +179,7 @@ export const AddClientLegalForm = () => {
         p: 4
     };
 
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
     const handleOpen = () => {
         setOpen(true);
         setIsActive(true);
@@ -220,6 +221,7 @@ export const AddClientLegalForm = () => {
                                 fullWidth
                                 options={optionsBranches}
                                 loading={loadingSelectBranches}
+                                loadingText={"Cargando sucursales..."}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -272,6 +274,7 @@ export const AddClientLegalForm = () => {
                                 fullWidth
                                 options={options}
                                 loading={loading}
+                                loadingText={"Cargando localizaciones..."}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -391,7 +394,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LocalPhone />
+                                            <LocationOn />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -416,7 +419,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LocalPhone />
+                                            <LocationOn />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -441,7 +444,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <AddLocation />
+                                            <GpsFixed />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -466,7 +469,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <AddLocation />
+                                            <GpsFixed />
                                         </InputAdornment>
                                     ),
                                 }}

@@ -7,6 +7,7 @@ import useStateContext from "../../../../context/custom/useStateContext";
 import { AddClientLegalForm } from "./AddClientLegalForm";
 import StyledSearch from "../../clientes-naturales/components/StyledSearch";
 import { AddCircleOutline } from "@mui/icons-material";
+import LegalStyledSearch from "./LegalStyledSearch";
 
 export const LegalClientFinder = () => {
     const [isFormVisible, setIsFormVisible] = useState(false);
@@ -25,7 +26,7 @@ export const LegalClientFinder = () => {
         <>
             <Grid container spacing={4}>
                 <Grid item xs={8}>
-                    <StyledSearch />
+                    <LegalStyledSearch />
                 </Grid>
                 <Grid item xs={4}>
                     <div>
