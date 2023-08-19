@@ -1,13 +1,13 @@
 import axios from 'axios'
 
 
-// URL LOCAL
 //export const BASE_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
-export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
-// export const BASE_ADMIN_URL = 'http://localhost:8080/api/v1/';
+// export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
+
+// URL LOCAL
+export const BASE_ADMIN_URL = 'http://localhost:8080/api/v1/';
 export const BASE_URL = 'http://localhost:8080/api/v1/';
-// export const CLIENTS_URL = 'https://banquito-ws-clientes-production.up.railway.app/api/v1/';
-export const CLIENTS_URL = 'http://localhost:8080/api/v1/';
+export const CLIENTS_URL = 'https://banquito-ws-clientes-production.up.railway.app/api/v1/';
 export const ENDPOINTS = {
     accounts: 'customers',
     geoStructure: 'geo-structure',
