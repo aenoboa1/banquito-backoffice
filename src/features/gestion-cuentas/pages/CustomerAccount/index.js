@@ -1,15 +1,13 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import {ContainedGroup} from "./components/ContainedGroup";
 
 
-function GestionCuentas() {
+function CustomerAccount() {
     return (
         <DashboardLayout>
             <DashboardNavbar />
-            <ContainedGroup/>
         </DashboardLayout>
     );
 }
 
-export default GestionCuentas;
+export default CustomerAccount;

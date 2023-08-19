@@ -53,6 +53,8 @@ import GestionSucursales from "../features/gestion-sucursales";
 import SearchTable from "../features/gestion-clientes/clientes-naturales/components/SearchTable";
 import {UpdateClientForm} from "../features/gestion-clientes/clientes-naturales/components/UpdateClientForm";
 import SearchLegalTable from "features/gestion-clientes/clientes-juridicos/components/SearchLegalTable";
+import CustomerAccount from "../features/gestion-cuentas/pages/CustomerAccount";
+import AccountsCompany from "../features/gestion-cuentas/pages/CompanyAccount";
 
 const routes = [
     {
@@ -148,8 +150,14 @@ const routes = [
     {
         name: "ClientResults",
         key: "clientResults",
-        route: "/clientesnaturales/results",
-        component: <SearchTable/>
+        route: "/cuentascliente",
+        component: <CustomerAccount/>
+    },
+    {
+        name: "CustomerAccounts",
+        key: "customerAccounts",
+        route: "/cuentascompania",
+        component: <AccountsCompany/>
     },
     {
         name: "LegalResults",

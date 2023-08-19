@@ -1,5 +1,5 @@
 import React,{useState, useEffect} from "react";
-import {Box, Button, Modal, TextField, Typography} from "@mui/material";
+import {Alert, AlertTitle, Box, Button, Modal, TextField, Typography} from "@mui/material";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -26,6 +26,8 @@ const selectStyle = {
 const ErrorText = ({ children }) => <div style={{ color: 'red', fontSize: '12px' }}>{children}</div>;
 
 export default function HolidayGenerate({ isOpen, onClose }) {
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
     const [openLocations, setOpenLocations] = useState(false);
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -34,11 +36,14 @@ export default function HolidayGenerate({ isOpen, onClose }) {
     const [countryOptions, setCountryOptions] = useState([]);
     const [loadingCountries, setLoadingCountries] = useState(false);
 
-    useEffect(() => {
-        if (openLocations && options.length === 0) {
-            setLoading(true);
+    const [selectedCountryCode, setSelectedCountryCode] = useState('');
+    const [selectedLocationType, setSelectedLocationType] = useState('');
 
-            fetchLocations()
+    useEffect(() => {
+        if (openLocations && selectedCountryCode !== '' && selectedLocationType) {
+            setLoading(true);
+            setOptions([]);
+            fetchLocations(selectedCountryCode, selectedLocationType)
                 .then((res) => {
                     console.log(res.locations);
                     setOptions(res.locations);
@@ -49,11 +54,11 @@ export default function HolidayGenerate({ isOpen, onClose }) {
                     setLoading(false);
                 });
         }
-    }, [openLocations]);
+    }, [openLocations, selectedCountryCode, selectedLocationType]);
 
-    const fetchLocations = () => {
+    const fetchLocations = (countryCode, locationType) => {
         return createAPIEndpoint(ENDPOINTS.geoStructure)
-            .fetchProvinceByCountry("ECU", "1")
+            .fetchProvinceByCountry(countryCode, locationType)
             .then((res) => res.data)
             .catch((error) => {
                 console.error(error);
@@ -88,6 +93,13 @@ export default function HolidayGenerate({ isOpen, onClose }) {
             });
     };
 
+    const closeModalWithDelay = () =>{
+        setSuccessMessage('Feriado creado correctamente');
+        setTimeout(()=>{
+            onClose();
+        }, 3000);
+    }
+
     const submit =(data) =>{
         let requestData = {
             year: data.year,
@@ -107,6 +119,15 @@ export default function HolidayGenerate({ isOpen, onClose }) {
             requestData.sunday = true;
         }
 
+        if (data.type === "REG" && !data.idLocation) {
+            setError("No se puede seleccionar un tipo 'Regional' sin una ubicación");
+            return;
+        }
+
+        if(!data.idLocation){
+            data.idLocation = 0;
+        }
+
         console.log(requestData)
         createAPIEndpoint(ENDPOINTS.holiday,
         ).postHolidayGenerate(
@@ -117,38 +138,37 @@ export default function HolidayGenerate({ isOpen, onClose }) {
             requestData.codeCountry,
             requestData.idLocation,
         ).then((response)=>{
-            onClose();
+            setSuccessMessage('Feriados generados correctamente');
+            closeModalWithDelay()
         }).catch((error) => console.log(error));
     };
 
     return (
-        <Modal open={isOpen} onClose={onClose}>
+        <Modal open={isOpen} onClose={() => {
+            onClose();
+            setError(null);
+            setSuccessMessage(null);
+        }}>
             <div style={modalStyle}>
                 <Typography variant="h5" gutterBottom>
                     <Box sx={{ textAlign: 'center', m: 1 }}>Generar feriados de un mes</Box>
                 </Typography>
+                {error && <div style={{ color: 'red', fontSize: '12px', textAlign: 'center' }}>{error}</div>}
                 <Formik
                     initialValues={{
                         year:'',
                         month:'',
                         daysOfWeek:'',
                         codeCountry:'',
-                        idLocation:''
+                        idLocation:'',
+                        locationType: ''
                     }}
                     validate={(values) => {
                         const errors = {};
-                        if (!values.year) {
-                            errors.year = 'Debe seleccionar un año';
-                        }
-                        if (!values.month) {
-                            errors.month = 'Debe seleccionar un mes';
-                        }
-                        if (!values.codeCountry) {
-                            errors.codeCountry = 'Debe escribir un país';
-                        }
-                        if (!values.daysOfWeek) {
-                            errors.daysOfWeek = 'Debe seleccionar al menos una opción';
-                        }
+                        if (!values.year) errors.year = 'Debe seleccionar un año';
+                        if (!values.month) errors.month = 'Debe seleccionar un mes';
+                        if (!values.codeCountry) errors.codeCountry = 'Debe escribir un país';
+                        if (!values.daysOfWeek) errors.daysOfWeek = 'Debe seleccionar al menos una opción';
                         return errors;
                     }}
                     onSubmit={(values, {resetForm}) =>{
@@ -212,9 +232,10 @@ export default function HolidayGenerate({ isOpen, onClose }) {
                                     getOptionLabel={(option) => option.name || ""}
                                     options={countryOptions}
                                     loading={loadingCountries}
-                                    onChange={(_event, data) =>
-                                        handleChange({ target: { name: "codeCountry", value: data?.code ?? "" } })
-                                    }
+                                    onChange={(_event, data) =>{
+                                        handleChange({ target: { name: "codeCountry", value: data?.code ?? "" } });
+                                        setSelectedCountryCode(data?.code || '');
+                                    }}
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
@@ -238,42 +259,64 @@ export default function HolidayGenerate({ isOpen, onClose }) {
                                 <ErrorMessage name="codeCountry" component={ErrorText} />
                             </div>
                             <div className="form-group">
-                                <label>Locación:</label>
-                                <Autocomplete
-                                    id="idLocation"
-                                    open={openLocations}
-                                    onOpen={() => {
-                                        setOpenLocations(true);
+                                <label>Tipo de Ubicación:</label>
+                                <Field
+                                    type="text"
+                                    name="locationType"
+                                    as="select"
+                                    onChange={(e) =>{
+                                        handleChange(e);
+                                        setSelectedLocationType(e.target.value);
                                     }}
-                                    onClose={() => {
-                                        setOpenLocations(false);
-                                    }}
-                                    isOptionEqualToValue={(option, value) => option.id === value?.id}
-                                    getOptionLabel={(option) => option.name || ''}
-                                    groupBy={(option) => option.firstLetter}
-                                    options={options}
-                                    loading={loading}
-                                    onChange={(_event, data) => handleChange({ target: { name: 'idLocation', value: data?.id ?? '' } })}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Selecciona una locación"
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                endAdornment: (
-                                                    <React.Fragment>
-                                                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                                        {params.InputProps.endAdornment}
-                                                    </React.Fragment>
-                                                ),
-                                            }}
-                                            error={Boolean(errors.idLocation)}
-                                            helperText={errors.idLocation?.message}
-                                        />
-                                    )}
-                                />
-                                <ErrorMessage name="idLocation" component={ErrorText} />
+                                    style={selectStyle}
+                                    value={values.locationType}
+                                >
+                                    <option value="">Seleccione un tipo</option>
+                                    <option value="1">Provincia</option>
+                                    <option value="2">Cantón</option>
+                                    <option value="3">Parroquia</option>
+                                </Field>
+                                <ErrorMessage name="locationType" component={ErrorText} />
                             </div>
+                            {values.locationType && (
+                                <div className="form-group">
+                                    <label>Locación:</label>
+                                    <Autocomplete
+                                        id="idLocation"
+                                        open={openLocations}
+                                        onOpen={() => {
+                                            setOpenLocations(true);
+                                        }}
+                                        onClose={() => {
+                                            setOpenLocations(false);
+                                        }}
+                                        isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                        getOptionLabel={(option) => option.name || ''}
+                                        groupBy={(option) => option.firstLetter}
+                                        options={options}
+                                        loading={loading}
+                                        onChange={(_event, data) => handleChange({ target: { name: 'idLocation', value: data?.id ?? '' } })}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Selecciona una locación"
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                        <React.Fragment>
+                                                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                            {params.InputProps.endAdornment}
+                                                        </React.Fragment>
+                                                    ),
+                                                }}
+                                                error={Boolean(errors.idLocation)}
+                                                helperText={errors.idLocation?.message}
+                                            />
+                                        )}
+                                    />
+                                    <ErrorMessage name="idLocation" component={ErrorText} />
+                                </div>
+                            )}
                             <div className="form-group">
                                 <label>Días:</label>
                                 <Field
@@ -302,6 +345,12 @@ export default function HolidayGenerate({ isOpen, onClose }) {
                         </Form>
                     )}
                 </Formik>
+                {successMessage && (
+                    <Alert severity="success">
+                        <AlertTitle>Éxito</AlertTitle>
+                        {successMessage}
+                    </Alert>
+                )}
             </div>
         </Modal>
     )
