@@ -2,9 +2,10 @@ import axios from 'axios'
 
 
 // URL LOCAL
-export const BASE_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
-export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
-
+//export const BASE_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
+//export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
+export const BASE_ADMIN_URL = 'http://localhost:8080/api/v1/';
+export const BASE_URL = 'http://localhost:8080/api/v1/';
 export const CLIENTS_URL = 'https://banquito-ws-clientes-production.up.railway.app/api/v1/';
 export const ENDPOINTS = {
     accounts: 'customers',
@@ -44,6 +45,7 @@ export const createAPIEndpoint = endpoint => {
     let urlHolidayUnique = BASE_URL + endpoint + '/holiday-get/';
     let urlHolidayPut = BASE_URL + endpoint + '/holiday-update';
     let urlHolidayGenerate = BASE_URL + endpoint + '/holiday-generate'
+    let urlHolidayActivate = BASE_URL + endpoint+ '/holiday-activate/'
 
     let urlLocationGet = BASE_URL + endpoint + '/';
 
@@ -60,21 +62,24 @@ export const createAPIEndpoint = endpoint => {
         fetchBranches: (id,token) => axios.get(adminurl + 'branch-list/' + id, token),
         fetchGroupRoles : (token) => axios.get( businessRouteurl, token),
         fetchByTypeDocumentAndDocumentId: (typeDocument, documentId, token) => axios.get(clientUrl + 'typeanddocument?typeDocument=' + typeDocument + '&document=' + documentId, token),
-        fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
+        fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'provinces/' + id + '?levelCode=' +levelcode, token),
+        //fetchProvinceByCountry: (id,levelcode,token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' +levelcode, token),
         fetchByStatusOrDocumentOrBranch: (status,documentId,branch, token) => axios.get(url + 'statusanddocumentandbranch?status=' + status + '&documentId=' + documentId + '&branch=' + branch, token),
         fetchByCode: (code, token) => axios.get(url + code,token),
         fetchAll: (token) => axios.get(getAllUrl, token),
         fetchAllRoles: (token) => axios.get(groupRolesUrl, token),
         fetchAllCustomers: (token) => axios.get(clientUrl + 'all', token),
         // Holiday
-        fetchHolidayBetweenDates: (startDate, endDate, token) => axios.get(urlHolidayGet, {
+        fetchHolidayBetweenDates: (startDate, endDate, selectedCountryCode, token) => axios.get(urlHolidayGet, {
             params: {
                 start: startDate.toISOString(),
                 end: endDate.toISOString(),
+                country: selectedCountryCode,
             },
             token: token
         }),
-        postHoliday: (newHoliday, token) => axios.post(urlHolidayPost, newHoliday),
+        postHoliday: (newHoliday, codeCountry, idLocation, token) => axios.post(urlHolidayPost+`?codeCountry=${codeCountry}&idLocation=${idLocation}`, newHoliday),
+        activateHoliday: id => axios.put(urlHolidayActivate + id),
         deleteHoliday: id => axios.delete(urlHolidayDelete + id),
         fectchHoliday: (id, token) => axios.get(urlHolidayUnique + id, token),
         putHoliday: (updatedHoliday, token) => axios.put(urlHolidayPut, updatedHoliday, token),

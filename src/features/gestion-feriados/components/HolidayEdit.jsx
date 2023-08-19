@@ -35,6 +35,8 @@ export default function HolidayEdit({ isOpen, onClose, selectedHolidayId, update
         canEditType: true,
     });
 
+    const [isTypeEditable, setIsTypeEditable] = useState(true);
+
     useEffect(() => {
         if (isOpen && selectedHolidayId) {
             const holidayEndpoint = createAPIEndpoint(ENDPOINTS.holiday);
@@ -42,6 +44,7 @@ export default function HolidayEdit({ isOpen, onClose, selectedHolidayId, update
                 .then(response => {
                     setHolidayData(response.data);
                     console.log(response);
+                    setIsTypeEditable(response.data.location !== null)
                 })
                 .catch(error => console.error('Error al obtener los datos del feriado:', error));
         }
@@ -60,7 +63,7 @@ export default function HolidayEdit({ isOpen, onClose, selectedHolidayId, update
             ...holidayData,
             holidayDate: userPermissions.canEditHolidayDate ? values.holidayDate : holidayData.holidayDate,
             name: userPermissions.canEditName ? values.name : holidayData.name,
-            type: userPermissions.canEditType ? values.type : holidayData.type,
+            type: isTypeEditable ? (userPermissions.canEditType ? values.type : holidayData.type) : holidayData.type,
         };
 
         createAPIEndpoint(ENDPOINTS.holiday)
@@ -149,11 +152,13 @@ export default function HolidayEdit({ isOpen, onClose, selectedHolidayId, update
                                 </div>
                                 <div>
                                     <label>Tipo:</label>
+                                    {console.log(isTypeEditable)}
                                     <select
                                         name="type"
                                         style={flatpickrStyle}
                                         value={values.type}
                                         onChange={handleChange}
+                                        disabled ={!isTypeEditable}
                                     >
                                         <option value="">Seleccione un tipo</option>
                                         <option value="NAT">Nacional</option>

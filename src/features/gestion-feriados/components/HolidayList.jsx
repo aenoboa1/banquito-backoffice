@@ -1,19 +1,20 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid, GridCellParams, GridColumns } from '@mui/x-data-grid';
-import { styled, Button } from "@mui/material";
+import { styled, Button, TextField, CircularProgress } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { createAPIEndpoint, ENDPOINTS } from './../../../api/index';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/themes/light.css';
-import {useState} from "react";
 import HolidayEdit from './HolidayEdit';
+import Alert from '@mui/material/Alert';
+import Autocomplete from "@mui/material/Autocomplete";
 
-const StyledDataGrid = styled(DataGrid)(({theme}) => ({
+const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     border: 0,
-    color:
-        theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.85)',
+    color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.85)',
     fontFamily: [
         '-apple-system',
         'BlinkMacSystemFont',
@@ -35,18 +36,13 @@ const StyledDataGrid = styled(DataGrid)(({theme}) => ({
         display: 'none',
     },
     '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
-        borderRight: `1px solid ${
-            theme.palette.mode === 'light' ? '#f0f0f0' : '#303030'
-        }`,
+        borderRight: `1px solid ${theme.palette.mode === 'light' ? '#f0f0f0' : '#303030'}`,
     },
     '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
-        borderBottom: `1px solid ${
-            theme.palette.mode === 'light' ? '#f0f0f0' : '#303030'
-        }`,
+        borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#f0f0f0' : '#303030'}`,
     },
     '& .MuiDataGrid-cell': {
-        color:
-            theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)',
+        color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)',
     },
     '& .MuiPaginationItem-root': {
         borderRadius: 0,
@@ -59,6 +55,7 @@ const flatpickrStyle = {
     border: '1px solid #ccc',
     borderRadius: '5px',
 };
+
 const formatDate = (params) => {
     const date = new Date(params.value);
 
@@ -71,73 +68,129 @@ const formatDate = (params) => {
 
 const formatType = (params) => {
     const type = params.value;
-    if (type === 'NAT') {
-        return 'Nacional';
-    } else if (type === 'REG') {
-        return 'Regional';
-    }
-    return type;
-}
+    return type === 'NAT' ? 'Nacional' : type === 'REG' ? 'Regional' : type;
+};
 
 const formatState = (params) => {
     const state = params.value;
-    if (state === 'ACT') {
-        return 'Activo';
-    } else if (state === 'INA') {
-        return 'Inactivo';
-    }
-    return state;
-}
+    return state === 'ACT' ? 'Activo' : state === 'INA' ? 'Inactivo' : state;
+};
 
 export default function HolidayList() {
     const [error, setError] = useState(null);
-    const [rows, setRows] = React.useState([]);
-    const [startDate, setStartDate] = React.useState(new Date('2022-01-15T00:00:00.000Z'));
-    const [endDate, setEndDate] = React.useState(new Date('2023-01-15T00:00:00.000Z'));
+    const [successMessage, setSuccessMessage] = useState(null);
+    const [rows, setRows] = useState([]);
+    const [startDate, setStartDate] = useState(new Date('2022-01-15T00:00:00.000Z'));
+    const [endDate, setEndDate] = useState(new Date('2023-01-15T00:00:00.000Z'));
     const [selectedHolidayId, setSelectedHolidayId] = useState(null);
+
+    const [openCountryAutocomplete, setOpenCountryAutocomplete] = useState(false);
+    const [countryOptions, setCountryOptions] = useState([]);
+    const [countryLoading, setCountryLoading] = useState(false);
+
+    const [selectedCountryCode, setSelectedCountryCode] = useState("");
 
     const holidayEndpoint = createAPIEndpoint(ENDPOINTS.holiday);
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchHolidays();
-    }, [startDate, endDate]);
+        fetchCountryOptions();
+    }, [startDate, endDate, openCountryAutocomplete, countryOptions]);
 
     const fetchHolidays = () => {
-        holidayEndpoint.fetchHolidayBetweenDates(startDate, endDate, 'TU_TOKEN')
+        if (startDate > endDate) {
+            handleError('La fecha inicial no puede ser posterior a la fecha final');
+            return;
+        }
+
+        holidayEndpoint.fetchHolidayBetweenDates(startDate, endDate, selectedCountryCode, 'TU_TOKEN')
             .then(response => {
-                const rowsWithId = response.data.map(item => ({
+                setError(null);
+                setRows(response.data.map(item => ({
                     id: item.uniqueId,
                     holidayDate: item.holidayDate,
                     name: item.name,
                     type: item.type,
                     state: item.state,
-                }));
-                setRows(rowsWithId);
+                })));
             })
-            .catch(error=> {
-                console.log(error);
+            .catch(handleError);
+    };
+
+    const fetchCountryOptions = () => {
+        if (openCountryAutocomplete && countryOptions.length === 0) {
+            setCountryLoading(true);
+
+            fetchCountries()
+                .then((res) => {
+                    console.log('Paises obtenidos', res);
+                    setCountryOptions(res);
+                    setCountryLoading(false);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setCountryLoading(false);
+                });
+        }
+    };
+
+    const fetchCountries = () => {
+        return createAPIEndpoint(ENDPOINTS.country)
+            .fetchCountry()
+            .then((res) => {
+                console.log('Datos paises', res.data);
+                return res.data;
+            })
+            .catch((error) => {
+                console.error(error);
+                return [];
             });
     };
 
-    const clickDelete = (id) =>{
-        holidayEndpoint.deleteHoliday(id, 'TU_TOKEN')
-          .then(() => {
-                fetchHolidays();
-            })
-          .catch(() => {
-                setError('El feriado ya se encuentra inactivo');
-            });
+    const handleCountryAutocompleteChange = (_event, data) => {
+        // Manejar la selección de país aquí
+        console.log('País seleccionado:', data?.code ?? "");
+        setSelectedCountryCode(data?.code || "");
     };
 
-    const clickEdit = (id) =>{
+    const handleError = (errorMessage) => {
+        setError(errorMessage);
+        setRows([]);
+        setTimeout(() => {
+            setError(null);
+        }, 4000);
+    };
+
+    const handleAction = (action, id, successMessage, errorMessage) => {
+        holidayEndpoint[action](id, 'TU_TOKEN')
+            .then(() => handleActionSuccess(successMessage))
+            .catch(() => handleActionError(errorMessage));
+    };
+
+    const handleActionSuccess = (message) => {
+        fetchHolidays();
+        setSuccessMessage(message);
+        setTimeout(() => {
+            setSuccessMessage(null);
+        }, 3500);
+    };
+
+    const handleActionError = (errorMessage) => {
+        setError(errorMessage);
+        setTimeout(() => {
+            setError(null);
+        }, 4000);
+    };
+
+    const handleEdit = (id) => {
         setSelectedHolidayId(id);
-    }
+    };
 
     const columns: GridColumns = [
-        { field: 'holidayDate', headerName: 'Fecha', flex: 1, headerAlign: 'center', align: 'center', valueGetter: (params) => formatDate(params)},
+        { field: 'holidayDate', headerName: 'Fecha', flex: 1, headerAlign: 'center', align: 'center', valueGetter: (params) => formatDate(params) },
         { field: 'name', headerName: 'Nombre', flex: 2, headerAlign: 'center', align: 'center' },
-        { field: 'type', headerName: 'Tipo', flex: 1, headerAlign: 'center', align: 'center', valueGetter:(params) => formatType(params) },
-        { field: 'state', headerName: 'Estado', flex: 1, headerAlign: 'center', align: 'center', valueGetter:(params) => formatState(params) },
+        { field: 'type', headerName: 'Tipo', flex: 1, headerAlign: 'center', align: 'center', valueGetter: (params) => formatType(params) },
+        { field: 'state', headerName: 'Estado', flex: 1, headerAlign: 'center', align: 'center', valueGetter: (params) => formatState(params) },
         {
             field: 'actions',
             headerName: 'Acciones',
@@ -146,29 +199,75 @@ export default function HolidayList() {
             align: 'center',
             renderCell: (params: GridCellParams) => (
                 <Box display="flex" justifyContent="flex-start">
-                    <Button  onClick={()=>clickEdit(params.row.id)}>
+                    <Button onClick={() => handleEdit(params.row.id)}>
                         <EditIcon color="primary" style={{ marginRight: '15px' }} />
                     </Button>
-                    <Button onClick={()=>clickDelete(params.row.id)}>
-                        <DeleteIcon color="primary" />
-                    </Button>
+                    {params.row.state === 'INA' ? (
+                        <Button onClick={() => handleAction('activateHoliday', params.row.id, 'Feriado activado correctamente', 'El feriado ya se encuentra activo')}>
+                            <CheckCircleOutlineIcon style={{ color: 'green' }} />
+                        </Button>
+                    ) : (
+                        <Button onClick={() => handleAction('deleteHoliday', params.row.id, 'Feriado eliminado correctamente', 'El feriado ya se encuentra inactivo')}>
+                            <DeleteIcon color="primary" />
+                        </Button>
+                    )}
                 </Box>
             ),
         },
     ];
 
-    const updateHolidayInTable = (updatedHoliday) => {
+    const updateHolidayInTable = () => {
         fetchHolidays();
     };
+
     return (
         <Box>
-            {error && <div style={{ color: 'red', fontSize: '12px', textAlign: 'center' }}>{error}</div>}
+            {error && (
+                <Alert severity="error" style={{ marginBottom: '16px' }}>
+                    {error}
+                </Alert>
+            )}
+            {successMessage && (
+                <Alert severity="success" style={{ marginBottom: '16px' }}>
+                    {successMessage}
+                </Alert>
+            )}
             <HolidayEdit
                 isOpen={Boolean(selectedHolidayId)}
                 onClose={() => setSelectedHolidayId(null)}
                 selectedHolidayId={selectedHolidayId}
                 updateHolidayInTable={updateHolidayInTable} />
             <Box display="flex" alignItems="center" justifyContent="center" my={2}>
+                <Box>
+                    <Autocomplete
+                        id="codeCountry"
+                        open={openCountryAutocomplete}
+                        onOpen={() => setOpenCountryAutocomplete(true)}
+                        onClose={() => setOpenCountryAutocomplete(false)}
+                        isOptionEqualToValue={(option, value) => option.code === value?.code}
+                        getOptionLabel={(option) => option.name || ""}
+                        options={countryOptions}
+                        loading={countryLoading}
+                        onChange={handleCountryAutocompleteChange}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Selecciona un país"
+                                style={{width: 250}}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                        <React.Fragment>
+                                            {countryLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                                            {params.InputProps.endAdornment}
+                                        </React.Fragment>
+                                    ),
+                                }}
+                            />
+                        )}
+                    />
+                </Box>
+                <Box mx={2} />
                 <Box>
                     <label>Fecha Inicial:</label>
                     <Flatpickr
@@ -205,5 +304,5 @@ export default function HolidayList() {
                 />
             </Box>
         </Box>
-    )
+    );
 }
