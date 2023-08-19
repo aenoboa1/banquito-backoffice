@@ -48,6 +48,7 @@ export default function BasicCard() {
 					<Button onClick={handleOpenModalForm} variant="contained" color="primary" style={{ color: 'white' }}>
 						Agregar Sucursal
 					</Button>
+					
 				</Box>
 				
 				<BranchForm isOpen={isModalOpenForm} onClose={handleCloseModalForm} onSubmit={handleSubmitForm} />
