@@ -101,10 +101,8 @@ export const ContainedGroup = () => {
                         {images.map((image) => {
                             // Check if the image title contains "Clientes Naturales"
                             const containsClientesNaturales = image.title.includes("Clientes Naturales");
-
                             // Check if the image title contains "empresas"
                             const containsEmpresas = image.title.includes("Empresas");
-
                             // Define the new href based on the conditions
                             let newHref = image.title;
                             if (containsClientesNaturales) {

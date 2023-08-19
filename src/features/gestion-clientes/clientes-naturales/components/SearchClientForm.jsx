@@ -117,7 +117,7 @@ export const SearchClientForm = () => {
     };
 
     const onSubmit = (data) => {
-        createAPIEndpoint(ENDPOINTS.accounts)
+        createAPIEndpoint(ENDPOINTS.clients)
             .fetchByTypeDocumentAndDocumentId(data.typeDocumentId, data.documentId)
             .then((res) => {
                 navigate("/clientesnaturales/results", { state: { data: res.data } });

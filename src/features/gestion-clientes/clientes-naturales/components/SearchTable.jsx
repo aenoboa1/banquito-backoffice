@@ -129,7 +129,7 @@ export const CustomerDataGrid = ({data}) => {
             addresses: null,
             phones: null,
         });
-        createAPIEndpoint(ENDPOINTS.accounts).fetchById(
+        createAPIEndpoint(ENDPOINTS.clients).fetchById(
             rowId
         ).then(res => {
 

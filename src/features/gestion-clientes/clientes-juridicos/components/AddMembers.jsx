@@ -67,7 +67,7 @@ const AddMemberForm = ({ setIsActive }) => {
         (async () => {
             await sleep(1e3);
             if (active) {
-                createAPIEndpoint(ENDPOINTS.accounts).fetchAllCustomers()
+                createAPIEndpoint(ENDPOINTS.clients).fetchAllCustomers()
                     .then(
                         (res) => {
                             if (res.data.length > 0) {

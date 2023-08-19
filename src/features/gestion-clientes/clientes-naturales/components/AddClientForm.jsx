@@ -233,7 +233,7 @@ export const AddClientForm = () => {
         };
 
 
-        createAPIEndpoint(ENDPOINTS.accounts,
+        createAPIEndpoint(ENDPOINTS.customers,
         ).postClient(updatedcontext, {}).then(
 
         ).catch(

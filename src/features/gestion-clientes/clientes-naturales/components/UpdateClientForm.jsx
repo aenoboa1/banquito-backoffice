@@ -143,7 +143,7 @@ export const UpdateClientForm = () => {
             customerId: customerData.id, // Append the customer ID to the context
         };
 
-        createAPIEndpoint(ENDPOINTS.accounts,
+        createAPIEndpoint(ENDPOINTS.clients,
         ).putCustomer(updatedcontext, {}).then(
 
         ).catch(
