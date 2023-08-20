@@ -31,7 +31,7 @@ import SoftBox from "../../../../components/SoftBox";
 
 const validationSchema = yup.object({
     firstName: yup.string().required('Primer Nombre es requerido'),
-    lastName: yup.string().required('Segundo Nombre es requerido'),
+    lastName: yup.string().required('Apellido es requerido'),
     emailAddress: yup
         .string()
         .email('Introduzca un email válido')
@@ -254,7 +254,7 @@ export const UpdateClientForm = () => {
                                                         fullWidth
                                                         type="text"
                                                         id="firstName"
-                                                        label="Primer Nombre"
+                                                        label="Nombre"
                                                         {...field}
                                                         error={Boolean(errors.firstName)}
                                                         helperText={errors.firstName?.message}
@@ -273,7 +273,7 @@ export const UpdateClientForm = () => {
                                                         fullWidth
                                                         type="text"
                                                         id="lastName"
-                                                        label="Segundo Nombre"
+                                                        label="Apellido"
                                                         {...field}
                                                         error={Boolean(errors.lastName)}
                                                         helperText={errors.lastName?.message}

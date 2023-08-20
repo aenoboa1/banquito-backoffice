@@ -352,7 +352,7 @@ export const AddClientForm = () => {
                                         fullWidth
                                         type="text"
                                         id="firstName"
-                                        label="Primer Nombre"
+                                        label="Nombre"
                                         {...field}
                                         error={Boolean(errors.firstName)}
                                         helperText={errors.firstName?.message}
@@ -371,7 +371,7 @@ export const AddClientForm = () => {
                                         fullWidth
                                         type="text"
                                         id="lastName"
-                                        label="Segundo Nombre"
+                                        label="Apellido"
                                         {...field}
                                         error={Boolean(errors.lastName)}
                                         helperText={errors.lastName?.message}
