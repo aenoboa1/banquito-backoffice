@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {Box, Button, FormControlLabel, InputAdornment, Switch, TextField} from '@mui/material';
 import SoftTypography from '../../../../components/SoftTypography';
@@ -35,7 +35,7 @@ const AddressCreationForm = () => {
     const [options, setOptions] = React.useState([]);
     const loading = openLocations && options.length === 0;
 
-    React.useEffect(() => {
+    useEffect(() => {
         let active = true;
 
         if (!loading) {
@@ -63,7 +63,7 @@ const AddressCreationForm = () => {
         };
     }, [loading]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!openLocations) {
             setOptions([]);
 
@@ -86,7 +86,6 @@ const AddressCreationForm = () => {
             isDefault: false,
         },
     });
-
 
     const onSubmit = (data) => {
         const updatedAddresses = Array.isArray(context.addresses)
@@ -278,7 +277,7 @@ const AddressCreationForm = () => {
                     </Box>
 
                     <Box gridColumn="span 12">
-                        <Button color="primary" variant="contained" fullWidth type="submit">
+                        <Button color="primary" variant="contained" fullWidth type="button" onClick={handleSubmit(onSubmit)}>
                             Crear Dirección
                         </Button>
                     </Box>

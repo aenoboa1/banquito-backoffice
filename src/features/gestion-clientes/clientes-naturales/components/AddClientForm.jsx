@@ -1,4 +1,4 @@
-import React, {ReactNode, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {
     Accordion,
@@ -10,6 +10,7 @@ import {
     FormGroup,
     InputAdornment,
     Modal,
+    Snackbar,
     Stack,
     TextField
 } from '@mui/material';
@@ -20,7 +21,7 @@ import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
 import PhoneCreationForm from "./AddClientPhone";
 import AddressCreationForm from "./AddClientAddress";
-import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
+import {createAPIEndpoint, createAPIEndpointProducts, ENDPOINTS} from "../../../../api";
 import MenuItem from "@mui/material/MenuItem";
 import useStateContext from "../../../../context/custom/useStateContext";
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
@@ -30,18 +31,27 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {AccountCircle, AddCircleOutline, Business, ChatBubble, Email, ExpandMore} from "@mui/icons-material";
-import EditIcon from "@mui/icons-material/Edit";
+import {
+    AccountBalanceWallet,
+    AccountCircle,
+    AddCircleOutline,
+    Business,
+    ChatBubble,
+    Email,
+    ExpandMore,
+    Map,
+    Phone
+} from "@mui/icons-material";
 import Grid from "@mui/material/Grid";
-
+import MuiAlert from "@mui/material/Alert";
 import colors from "assets/theme/base/colors";
 import borders from "assets/theme/base/borders";
 import SoftButton from "../../../../components/SoftButton";
 import FormControl from "@mui/material/FormControl";
 
 const validationSchema = yup.object({
-    firstName: yup.string().required('Primer Nombre es requerido'),
-    lastName: yup.string().required('Segundo Nombre es requerido'),
+    firstName: yup.string().required('Nombre es requerido'),
+    lastName: yup.string().required('Apellido es requerido'),
     emailAddress: yup
         .string()
         .email('Introduzca un email válido')
@@ -54,14 +64,39 @@ const validationSchema = yup.object({
     comments: yup.string().required('Comentario es requerido'),
     groupRoleId: yup.string().optional(),
     groupCompanyId: yup.string().optional(),
+    accountAlias: yup.string(),
+    productAccountId: yup.string().optional('Seleccione un tipo de cuenta'),
 });
-
-function MuiAlert(props: { severity: string, children: ReactNode }) {
-    return null;
-}
-
 export const AddClientForm = () => {
+
+
     const [groupMember, setGroupMember] = useState([]);
+    // error codes
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // or "error"
+    function sleep(delay = 0) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, delay);
+        });
+    }
+
+    const [expanded, setExpanded] = useState(false);
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
+
+    const [openBranches, setOpenBranches] = useState(false);
+    const [options, setOptions] = useState([]);
+    const loading = openBranches && options.length === 0;
+
+
+    // ACCOUNT PART
+    const [productOptions, setProductOptions] = useState([]);
+    const [openProducts, setOpenProducts] = useState(false);
+    const loadingProducts = openProducts && options.length === 0;
+
 
     function sleep(delay = 0) {
         return new Promise((resolve) => {
@@ -69,13 +104,35 @@ export const AddClientForm = () => {
         });
     }
 
+    useEffect(() => {
+        let active = true;
+        if (!loadingProducts) {
+            return undefined;
+        }
 
-    const [openBranches, setOpenBranches] = React.useState(false);
-    const [options, setOptions] = React.useState([]);
-    const loading = openBranches && options.length === 0;
+        (async () => {
+            await sleep(1e3);
+            if (active) {
+                createAPIEndpointProducts(ENDPOINTS.productAccount).fetchAll(
+                    {}
+                ).then(
+                    res => {
+                        console.log(res.data);
+                        setProductOptions(res.data);
+                    }).then(
+                    err => console.log(err)
+                )
+            }
+        })()
+    });
 
+    useEffect(() => {
+        if (!openProducts) {
+            setProductOptions([]);
+        }
+    }, [openProducts]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         let active = true;
 
         if (!loading) {
@@ -106,18 +163,18 @@ export const AddClientForm = () => {
         };
     }, [loading]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!openBranches) {
             setOptions([]);
         }
     }, [openBranches]);
 
 
-    const [openGroupRole, setOpenGroupRole] = React.useState(false);
-    const [optionsGroupRole, setOptionsGroupRole] = React.useState([]);
+    const [openGroupRole, setOpenGroupRole] = useState(false);
+    const [optionsGroupRole, setOptionsGroupRole] = useState([]);
     const loadingGroupRole = openGroupRole && options.length === 0;
 
-    React.useEffect(() => {
+    useEffect(() => {
         let active = true;
 
         if (!loadingGroupRole) {
@@ -147,18 +204,18 @@ export const AddClientForm = () => {
         };
     }, [loadingGroupRole]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!openGroupRole) {
             setOptionsGroupRole([]);
         }
     }, [openGroupRole]);
 
 
-    const [openGroupCompany, setOpenGroupCompany] = React.useState(false);
-    const [optionsGroupCompany, setOptionsGroupCompany] = React.useState([]);
+    const [openGroupCompany, setOpenGroupCompany] = useState(false);
+    const [optionsGroupCompany, setOptionsGroupCompany] = useState([]);
     const loadingGroup = openGroupCompany && options.length === 0;
 
-    React.useEffect(() => {
+    useEffect(() => {
         let active = true;
 
         if (!loadingGroup) {
@@ -217,6 +274,12 @@ export const AddClientForm = () => {
 
     const onSubmit = (data) => {
 
+        if (includeAccount) {
+            data.hasAccount = true;
+        } else {
+            data.hasAccount = false; // Optionally set it to false if checkbox is not checked
+        }
+
         const updatedcontext = {
             addresses: Array.isArray(context.addresses) ? [...context.addresses] : [],
             phones: Array.isArray(context.phones) ? [...context.phones] : [],
@@ -232,13 +295,25 @@ export const AddClientForm = () => {
                 : groupMember,
         };
 
+        createAPIEndpoint(ENDPOINTS.clients,
+        ).postClient(updatedcontext, {}).then((res) => {
 
-        createAPIEndpoint(ENDPOINTS.customers,
-        ).postClient(updatedcontext, {}).then(
-
-        ).catch(
-            err => console.log(err)
-        )
+            setOpenSnackbar(true);
+            setSnackbarMessage("Cliente creado correctamente");
+            setSnackbarSeverity("success");
+        }).catch(
+            err => {
+                console.log(err);
+                if (err.response.data === "La cedula/correo/telefono ya fueron registrados") {
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("La cedula/correo/telefono ya fueron registrados");
+                    setSnackbarSeverity("error");
+                } else if (err.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("El usuario ya tiene una cuenta de este tipo");
+                    setSnackbarSeverity("error");
+                }
+            })
     };
 
     function handleSearch(e) {
@@ -336,6 +411,7 @@ export const AddClientForm = () => {
     // Function to add a new phone number field
 
     const [includeGroupCompany, setIncludeGroupCompany] = useState(false);
+    const [includeAccount, setIncludeAccount] = useState(false);
 
     return (
         <Stack gap={5}>
@@ -603,7 +679,8 @@ export const AddClientForm = () => {
                                     {context.phones.map((phone, index) => (
                                         <Box gridColumn="span 12">
                                             <div>
-                                                <Accordion key={index}>
+                                                <Accordion expanded={expanded === 'panel' + index}
+                                                           onChange={handleChange('panel' + index)}>
                                                     <AccordionSummary
                                                         expandIcon={<ExpandMore/>}
                                                         aria-controls="panel1a-content"
@@ -618,7 +695,7 @@ export const AddClientForm = () => {
                                                                  sx={{position: 'relative'}}>
                                                                 <SoftTypography align="center"
                                                                                 sx={{fontWeight: 'bold'}}>
-                                                                    Teléfono {index + 1}
+                                                                    <Phone/> Teléfono {index + 1}
                                                                 </SoftTypography>
 
                                                             </Box>
@@ -626,12 +703,27 @@ export const AddClientForm = () => {
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <Box>
-                                                            <SoftTypography>{`Número: ${phone.phoneNumber}`}</SoftTypography>
-                                                            <SoftTypography>{`Tipo: ${getPhoneTypeLabel(phone.phoneType)}`}</SoftTypography>
-                                                            <SoftTypography>{`¿Predeterminado?: ${phone.isDefault ? 'Sí' : 'No'}`}</SoftTypography>
+
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    Número:
+                                                                </Box>
+                                                                {`${phone.phoneNumber}`}
+                                                            </SoftTypography>
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    Tipo:
+                                                                </Box>
+                                                                {`${getPhoneTypeLabel(phone.phoneType)}`}
+                                                            </SoftTypography>
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    ¿Predeterminado?:
+                                                                </Box>
+                                                                {`${phone.isDefault ? 'Sí' : 'No'}`}
+                                                            </SoftTypography>
                                                         </Box>
                                                         <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
-
                                                             <ButtonGroup variant="outlined"
                                                                          aria-label="outlined button group">
 
@@ -640,12 +732,8 @@ export const AddClientForm = () => {
                                                                     <DeleteIcon fontSize="small"/>
                                                                 </IconButton>
 
-                                                                <IconButton aria-label="edit">
-                                                                    <EditIcon fontSize="small"/>
-                                                                </IconButton>
                                                             </ButtonGroup>
                                                         </Box>
-                                                        {/* Optionally add more details here */}
                                                     </AccordionDetails>
                                                 </Accordion>
                                             </div>
@@ -676,186 +764,314 @@ export const AddClientForm = () => {
                             </div>
                         </Grid>
 
-                        {context.addresses && (
-                            <>
-                                {context.addresses.map((address, index) => (
+                        <Grid item xs={6}>
+                            {context.addresses && (
+                                <>
+                                    {context.addresses.map((address, index) => (
+                                        <Box gridColumn="span 12">
+                                            <div>
+                                                <Accordion key={index}>
+                                                    <AccordionSummary
+                                                        expandIcon={<ExpandMore/>}
+                                                        aria-controls="panel1a-content"
+                                                        id="panel1a-header"
+                                                    >
+                                                        <Box sx={{
+                                                            display: 'grid',
+                                                            gridTemplateColumns: 'repeat(10, 1fr)',
+                                                            gap: 4
+                                                        }}>
+                                                            <Box gridColumn="span 12"
+                                                                 sx={{position: 'relative'}}>
+                                                                <SoftTypography align="center"
+                                                                                sx={{fontWeight: 'bold'}}>
+                                                                    <Map/> Dirección {index + 1}
+                                                                </SoftTypography>
+                                                            </Box>
+                                                        </Box>
+                                                    </AccordionSummary>
+                                                    <AccordionDetails sx={{position: 'relative'}}>
+                                                        <Box>
 
-                                    <Box gridColumn="span 12">
-                                        <div>
-                                            <Accordion key={index}>
-                                                <AccordionSummary
-                                                    expandIcon={<ExpandMore/>}
-                                                    aria-controls="panel1a-content"
-                                                    id="panel1a-header"
-                                                >
-                                                    <Box sx={{
-                                                        display: 'grid',
-                                                        gridTemplateColumns: 'repeat(12, 1fr)',
-                                                        gap: 4
-                                                    }}>
-                                                        <Box gridColumn="span 12"
-                                                             sx={{position: 'relative'}}>
-                                                            <SoftTypography align="center"
-                                                                            sx={{fontWeight: 'bold'}}>
-                                                                Dirección {index + 1}
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    Tipo de Dirección:
+                                                                </Box>
+                                                                {`${getAddressTypeLabel(address.typeAddress)}`}
+                                                            </SoftTypography>
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    Dirección Línea 1:
+                                                                </Box>
+                                                                {`${address.line1}`}
+                                                            </SoftTypography>
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    Dirección Línea 2:
+                                                                </Box>
+                                                                {`${address.line2}`}
+                                                            </SoftTypography>
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    Latitud:
+                                                                </Box>
+                                                                {`${address.latitude}`}
+                                                            </SoftTypography>
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    Longitud:
+                                                                </Box>
+                                                                {`${address.longitude}`}
+                                                            </SoftTypography>
+                                                            <SoftTypography>
+                                                                <Box sx={{fontWeight: 'bold', m: 1}} display='inline'>
+                                                                    ¿Predeterminada?:
+                                                                </Box>
+                                                                {`${address.isDefault ? 'Sí' : 'No'}`}
                                                             </SoftTypography>
                                                         </Box>
-                                                    </Box>
-                                                </AccordionSummary>
-                                                <AccordionDetails sx={{position: 'relative'}}>
-                                                    <Box>
-                                                        <SoftTypography>{`Tipo de Dirección: ${getAddressTypeLabel(address.typeAddress)}`}</SoftTypography>
-                                                        <SoftTypography>{`Dirección Línea 1: ${address.line1}`}</SoftTypography>
-                                                        <SoftTypography>{`Dirección Línea 2: ${address.line2}`}</SoftTypography>
-                                                        <SoftTypography>{`Latitud: ${address.latitude}`}</SoftTypography>
-                                                        <SoftTypography>{`Longitud: ${address.longitude}`}</SoftTypography>
-                                                        <SoftTypography>{`¿Predeterminada?: ${address.isDefault ? 'Sí' : 'No'}`}</SoftTypography>
-                                                    </Box>
-                                                    <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
-                                                        <IconButton aria-label="delete"
-                                                                    onClick={() => handleDeleteAddress(index)}>
-                                                            <DeleteIcon fontSize="small"/>
-                                                        </IconButton>
-                                                    </Box>
-                                                    {/* Optionally add more details here */}
-                                                </AccordionDetails>
-                                            </Accordion>
-                                        </div>
-                                    </Box>
-                                ))}
+                                                        <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
+                                                            <IconButton aria-label="delete"
+                                                                        onClick={() => handleDeleteAddress(index)}>
+                                                                <DeleteIcon fontSize="small"/>
+                                                            </IconButton>
+                                                        </Box>
+                                                        {/* Optionally add more details here */}
+                                                    </AccordionDetails>
+                                                </Accordion>
+                                            </div>
+                                        </Box>
+                                    ))}
 
 
-                            </>
-                        )}
+                                </>
+                            )}
+                        </Grid>
 
-                        <FormControl component="fieldset">
-                            <FormGroup>
-                                {/* Checkbox for including groupCompanyId in form submission */}
 
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={includeGroupCompany}
-                                            onChange={(e) => setIncludeGroupCompany(e.target.checked)}
-                                            color="primary"
+                        <Grid item xs={12}>
+                            <FormControl component="fieldset">
+                                <FormGroup>
+                                    <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={includeGroupCompany}
+                                                    onChange={(e) => setIncludeGroupCompany(e.target.checked)}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="¿Es representante de una empresa?"
                                         />
+                                    </Grid>
+                                    {/* Input field for groupCompanyId */}
+                                    {includeGroupCompany && (
+                                        <>
+
+                                            <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                                <Controller
+                                                    name="groupCompanyId"
+                                                    control={control}
+                                                    render={({field}) => (
+                                                        <Autocomplete
+                                                            id="groupCompanyId"
+                                                            open={openGroupCompany}
+                                                            onOpen={() => {
+                                                                setOpenGroupCompany(true);
+                                                            }}
+                                                            onClose={() => {
+                                                                setOpenGroupCompany(false);
+                                                            }}
+                                                            getOptionSelected={(option, value) =>
+                                                                value === undefined || value === "" || option.id === value.id
+                                                            }
+                                                            isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                            getOptionLabel={(option) => option.groupName || ''}
+                                                            options={optionsGroupCompany}
+                                                            loading={loadingGroup}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label="Seleccione una Empresa"
+                                                                    fullWidth
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                        endAdornment: (
+                                                                            <React.Fragment>
+                                                                                {loadingGroup ?
+                                                                                    <CircularProgress color="inherit"
+                                                                                                      size={20}/> : null}
+                                                                                {params.InputProps.endAdornment}
+                                                                            </React.Fragment>
+                                                                        ),
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <Business/>
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                    }}
+                                                                    error={Boolean(errors.groupcompanyId)}
+                                                                    helperText={errors.groupcompanyId?.message}
+                                                                />
+                                                            )}
+                                                            onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+                                            <Grid item xs="12">
+                                                <Controller
+                                                    name="groupRoleId"
+                                                    control={control}
+                                                    render={({field}) => (
+                                                        <Autocomplete
+                                                            id="groupRoleId"
+                                                            open={openGroupRole}
+                                                            onOpen={() => {
+                                                                setOpenGroupRole(true);
+                                                            }}
+                                                            onClose={() => {
+                                                                setOpenGroupRole(false);
+                                                            }}
+                                                            getOptionSelected={(option, value) =>
+                                                                value === undefined || value === "" || option.id === value.id
+                                                            }
+                                                            isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                            getOptionLabel={(option) => option.groupRoleName || ''}
+                                                            fullWidth
+                                                            options={optionsGroupRole}
+                                                            loading={loadingGroupRole}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label="Seleccione su Rol "
+                                                                    fullWidth
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                        endAdornment: (
+                                                                            <React.Fragment>
+                                                                                {loadingGroupRole ?
+                                                                                    <CircularProgress color="inherit"
+                                                                                                      size={20}/> : null}
+                                                                                {params.InputProps.endAdornment}
+                                                                            </React.Fragment>
+                                                                        ),
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <Business/>
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                    }}
+                                                                    error={Boolean(errors.groupRoleId)}
+                                                                    helperText={errors.groupRoleId?.message}
+                                                                />
+                                                            )}
+                                                            onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+
+
+                                        </>
+                                    )
+
                                     }
-                                    label="Es representante de una empresa?"
-                                />
-                                {/* Input field for groupCompanyId */}
-                                {includeGroupCompany && (
-                                    <>
+                                </FormGroup>
+                            </FormControl>
+                        </Grid>
 
-                                        <Controller
-                                            name="groupCompanyId"
-                                            control={control}
-                                            render={({field}) => (
-                                                <Autocomplete
-                                                    id="groupCompanyId"
-                                                    open={openGroupCompany}
-                                                    onOpen={() => {
-                                                        setOpenGroupCompany(true);
-                                                    }}
-                                                    onClose={() => {
-                                                        setOpenGroupCompany(false);
-                                                    }}
-                                                    getOptionSelected={(option, value) =>
-                                                        value === undefined || value === "" || option.id === value.id
-                                                    }
-                                                    isOptionEqualToValue={(option, value) => option.id === value?.id}
-                                                    getOptionLabel={(option) => option.groupName || ''}
-                                                    fullWidth
-                                                    options={optionsGroupCompany}
-                                                    loading={loadingGroup}
-                                                    renderInput={(params) => (
+                        <Grid item xs={12}>
+                            <FormControl component="fieldset">
+                                <FormGroup>
+                                    <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={includeAccount}
+                                                    onChange={(e) => setIncludeAccount(e.target.checked)}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="¿Desea asignar una cuenta al Cliente?"
+                                        />
+                                    </Grid>
+                                    {includeAccount && (
+                                        <>
+                                            <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                                <Controller
+                                                    name="accountAlias"
+                                                    control={control}
+                                                    render={({field}) => (
                                                         <TextField
-                                                            {...params}
-                                                            label="Seleccione una Empresa"
                                                             fullWidth
-                                                            InputProps={{
-                                                                ...params.InputProps,
-                                                                endAdornment: (
-                                                                    <React.Fragment>
-                                                                        {loadingGroup ?
-                                                                            <CircularProgress color="inherit"
-                                                                                              size={20}/> : null}
-                                                                        {params.InputProps.endAdornment}
-                                                                    </React.Fragment>
-                                                                ),
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <Business/>
-                                                                    </InputAdornment>
-                                                                ),
-                                                            }}
-                                                            error={Boolean(errors.groupcompanyId)}
-                                                            helperText={errors.groupcompanyId?.message}
+                                                            type="text"
+                                                            id="accountAlias"
+                                                            label="Alias de la cuenta"
+                                                            {...field}
+                                                            error={Boolean(errors.accountAlias)}
+                                                            helperText={errors.accountAlias?.message}
                                                         />
                                                     )}
-                                                    onChange={(_event, data) => field.onChange(data?.id ?? '')}
                                                 />
-                                            )}
-                                        />
+                                            </Grid>
 
-                                        <Controller
-                                            name="groupRoleId"
-                                            control={control}
-                                            render={({field}) => (
-                                                <Autocomplete
-                                                    id="groupRoleId"
-                                                    open={openGroupRole}
-                                                    onOpen={() => {
-                                                        setOpenGroupRole(true);
-                                                    }}
-                                                    onClose={() => {
-                                                        setOpenGroupRole(false);
-                                                    }}
-                                                    getOptionSelected={(option, value) =>
-                                                        value === undefined || value === "" || option.id === value.id
-                                                    }
-                                                    isOptionEqualToValue={(option, value) => option.id === value?.id}
-                                                    getOptionLabel={(option) => option.groupRoleName || ''}
-                                                    fullWidth
-                                                    options={optionsGroupRole}
-                                                    loading={loadingGroupRole}
-                                                    renderInput={(params) => (
-                                                        <TextField
-                                                            {...params}
-                                                            label="Seleccione su Rol "
-                                                            fullWidth
-                                                            InputProps={{
-                                                                ...params.InputProps,
-                                                                endAdornment: (
-                                                                    <React.Fragment>
-                                                                        {loadingGroupRole ?
-                                                                            <CircularProgress color="inherit"
-                                                                                              size={20}/> : null}
-                                                                        {params.InputProps.endAdornment}
-                                                                    </React.Fragment>
-                                                                ),
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <Business/>
-                                                                    </InputAdornment>
-                                                                ),
+                                            <Grid item xs={12}>
+                                                <Controller
+                                                    name="productAccountId"
+                                                    control={control}
+                                                    render={({field}) => (
+                                                        <Autocomplete
+                                                            id="productAccountId"
+                                                            open={openProducts}
+                                                            onOpen={() => {
+                                                                setOpenProducts(true);
                                                             }}
-                                                            error={Boolean(errors.groupRoleId)}
-                                                            helperText={errors.groupRoleId?.message}
+                                                            onClose={() => {
+                                                                setOpenProducts(false);
+                                                            }}
+
+                                                            isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
+                                                            getOptionLabel={(option) => option.name || ''}
+                                                            fullWidth
+                                                            options={productOptions}
+                                                            loading={loadingProducts}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label="Seleccione el tipo de cuenta"
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                        endAdornment: (
+                                                                            <React.Fragment>
+                                                                                {loadingProducts ?
+                                                                                    <CircularProgress color="inherit"
+                                                                                                      size={20}/> : null}
+                                                                                {params.InputProps.endAdornment}
+                                                                            </React.Fragment>
+                                                                        ),
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <AccountBalanceWallet/>
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                    }}
+                                                                    error={Boolean(errors.uniqueKey)}
+                                                                    helperText={errors.uniqueKey?.message}
+                                                                />
+                                                            )}
+                                                            onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
                                                         />
                                                     )}
-                                                    onChange={(_event, data) => field.onChange(data?.id ?? '')}
                                                 />
-                                            )}
-                                        />
+                                            </Grid>
+                                        </>
+                                    )
 
-
-                                    </>
-                                )
-
-                                }
-                            </FormGroup>
-                        </FormControl>
-
+                                    }
+                                </FormGroup>
+                            </FormControl>
+                        </Grid>
 
                         <Grid item xs={12}>
                             <SoftButton
@@ -871,7 +1087,20 @@ export const AddClientForm = () => {
                         </Grid>
                     </Grid>
                 </form>
-
+                <Snackbar
+                    open={openSnackbar}
+                    autoHideDuration={6000}
+                    onClose={() => setOpenSnackbar(false)}
+                >
+                    <MuiAlert
+                        elevation={6}
+                        variant="filled"
+                        onClose={() => setOpenSnackbar(false)}
+                        severity={snackbarSeverity}
+                    >
+                        {snackbarMessage}
+                    </MuiAlert>
+                </Snackbar>
             </Stack>
         </Stack>
     );

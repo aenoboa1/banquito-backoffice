@@ -9,9 +9,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
-import {Modal} from "@mui/material";
+import {Modal, Typography} from "@mui/material";
 import {UpdateClientForm} from "./UpdateClientForm";
 import useStateContext from "../../../../context/custom/useStateContext";
+import {Email, LocationCity, Person, Phone} from "@mui/icons-material";
+
 
 const stateOptions = [
     {value: 'ACT', label: 'Activo'},
@@ -20,10 +22,31 @@ const stateOptions = [
     {value: 'BLO', label: 'Bloqueado'},
 ];
 
+const documentTypes = [
+    {label: 'Cédula', value: 'CID'},
+    {label: 'Pasaporte', value: 'PASS'},
+    {label: 'RUC', value: 'RUC'},
+];
+
 const genderTypes = [
     {label: 'Masculino', value: 'M'},
     {label: 'Femenino', value: 'F'},
 ];
+
+const getColumnIcon = (field) => {
+    switch (field) {
+        case 'firstName':
+            return <Person />;
+        case 'emailAddress':
+            return <Email />;
+        case 'addresses':
+            return <LocationCity />;
+        default:
+            return null;
+    }
+};
+
+
 
 
 const StyledGridOverlay = styled('div')(({theme}) => ({
@@ -62,6 +85,8 @@ const style = {
     p: 4
 };
 function CustomNoRowsOverlay() {
+
+
     return (
         <StyledGridOverlay>
             <svg
@@ -109,7 +134,20 @@ function CustomNoRowsOverlay() {
 }
 
 export const CustomerDataGrid = ({data}) => {
+
+    const [selectedPhones, setSelectedPhones] = useState([]);
+    const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+
+    const handlePhoneClick = (phones) => {
+        setSelectedPhones(phones);
+        setIsPhoneModalOpen(true);
+    };
+
+    const handleClosePhoneModal = () => {
+        setIsPhoneModalOpen(false);
+    };
     const {state} = useLocation();
+
     console.log(state.data);
 
 
@@ -129,7 +167,7 @@ export const CustomerDataGrid = ({data}) => {
             addresses: null,
             phones: null,
         });
-        createAPIEndpoint(ENDPOINTS.clients).fetchById(
+        createAPIEndpoint(ENDPOINTS.clients).fetchCustomerById(
             rowId
         ).then(res => {
 
@@ -147,6 +185,16 @@ export const CustomerDataGrid = ({data}) => {
     const columns = [
         {field: 'firstName', headerName: 'Nombres', width: 150}, // Use Spanish name for First Name
         {field: 'lastName', headerName: 'Apellidos', width: 150}, // Use Spanish name for Last Name
+        {
+            field: 'typeDocumentId',
+            headerName: 'Tipo de Documento',
+            width: 120,
+            valueGetter: (params) => {
+                const typeOptions = documentTypes.find((option) => option.value === params.value);
+                return typeOptions ? typeOptions.label : '';
+            },
+        }, // Use Spanish name for State
+        {field: 'documentId', headerName: 'Identificacion', width: 150}, //
         {
             field: 'gender',
             headerName: 'Género',
@@ -178,7 +226,7 @@ export const CustomerDataGrid = ({data}) => {
                 const formattedAddresses = addresses
                     .map(
                         (address) =>
-                            `${address.line1}${address.line2 ? ', ' + address.line2 : ''}, ${address.state}`
+                            `${address.line1}${address.line2 ? ', ' + address.line2 : ''}`
                     )
                     .join('\n');
                 return <div style={{whiteSpace: 'pre-wrap'}}>{formattedAddresses}</div>;
@@ -194,18 +242,30 @@ export const CustomerDataGrid = ({data}) => {
                     return 'No hay teléfonos';
                 }
                 const formattedPhones = phones.map((phone) => `${phone.phoneNumber}`).join(', ');
-                return <div style={{whiteSpace: 'pre-wrap'}}>{formattedPhones}</div>;
+                return (
+                    <div
+                        style={{ whiteSpace: 'pre-wrap', cursor: 'pointer' }}
+                        onClick={() => handlePhoneClick(phones)}
+                    >
+                        {formattedPhones}
+                        <Phone style={{ marginLeft: '0.5rem' }} />
+                    </div>
+                );
             },
         },
         {
             field: 'actions',
             headerName: 'Acciones',
-            width: 150,
+            width: 100,
+            headerRenderer: (params) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {getColumnIcon('addresses')}
+                    Direcciones
+                </div>
+            ),
             renderCell: (params) => {
 
                 const rowId = params.row.id; // Get the ID of the current row
-
-                // Return the JSX with the edit and delete icons as actions
                 return (
                     <div>
                         <IconButton
@@ -237,6 +297,46 @@ export const CustomerDataGrid = ({data}) => {
                 />
             </div>
 
+
+            <Modal
+                open={isPhoneModalOpen}
+                onClose={handleClosePhoneModal}
+                aria-labelledby="phone-modal-title"
+                aria-describedby="phone-modal-description"
+            >
+
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        maxWidth: '80vw',
+                        maxHeight: '80vh',
+                        overflow: 'auto',
+                    }}
+                >
+                    <Typography variant="h6" component="h2" id="phone-modal-title">
+                        Información de Teléfonos
+                    </Typography>
+                    {selectedPhones.map((phone, index) => (
+                        <div key={index}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                <strong>Teléfono {index + 1}:</strong> {phone.phoneNumber}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                                <strong>Tipo de Teléfono:</strong> {phone.phoneType}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                                <strong>Es Predeterminado:</strong> {phone.phoneIsDefault ? 'Sí' : 'No'}
+                            </Typography>
+                        </div>
+                    ))}
+                </Box>
+            </Modal>
         </>
     );
 };

@@ -35,22 +35,24 @@ export const ClientFinder = () => {
                         </Button>
                     </div>
                 </Grid>
-                <SoftBox
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    minHeight="90vh"
-                >
-                    <Grid item xs={5}>
-                        {isFormVisible && (
-                            <Collapse in={isFormVisible} unmountOnExit>
-                                <div style={{marginRight: "40px"}}>
-                                    <AddClientForm/>
-                                </div>
-                            </Collapse>
-                        )}
-                    </Grid>
-                </SoftBox>
+                <Grid item xs={12}>
+                    <SoftBox
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        minHeight="90vh"
+                    >
+                        <Grid item xs={6.3}>
+                            {isFormVisible && (
+                                <Collapse in={isFormVisible} unmountOnExit>
+                                    <div style={{marginRight: "40px"}}>
+                                        <AddClientForm/>
+                                    </div>
+                                </Collapse>
+                            )}
+                        </Grid>
+                    </SoftBox>
+                </Grid>
 
 
             </Grid>

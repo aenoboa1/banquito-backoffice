@@ -33,7 +33,7 @@ const formControlLabel = {
 
     label: {
       display: "inline-block",
-      fontSize: size.xxs,
+      fontSize: size.xs,
       fontWeight: fontWeightBold,
       color: dark.main,
       lineHeight: 1,

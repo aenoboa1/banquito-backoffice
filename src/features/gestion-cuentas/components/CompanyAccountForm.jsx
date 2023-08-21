@@ -7,7 +7,7 @@ import {yupResolver} from "@hookform/resolvers/yup";
 import SoftBox from "../../../components/SoftBox";
 import SoftTypography from "../../../components/SoftTypography";
 import Grid from "@mui/material/Grid";
-import {AccountBalanceWallet, AccountCircle, AddBusiness, BusinessCenter} from "@mui/icons-material";
+import {AccountBalanceWallet, AddBusiness, BusinessCenter} from "@mui/icons-material";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import {InputAdornment, Snackbar} from "@mui/material";
@@ -89,12 +89,11 @@ const CustomerAccountForm = () => {
             })
             .catch((error) => {
                 console.log(error.response.data);
-                if(error.response.data === "La compania no existe"){
+                if (error.response.data === "La compania no existe") {
                     setOpenSnackbar(true);
                     setSnackbarMessage("La compania con el documento de identidad ingresado no existe.");
                     setSnackbarSeverity("error");
-                }
-                else if (error.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
+                } else if (error.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
                     setOpenSnackbar(true);
                     setSnackbarMessage("La compania ya tiene una cuenta de este tipo");
                     setSnackbarSeverity("error");
@@ -240,7 +239,7 @@ const CustomerAccountForm = () => {
 
                                 <Grid item xs={12}>
                                     <Button type="submit" variant="contained" color="primary">
-                                        Crear cuenta
+                                        Asignar cuenta
                                     </Button>
                                 </Grid>
                             </Grid>

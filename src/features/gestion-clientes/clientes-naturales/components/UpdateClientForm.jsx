@@ -42,10 +42,10 @@ const validationSchema = yup.object({
     documentId: yup.string().required('Documento de identidad es requerido'),
     branchId: yup.string().required('Seleccione una sucursal'),
     comments: yup.string().required('Comentario es requerido'),
+    state: yup.string().required('Se requiere el estado del cliente')
 });
 
 export const UpdateClientForm = () => {
-
 
 
     const {state} = useLocation();
@@ -58,13 +58,12 @@ export const UpdateClientForm = () => {
     const navigate = useNavigate();
 
     const [phones, setPhones] = useState(customerData?.phones || []);
-    const [addresses, setAddresses] = useState(customerData?.addresses|| []);
+    const [addresses, setAddresses] = useState(customerData?.addresses || []);
 
     useEffect(() => {
         setContext(
             context.addresses = addresses,
             context.phones = phones
-
         )
     }, []);
 
@@ -82,6 +81,7 @@ export const UpdateClientForm = () => {
             comments: customerData?.comments || '',
             phones: customerData?.phones || '',
             addresses: customerData?.addresses || '',
+            state: customerData?.state || '',
             // Add more fields with default values here...
         },
     });
@@ -136,16 +136,20 @@ export const UpdateClientForm = () => {
 
     const onSubmit = (data) => {
 
+
         const updatedcontext = {
             addresses: Array.isArray(context.addresses) ? [...context.addresses] : [],
             phones: Array.isArray(context.phones) ? [...context.phones] : [],
             ...data,
-            customerId: customerData.id, // Append the customer ID to the context
+            id: customerData.id, // Append the customer ID to the context
         };
+        console.log(updatedcontext);
 
         createAPIEndpoint(ENDPOINTS.clients,
-        ).putCustomer(updatedcontext, {}).then(
-
+        ).putCustomer(updatedcontext, {}).then((
+                res) => {
+                console.log(res);
+            }
         ).catch(
             err => console.log(err)
         )
@@ -192,6 +196,12 @@ export const UpdateClientForm = () => {
     const genderTypes = [
         {label: 'Masculino', value: 'M'},
         {label: 'Femenino', value: 'F'},
+    ];
+
+    const stateTypes = [
+        {label: 'Activo', value: 'ACT'},
+        {label: 'Inactivo', value: 'INA'},
+        {label: 'Suspendido', value: 'SUS'}
     ];
 
     const getPhoneTypeLabel = (value) => {
@@ -480,6 +490,31 @@ export const UpdateClientForm = () => {
                                             />
                                         </Grid>
 
+                                        <Grid item xs={12}>
+                                            {/* Gender */}
+
+                                            <Controller
+                                                name="state"
+                                                control={control}
+                                                render={({field}) => (
+                                                    <TextField
+                                                        {...field}
+                                                        fullWidth
+                                                        select // tell TextField to render select
+                                                        label="Estado"
+                                                        error={Boolean(errors.state)}
+                                                        helperText={errors.state?.message}
+                                                    >
+                                                        {stateTypes.map((type) => (
+                                                            <MenuItem key={type.value} value={type.value}>
+                                                                {type.label}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                )}
+                                            />
+                                        </Grid>
+
 
                                         <Grid item xs={6}>
                                             <Button onClick={handleOpen} variant="contained"
@@ -539,10 +574,10 @@ export const UpdateClientForm = () => {
                                                                             right: 0
                                                                         }}>
 
-                                                                                <IconButton aria-label="delete"
-                                                                                            onClick={() => handleDeletePhone(index)}>
-                                                                                    <DeleteIcon fontSize="small"/>
-                                                                                </IconButton>
+                                                                            <IconButton aria-label="delete"
+                                                                                        onClick={() => handleDeletePhone(index)}>
+                                                                                <DeleteIcon fontSize="small"/>
+                                                                            </IconButton>
                                                                         </Box>
                                                                         {/* Optionally add more details here */}
                                                                     </AccordionDetails>

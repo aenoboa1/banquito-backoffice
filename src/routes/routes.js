@@ -159,6 +159,20 @@ const routes = [
         route: "/cuentascompania",
         component: <AccountsCompany/>
     },
+
+    {
+        name: "ClientResults",
+        key: "clientResults",
+        route: "/clientesnaturales/results",
+        component: <SearchTable/>
+    },
+    {
+        name: "ClientEdit",
+        key: "clientEdit",
+        route: "/clientesnaturales/results/edit",
+        component: <UpdateClientForm/>
+    },
+
     {
         name: "LegalResults",
         key: "legalResults",

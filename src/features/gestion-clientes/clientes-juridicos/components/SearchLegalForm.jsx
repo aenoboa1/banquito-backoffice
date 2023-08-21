@@ -150,7 +150,7 @@ export const SearchLegalForm = () => {
     const onSubmit = (data) => {
         console.log("-->", data);
         createAPIEndpoint(ENDPOINTS.groupCompany)
-            .fetchByBranchandLocationandState(data.branchId ,data.locationId, data.state)
+            .fetchByBranchAndLocationAndState(data.branchId ,data.locationId, data.state)
             .then((res) => {
                 navigate("/clientesjuridicos/results", { state: { data: res.data } });
             })

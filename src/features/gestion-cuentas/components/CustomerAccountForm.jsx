@@ -76,9 +76,16 @@ const CustomerAccountForm = () => {
     }, [openProducts]);
 
 
+    function removeEmptyFields(data) {
+        Object.keys(data).forEach(key => {
+            if (data[key] === '' || data[key] == null) {
+                delete data[key];
+            }
+        });
+    }
     const onSubmit = (data) => {
+        removeEmptyFields(data);
 
-        console.log(data);
         createAPIEndpoint(ENDPOINTS.clients,
         ).postAccountCustomer(data, {})
             .then((response) => {
@@ -88,12 +95,11 @@ const CustomerAccountForm = () => {
             })
             .catch((error) => {
                 console.log(error.response.data);
-                if(error.response.data === "El usuario no existe"){
+                if (error.response.data === "El usuario no existe") {
                     setOpenSnackbar(true);
                     setSnackbarMessage("El usuario con el documento de identidad ingresado no existe.");
                     setSnackbarSeverity("error");
-                }
-                else if (error.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
+                } else if (error.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
                     setOpenSnackbar(true);
                     setSnackbarMessage("El usuario ya tiene una cuenta de este tipo");
                     setSnackbarSeverity("error");
@@ -239,7 +245,7 @@ const CustomerAccountForm = () => {
 
                                 <Grid item xs={12}>
                                     <Button type="submit" variant="contained" color="primary">
-                                        Crear cuenta
+                                        Asignar cuenta
                                     </Button>
                                 </Grid>
                             </Grid>
