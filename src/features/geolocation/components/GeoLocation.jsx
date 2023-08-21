@@ -22,6 +22,7 @@ export default function GeoLocation() {
     const [showProvinces, setShowProvinces] = useState(false);
     const [showCantons, setShowCantons] = useState(false);
     const [showParishes, setShowParishes] = useState(false);
+    const [showTable, setShowTable] = useState(false);
     const [provinces, setProvinces] = useState([]);
     const [searchedCountry, setSearchedCountry] = useState('');
     const [countries, setCountries] = useState([]);
@@ -31,6 +32,10 @@ export default function GeoLocation() {
         getAllCountries();
     }, []);
 
+    const toggleShowTable = () => {
+        setShowTable(!showTable);
+    }
+
     
     const toggleShowProvinces = () => {
         setShowProvinces(!showProvinces);
@@ -39,11 +44,13 @@ export default function GeoLocation() {
 
     const toggleShowCantons = () => {
         setShowCantons(!showCantons);
+        toggleShowTable();
         setLevelCode(2);
     }
 
     const toggleShowParishes = () => {
         setShowParishes(!showParishes);
+        toggleShowTable();
         setLevelCode(3);
     }
 
@@ -69,14 +76,17 @@ export default function GeoLocation() {
     }
 
     const getProvinces = (country) => {
-        axios.get('http://localhost:8080/api/v1/geo-structure/locations/'+country, { params: { levelCode: levelCode } })
+        axios.get('https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/geo-structure/locations/'+country, { params: { levelCode: levelCode } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setProvinces(response.data.locations);
+                    toggleShowTable();
                 }
             })
             .catch(err => console.log(err))
     }
+
+
 
     const columns = [
         {field: 'id', headerName: 'ID', width: 70},
@@ -89,13 +99,13 @@ export default function GeoLocation() {
         {
             field: 'areaPhoneCode',
             headerName: 'CÓDIGO DE ÁREA',
-            width: 130,
+            width: 250,
             editable: true,
         },
         {
             field: 'zipCode',
             headerName: 'CÓDIGO POSTAL',
-            width: 130,
+            width: 300,
             editable: true,
         }
     ];
@@ -112,7 +122,7 @@ export default function GeoLocation() {
     const ProvincesTable = () => {
         return (
             <Box sx={{ height: 350, width: '100%' }}>
-                <DataGrid
+                <DataGrid 
                     rows={rows}
                     columns={columns}
                     initialState={{
@@ -121,10 +131,16 @@ export default function GeoLocation() {
                                 pageSize: 4,
                             },
                         },
+                        columns: {
+                            columnVisibilityModel: {
+                                id: false,
+                            }
+                        }
                     }}
                     pageSizeOptions={[4]}
                     disableRowSelectionOnClick                    
-                />
+                    sx={{ m: 4 }}
+                 />
             </Box>
 
         )
@@ -157,7 +173,7 @@ export default function GeoLocation() {
                     </IconButton>
                 </Grid>
                 <Divider></Divider>
-                {provinces.length > 0 ? (<ProvincesTable />) : (<></>)}
+                {showTable && <ProvincesTable />}
 
             </Box>
 

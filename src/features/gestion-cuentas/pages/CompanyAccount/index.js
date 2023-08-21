@@ -1,15 +1,15 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import {ClientFinder} from "./components/ClientFinder";
+import CompanyAccountForm from "../../components/CompanyAccountForm";
 
 
-function GestionNaturales() {
+function AccountsCompany() {
     return (
         <DashboardLayout>
-            <DashboardNavbar/>
-            <ClientFinder/>
+            <DashboardNavbar />
+            <CompanyAccountForm/>
         </DashboardLayout>
     );
 }
 
-export default GestionNaturales;
+export default AccountsCompany;

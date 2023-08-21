@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Divider from '@mui/material/Divider';
-import { AccountTree, AddLocationSharp, Delete, Edit, LocationSearching, TravelExplore } from "@mui/icons-material";
+import { AddLocationSharp } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import IconButton from '@mui/material/IconButton';
 import { Formik, ErrorMessage, Form } from 'formik';
@@ -13,7 +13,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { InputAdornment, InputLabel } from "@mui/material";
+import { InputLabel } from "@mui/material";
 import Alert from '@mui/material/Alert';
 import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
@@ -23,7 +23,6 @@ import { createAPIEndpoint, ENDPOINTS } from "../../../api";
 import { useNavigate } from 'react-router-dom';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import axios from 'axios';
-import { get } from 'react-hook-form';
 
 export default function GeoStructure() {
     const [searchedGeostructure, setSearchedGeoStructure] = useState('');
@@ -103,7 +102,7 @@ export default function GeoStructure() {
 
 
     const getProvinces = () => {
-        axios.get('http://localhost:8080/api/v1/geo-structure/locations/ECU', { params: { levelCode: 1 } })
+        axios.get('https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/geo-structure/locations/ECU', { params: { levelCode: 1 } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setProvinces(response.data.locations);
@@ -113,7 +112,7 @@ export default function GeoStructure() {
     }
 
     const getCantons = () => {
-        axios.get('http://localhost:8080/api/v1/geo-structure/locations/ECU', { params: {levelCode: 2 } })
+        axios.get('https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/geo-structure/locations/ECU', { params: {levelCode: 2 } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setCantons(response.data.locations);
@@ -132,7 +131,7 @@ export default function GeoStructure() {
             levelCode: levelCode,
             name: name,
         };
-        axios.post('http://localhost:8080/api/v1/geo-structure', geoStructure, { params: { countryCode: countryCode } })
+        axios.post('https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/geo-structure', geoStructure, { params: { countryCode: countryCode } })
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setIsResponse(true);
@@ -146,7 +145,7 @@ export default function GeoStructure() {
     };
 
     const createLocation = (data) => {
-        axios.post('http://localhost:8080/api/v1/geo-location', data)
+        axios.post('https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/geo-location', data)
             .then(response => {
                 if (response.status.valueOf() === 200) {
                     setIsResponse(true);
@@ -271,7 +270,7 @@ export default function GeoStructure() {
             <Formik
                 initialValues={{
                     name: '',
-                    areaCode: '',
+                    areaPhoneCode: '',
                     zipCode: '',
                     locationParent: locationParent,
 
@@ -283,7 +282,7 @@ export default function GeoStructure() {
                     } else if (!/^[A-Za-z]+$/.test(values.name)) {
                         errors.name = 'El nombre debe contener solo letras!';
                     }
-                    if (values.areaCode > 4) {
+                    if (values.areaPhoneCode > 4) {
                         errors.code = 'El código debe tener un dígito entre 1 y 3!';
                     }
                     if (!values.zipCode) {
@@ -368,9 +367,9 @@ export default function GeoStructure() {
                                                 <ErrorMessage name="name" component={() => (<FormHelperText id="component-error-text">{errors.name}</FormHelperText>)} />
                                             </FormControl>
                                             <FormControl sx={{ p: 1, m: 1, display: 'block' }}>
-                                                <InputLabel htmlFor="areaCode" size="small">Código de área</InputLabel>
-                                                <OutlinedInput fullWidth id="areaCode" name="areaCode" onChange={handleChange} value={values.areaCode} />
-                                                <ErrorMessage name="areaCode" component={() => (<FormHelperText id="component-error-text">{errors.areaCode}</FormHelperText>)} />
+                                                <InputLabel htmlFor="areaPhoneCode" size="small">Código de área</InputLabel>
+                                                <OutlinedInput fullWidth id="areaPhoneCode" name="areaPhoneCode" onChange={handleChange} value={values.areaPhoneCode} />
+                                                <ErrorMessage name="areaPhoneCode" component={() => (<FormHelperText id="component-error-text">{errors.areaPhoneCode}</FormHelperText>)} />
                                             </FormControl>
                                             <FormControl sx={{ p: 1, m: 1, display: 'block' }}>
                                                 <InputLabel htmlFor="zipCode" size="small">Código postal</InputLabel>

@@ -1,15 +1,15 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import {ClientFinder} from "./components/ClientFinder";
+import {ContainedGroup} from "./components/ContainedGroup";
 
 
-function GestionNaturales() {
+function GestionCuentas() {
     return (
         <DashboardLayout>
-            <DashboardNavbar/>
-            <ClientFinder/>
+            <DashboardNavbar />
+            <ContainedGroup/>
         </DashboardLayout>
     );
 }
 
-export default GestionNaturales;
+export default GestionCuentas;

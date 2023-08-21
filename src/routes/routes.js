@@ -47,8 +47,25 @@ import ClientesJuridicos from "../features/gestion-clientes/clientes-juridicos";
 import EntidadBancaria from "../features/entidad-bancaria";
 import GestionGeostructure from "../features/gestion-geostructure";
 import GestionGeolocation from "features/geolocation";
+import GestionCuentas from "features/gestion-cuentas";
+import GestionSucursales from "../features/gestion-sucursales";
+
+import SearchTable from "../features/gestion-clientes/clientes-naturales/components/SearchTable";
+import {UpdateClientForm} from "../features/gestion-clientes/clientes-naturales/components/UpdateClientForm";
+import SearchLegalTable from "features/gestion-clientes/clientes-juridicos/components/SearchLegalTable";
+import CustomerAccount from "../features/gestion-cuentas/pages/CustomerAccount";
+import AccountsCompany from "../features/gestion-cuentas/pages/CompanyAccount";
 
 const routes = [
+    {
+        type: "collapse",
+        name: "Entidad Bancaria",
+        key: "entidadBancaria",
+        route: "/entidadBancaria",
+        icon: <CreditCard size="12px"/>,
+        component: <EntidadBancaria/>,
+        noCollapse: true,
+    },
     {
         type: "collapse",
         name: "Gestion Paises",
@@ -89,7 +106,7 @@ const routes = [
         key: "sucursales",
         route: "/sucursales",
         icon: <CreditCard size="12px"/>,
-        component: <GestionFeriados/>,
+        component: <GestionSucursales/>,
         noCollapse: true,
     },
 
@@ -121,6 +138,47 @@ const routes = [
         component: <ClientesJuridicos/>,
         noCollapse: true,
     },
+    {
+        type: "collapse",
+        name: "Gestion Cuentas",
+        key: "cuentas",
+        route: "/cuentas",
+        icon: <Folder size="12px"/>,
+        component: <GestionCuentas/>,
+        noCollapse: true,
+    },
+    {
+        name: "ClientResults",
+        key: "clientResults",
+        route: "/cuentascliente",
+        component: <CustomerAccount/>
+    },
+    {
+        name: "CustomerAccounts",
+        key: "customerAccounts",
+        route: "/cuentascompania",
+        component: <AccountsCompany/>
+    },
+
+    {
+        name: "ClientResults",
+        key: "clientResults",
+        route: "/clientesnaturales/results",
+        component: <SearchTable/>
+    },
+    {
+        name: "ClientEdit",
+        key: "clientEdit",
+        route: "/clientesnaturales/results/edit",
+        component: <UpdateClientForm/>
+    },
+
+    {
+        name: "LegalResults",
+        key: "legalResults",
+        route: "/clientesjuridicos/results",
+        component: <SearchLegalTable/>
+    }
 
 ];
 

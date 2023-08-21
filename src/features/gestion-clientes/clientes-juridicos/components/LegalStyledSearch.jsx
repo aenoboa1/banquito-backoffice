@@ -4,9 +4,9 @@ import Stack from '@mui/material/Stack';
 import SearchIcon from '@mui/icons-material/Search';
 import {Modal} from "@mui/material";
 import Box from "@mui/material/Box";
-import {SearchClientForm} from "./SearchClientForm";
+import {SearchLegalForm} from "./SearchLegalForm";
 
-export default function ClickableAndDeletableChips() {
+export default function LegalStyledSearch() {
     const [openChip, setOpenAddress] = React.useState(false);
     const handleOpenChip = () => setOpenAddress(true);
     const handleCloseChip = () => setOpenAddress(false);
@@ -16,7 +16,7 @@ export default function ClickableAndDeletableChips() {
         left: "50%",
         transform: "translate(-50%, -50%)",
         width: 400,
-        bgcolor: "#f7f8f9", // Color
+        bgcolor: "#f7f8f9",
         boxShadow: 24,
         borderRadius: '3px',
         p: 4
@@ -24,7 +24,7 @@ export default function ClickableAndDeletableChips() {
     return (
         <Stack direction="row" spacing={1} alignItems="center">
             <Chip
-                label="Buscar Clientes"
+                label="Buscar Empresa"
                 onClick={handleOpenChip}
                 size="medium"
                 color='primary'
@@ -40,8 +40,7 @@ export default function ClickableAndDeletableChips() {
                 style={{backdropFilter: "blur(5px)"}}
             >
                 <Box sx={style}>
-                    <SearchClientForm/>
-
+                    <SearchLegalForm/>
                 </Box>
             </Modal>
         </Stack>

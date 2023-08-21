@@ -1,44 +1,59 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
+import React, { useState } from 'react';
+import { Card, CardContent, Button, Box, Typography } from '@mui/material';
+import BranchForm from './BranchForm';
+//import HolidayGenerate from './HolidayGenerate'
+import BranchesList from './BranchesList'
+import BranchUpdate from "./BranchUpdate";
 
-const bull = (
-	<Box
-		component="span"
-		sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}
-	>
-		•
-	</Box>
-);
 
 export default function BasicCard() {
+	const [isModalOpenForm, setIsModalOpenForm ] = useState(false);
+	const [isModalOpenGenerate, setIsModalOpenGenerate] = useState(false);
+
+	const handleOpenModalForm = () => {
+		setIsModalOpenForm(true);
+	};
+
+	const handleCloseModalForm = () => {
+		setIsModalOpenForm(false);
+	};
+
+	const handleSubmitForm = (values) => {
+		// Lógica para enviar el formulario
+		console.log(values);
+		handleCloseModalForm();
+	};
+
+	const handleOpenModalGenerate = () => {
+		setIsModalOpenGenerate(true);
+	};
+
+	const handleCloseModalGenerate = () => {
+		setIsModalOpenGenerate(false);
+	};
+
+	const handleSubmitGenerate = (values) => {
+		// Lógica para enviar el formulario
+		console.log(values);
+		handleCloseModalGenerate();
+	};
+
 	return (
-		<Card sx={{ minWidth: 275 }}>
+		<Card>
 			<CardContent>
-				<Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-					Word of the Day
+				<Typography variant="h5" gutterBottom>
+					Gestión de Sucursales
 				</Typography>
-				<Typography variant="h5" component="div">
-					be{bull}nev{bull}o{bull}lent
-				</Typography>
-				<Typography sx={{ mb: 1.5 }} color="text.secondary">
-					adjective
-				</Typography>
-
-
-				<Typography variant="body2">
-					well meaning and kindly.
-					<br />
-					{'"a benevolent smile"'}
-				</Typography>
+				<Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="20px">
+					<Button onClick={handleOpenModalForm} variant="contained" color="primary" style={{ color: 'white' }}>
+						Agregar Sucursal
+					</Button>
+					
+				</Box>
+				
+				<BranchForm isOpen={isModalOpenForm} onClose={handleCloseModalForm} onSubmit={handleSubmitForm} />
+				<BranchesList></BranchesList>
 			</CardContent>
-			<CardActions>
-				<Button size="small">Learn More</Button>
-			</CardActions>
 		</Card>
 	);
 }
