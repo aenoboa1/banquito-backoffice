@@ -1,11 +1,8 @@
 import axios from 'axios'
 
-
-// CLOUD URL
+/// DEFINE URLS GCLOUD
 export const BASE_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
 export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
-
-// LOCAL URLS
 export const CLIENTS_URL = 'https://banquito-ws-clientes-ntsumodxxq-uc.a.run.app/api/v1/';
 export const ACCOUNTS_URL = 'https://banquito-ws-cuentas-ntsumodxxq-uc.a.run.app/api/v1/';
 export const PASSIVE_PRODUCTS_URL = 'https://banquito-ws-productos-pasivos-ntsumodxxq-uc.a.run.app/api/v1/';

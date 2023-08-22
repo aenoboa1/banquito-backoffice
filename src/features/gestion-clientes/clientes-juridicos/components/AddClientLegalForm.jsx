@@ -1,20 +1,35 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React, {Fragment, useEffect, useState} from 'react';
+import {Controller, useForm} from 'react-hook-form';
 import {
-    Accordion, AccordionDetails, AccordionSummary, Autocomplete, ButtonGroup,
-    IconButton, InputAdornment, Modal, TextField
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Autocomplete,
+    ButtonGroup,
+    IconButton,
+    InputAdornment,
+    Modal,
+    TextField
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
+import {yupResolver} from '@hookform/resolvers/yup';
+import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
 import AddMemberForm from './AddMembers';
 import {
-    AddCircleOutline, Email, ContactPhone, Comment, Group, AddLocation, ExpandMore,
-    Business, LocationOn, GpsFixed,
+    AddCircleOutline,
+    AddLocation,
+    Business,
+    Comment,
+    ContactPhone,
+    Email,
+    ExpandMore,
+    GpsFixed,
+    Group,
+    LocationOn,
 } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -41,7 +56,7 @@ const validationSchema = yup.object({
 
 export const AddClientLegalForm = () => {
     const [isActive, setIsActive] = useState(true);
-    const { context, setContext } = useStateContext();
+    const {context, setContext} = useStateContext();
 
     const [openBranches, setOpenBranches] = useState(false);
     const [optionsBranches, setOptionsBranches] = useState([]);
@@ -72,8 +87,8 @@ export const AddClientLegalForm = () => {
                     res => {
                         setOptionsBranches(res.data);
                     }).then(
-                        err => console.log(err)
-                    )
+                    err => console.log(err)
+                )
             }
         })();
         return () => {
@@ -97,8 +112,8 @@ export const AddClientLegalForm = () => {
                     (res) => {
                         setOptions(res.data.locations)
                     }).then(
-                        err => console.log(err)
-                    )
+                    err => console.log(err)
+                )
             }
         })();
         return () => {
@@ -121,7 +136,7 @@ export const AddClientLegalForm = () => {
     const {
         control,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
@@ -141,7 +156,6 @@ export const AddClientLegalForm = () => {
     });
 
     const onSubmit = (data) => {
-        console.log("DATA --> ", data);
         const updatedcontext = {
             members: Array.isArray(context.members) ? [...context.members] : [],
             ...data
@@ -203,7 +217,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="branchId"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Autocomplete
                                 id="branchId"
                                 open={openBranches}
@@ -213,9 +227,6 @@ export const AddClientLegalForm = () => {
                                 onClose={() => {
                                     setOpenBranches(false);
                                 }}
-                                // getOptionSelected={(option, value) =>
-                                //     value === undefined || value === "" || option.uniqueKey === value.uniqueKey
-                                // }
                                 isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
                                 getOptionLabel={(option) => option.name || ''}
                                 fullWidth
@@ -232,13 +243,13 @@ export const AddClientLegalForm = () => {
                                                 <Fragment>
                                                     {loadingSelectBranches ?
                                                         <CircularProgress color="inherit"
-                                                            size={20} /> : null}
+                                                                          size={20}/> : null}
                                                     {params.InputProps.endAdornment}
                                                 </Fragment>
                                             ),
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Business />
+                                                    <Business/>
                                                 </InputAdornment>
                                             ),
                                         }}
@@ -256,7 +267,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="locationId"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Autocomplete
                                 id="locationId"
                                 open={openLocations}
@@ -283,13 +294,13 @@ export const AddClientLegalForm = () => {
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {loading ? <CircularProgress color="inherit" size={20}/> : null}
                                                     {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <AddLocation />
+                                                    <AddLocation/>
                                                 </InputAdornment>
                                             ),
                                         }}
@@ -307,7 +318,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="groupName"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -319,7 +330,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Group />
+                                            <Group/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -332,7 +343,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="emailAddress"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -344,7 +355,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Email />
+                                            <Email/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -357,7 +368,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="phoneNumber"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -369,7 +380,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <ContactPhone />
+                                            <ContactPhone/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -382,7 +393,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="line1"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -394,7 +405,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LocationOn />
+                                            <LocationOn/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -407,7 +418,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="line2"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -419,7 +430,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LocationOn />
+                                            <LocationOn/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -432,7 +443,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="latitude"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -444,7 +455,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <GpsFixed />
+                                            <GpsFixed/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -457,7 +468,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="longitude"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -469,7 +480,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <GpsFixed />
+                                            <GpsFixed/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -482,7 +493,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="comments"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -494,7 +505,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Comment />
+                                            <Comment/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -506,7 +517,7 @@ export const AddClientLegalForm = () => {
                 <Box gridColumn="span 12">
                     <div>
                         <Button onClick={handleOpen} variant="contained"
-                            startIcon={<AddCircleOutline />}>
+                                startIcon={<AddCircleOutline/>}>
                             Agregar miembros
                         </Button>
                         <Modal
@@ -514,10 +525,10 @@ export const AddClientLegalForm = () => {
                             onClose={handleClose}
                             aria-labelledby="modal-modal-title"
                             aria-describedby="modal-modal-description"
-                            style={{ backdropFilter: "blur(5px)" }}
+                            style={{backdropFilter: "blur(5px)"}}
                         >
                             <Box sx={style}>
-                                <AddMemberForm setIsActive={setIsActive} />
+                                <AddMemberForm setIsActive={setIsActive}/>
                             </Box>
                         </Modal>
                     </div>
@@ -531,7 +542,7 @@ export const AddClientLegalForm = () => {
                                     <div>
                                         <Accordion key={index}>
                                             <AccordionSummary
-                                                expandIcon={<ExpandMore />}
+                                                expandIcon={<ExpandMore/>}
                                                 aria-controls="panel1a-content"
                                                 id="panel1a-header"
                                             >
@@ -541,9 +552,9 @@ export const AddClientLegalForm = () => {
                                                     gap: 4
                                                 }}>
                                                     <Box gridColumn="span 6"
-                                                        sx={{ position: 'relative' }}>
+                                                         sx={{position: 'relative'}}>
                                                         <SoftTypography align="center"
-                                                            sx={{ fontWeight: 'bold' }}>
+                                                                        sx={{fontWeight: 'bold'}}>
                                                             Miembro {index + 1}
                                                         </SoftTypography>
                                                     </Box>
@@ -558,18 +569,18 @@ export const AddClientLegalForm = () => {
                                                         {`Rol: ${getPhoneTypeLabel(member.roleType)}`}
                                                     </SoftTypography>
                                                 </Box>
-                                                <Box sx={{ position: 'absolute', bottom: 0, right: 0 }}>
+                                                <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
 
                                                     <ButtonGroup variant="outlined"
-                                                        aria-label="outlined button group">
+                                                                 aria-label="outlined button group">
 
                                                         <IconButton aria-label="delete"
-                                                            onClick={() => handleDeleteMember(index)}>
-                                                            <DeleteIcon fontSize="small" />
+                                                                    onClick={() => handleDeleteMember(index)}>
+                                                            <DeleteIcon fontSize="small"/>
                                                         </IconButton>
 
                                                         <IconButton aria-label="edit">
-                                                            <EditIcon fontSize="small" />
+                                                            <EditIcon fontSize="small"/>
                                                         </IconButton>
                                                     </ButtonGroup>
                                                 </Box>
@@ -584,7 +595,7 @@ export const AddClientLegalForm = () => {
 
                 <Box gridColumn="span 12">
                     <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"}
-                        disabled={isActive}
+                                disabled={isActive}
                     >
                         Crear Empresa
                     </SoftButton>

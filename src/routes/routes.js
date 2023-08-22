@@ -150,13 +150,13 @@ const routes = [
     {
         name: "ClientResults",
         key: "clientResults",
-        route: "/cuentascliente",
+        route: "/cuentas/cliente",
         component: <CustomerAccount/>
     },
     {
         name: "CustomerAccounts",
         key: "customerAccounts",
-        route: "/cuentascompania",
+        route: "/cuentas/compania",
         component: <AccountsCompany/>
     },
 
