@@ -93,7 +93,7 @@ const CustomerAccountForm = () => {
                     setOpenSnackbar(true);
                     setSnackbarMessage("La compania con el documento de identidad ingresado no existe.");
                     setSnackbarSeverity("error");
-                } else if (error.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
+                } else if (error.response.data === "400 Bad Request: \"El usuario/compania ya tiene una cuenta de este tipo\""){
                     setOpenSnackbar(true);
                     setSnackbarMessage("La compania ya tiene una cuenta de este tipo");
                     setSnackbarSeverity("error");

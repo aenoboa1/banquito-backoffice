@@ -83,6 +83,7 @@ const CustomerAccountForm = () => {
             }
         });
     }
+
     const onSubmit = (data) => {
         removeEmptyFields(data);
 
@@ -99,7 +100,7 @@ const CustomerAccountForm = () => {
                     setOpenSnackbar(true);
                     setSnackbarMessage("El usuario con el documento de identidad ingresado no existe.");
                     setSnackbarSeverity("error");
-                } else if (error.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
+                } else if (error.response.data === "400 Bad Request: \"El usuario/compania ya tiene una cuenta de este tipo\"") {
                     setOpenSnackbar(true);
                     setSnackbarMessage("El usuario ya tiene una cuenta de este tipo");
                     setSnackbarSeverity("error");

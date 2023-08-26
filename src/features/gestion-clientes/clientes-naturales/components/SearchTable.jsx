@@ -12,7 +12,7 @@ import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
 import {Modal, Typography} from "@mui/material";
 import {UpdateClientForm} from "./UpdateClientForm";
 import useStateContext from "../../../../context/custom/useStateContext";
-import {Email, LocationCity, Person, Phone} from "@mui/icons-material";
+import {Call, Email, LocationCity, Person, Phone} from "@mui/icons-material";
 
 
 const stateOptions = [
@@ -72,6 +72,14 @@ const StyledGridOverlay = styled('div')(({theme}) => ({
         fill: theme.palette.mode === 'light' ? '#f5f5f5' : '#fff',
     },
 }));
+
+
+const phoneTypeTranslations = {
+    'HOM': 'Casa',
+    'MOB': 'Móvil',
+    'OFF': 'Oficina',
+    'OTH': 'Otro',
+};
 
 const style = {
     position: "absolute",
@@ -135,6 +143,18 @@ function CustomNoRowsOverlay() {
 
 export const CustomerDataGrid = ({data}) => {
 
+// Inside CustomerDataGrid component
+    const [selectedAddress, setSelectedAddress] = useState([]);
+    const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+
+    const handleAddressClick = (address) => {
+        setSelectedAddress(address);
+        setIsAddressModalOpen(true);
+    };
+
+    const handleCloseAddressModal = () => {
+        setIsAddressModalOpen(false);
+    };
     const [selectedPhones, setSelectedPhones] = useState([]);
     const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
 
@@ -223,13 +243,19 @@ export const CustomerDataGrid = ({data}) => {
                 if (!addresses || addresses.length === 0) {
                     return 'No hay direcciones';
                 }
-                const formattedAddresses = addresses
-                    .map(
-                        (address) =>
-                            `${address.line1}${address.line2 ? ', ' + address.line2 : ''}`
-                    )
-                    .join('\n');
-                return <div style={{whiteSpace: 'pre-wrap'}}>{formattedAddresses}</div>;
+
+                const formattedAddresses = addresses.map((address) => (
+                    `${address.line1}${address.line2 ? ', ' + address.line2 : ''}`
+                )).join('\n');
+
+                return (
+                    <div
+                        style={{ whiteSpace: 'pre-wrap', cursor: 'pointer' }}
+                        onClick={() => handleAddressClick(formattedAddresses)}
+                    >
+                        {formattedAddresses}
+                    </div>
+                );
             },
         },
         {
@@ -257,12 +283,6 @@ export const CustomerDataGrid = ({data}) => {
             field: 'actions',
             headerName: 'Acciones',
             width: 100,
-            headerRenderer: (params) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {getColumnIcon('addresses')}
-                    Direcciones
-                </div>
-            ),
             renderCell: (params) => {
 
                 const rowId = params.row.id; // Get the ID of the current row
@@ -311,31 +331,74 @@ export const CustomerDataGrid = ({data}) => {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        p: 4,
-                        maxWidth: '80vw',
-                        maxHeight: '80vh',
-                        overflow: 'auto',
+                        width: '300px', // Adjust the width to your preference
+                        bgcolor: '#f0f0f0', // Phone-like color
+                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Phone-like shadow
+                        borderRadius: '20px', // Phone-like rounded corners
+                        p: 3, // Padding inside the phone box
+                        textAlign: 'center', // Center the content
+                        overflow: 'hidden', // Hide any overflowing content
                     }}
                 >
                     <Typography variant="h6" component="h2" id="phone-modal-title">
-                        Información de Teléfonos
+                        Información de Teléfonos <Call/>
                     </Typography>
                     {selectedPhones.map((phone, index) => (
                         <div key={index}>
                             <Typography variant="subtitle1" gutterBottom>
                                 <strong>Teléfono {index + 1}:</strong> {phone.phoneNumber}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" gutterBottom>
-                                <strong>Tipo de Teléfono:</strong> {phone.phoneType}
+                            <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+                                <strong>Tipo de Teléfono:</strong> {phoneTypeTranslations[phone.phoneType]}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                            <Typography variant="subtitle1" color="textSecondary" gutterBottom>
                                 <strong>Es Predeterminado:</strong> {phone.phoneIsDefault ? 'Sí' : 'No'}
                             </Typography>
                         </div>
                     ))}
                 </Box>
+
+            </Modal>
+
+
+            <Modal
+                open={isAddressModalOpen}
+                onClose={handleCloseAddressModal}
+                aria-labelledby="address-modal-title"
+                aria-describedby="address-modal-description"
+            >
+                {selectedAddress && (
+
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                width: '300px', // Adjust the width to your preference
+                                bgcolor: '#f0f0f0', // Phone-like color
+                                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Phone-like shadow
+                                borderRadius: '20px', // Phone-like rounded corners
+                                p: 3, // Padding inside the phone box
+                                textAlign: 'center', // Center the content
+                                overflow: 'hidden', // Hide any overflowing content
+                            }}
+                        >
+                        <Typography variant="h6" component="h2" id="address-modal-title">
+                            Detalles de la Dirección
+                        </Typography>
+                        <Typography variant="subtitle1" gutterBottom>
+                            <strong>Dirección:</strong> {selectedAddress.line1}
+                        </Typography>
+                        <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+                            {selectedAddress.line2}
+                        </Typography>
+                        <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+                            <strong>Ciudad:</strong> {selectedAddress.city}
+                        </Typography>
+                        {/* Add more address details as needed */}
+                    </Box>
+                )}
             </Modal>
         </>
     );
