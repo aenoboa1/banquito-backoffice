@@ -47,6 +47,7 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddressCreationForm from "./AddClientAddress";
 import MuiAlert from "@mui/material/Alert";
+import dayjs from "dayjs";
 
 const validationSchema = yup.object({
     firstName: yup.string().required('Primer Nombre es requerido'),
@@ -65,8 +66,6 @@ const validationSchema = yup.object({
 });
 
 export const UpdateClientForm = () => {
-
-
     const getAddressTypeLabel = (value) => {
         switch (value) {
             case 'HOM':
@@ -98,13 +97,31 @@ export const UpdateClientForm = () => {
 
     const [phones, setPhones] = useState(customerData?.phones || []);
     const [addresses, setAddresses] = useState(customerData?.addresses || []);
+    const [Branch, setBranch] = useState();
+
 
     useEffect(() => {
         setContext(
-            context.addresses = addresses,
-            context.phones = phones
-        )
+            {
+                ...context,
+                phones: phones,
+                addresses: addresses,
+            }
+        );
+
+
+        createAPIEndpoint(ENDPOINTS.bankEntity).fetchBranchByUQ(customerData.branchId,
+            {}
+        ).then(
+            res => {
+                setBranch(res.data.name)
+            }).then(
+            err => console.log(err))
+
     }, []);
+
+
+    const defaultBirthDate = customerData?.birthDate ? new Date(customerData.birthDate) : new Date();
 
     const {control, handleSubmit, formState: {errors}, reset} = useForm({
         resolver: yupResolver(validationSchema),
@@ -114,12 +131,12 @@ export const UpdateClientForm = () => {
             emailAddress: customerData?.emailAddress || '',
             gender: customerData?.gender || '',
             typeDocumentId: customerData?.typeDocumentId || '',
-            birthDate: customerData?.birthDate ? new Date(customerData.birthDate) : new Date(),
+            birthDate: defaultBirthDate, // Use the default birth date
             documentId: customerData?.documentId || '',
+            phones: customerData?.phones || [],
+            addresses: customerData?.addresses || [],
             branchId: customerData?.branchId || '',
             comments: customerData?.comments || '',
-            phones: customerData?.phones || '',
-            addresses: customerData?.addresses || '',
             state: customerData?.state || '',
             // Add more fields with default values here...
         },
@@ -152,9 +169,7 @@ export const UpdateClientForm = () => {
                     {}
                 ).then(
                     res => {
-                        console.log(res.data);
                         setOptions(res.data);
-
                     }).then(
                     err => console.log(err)
                 )
@@ -182,6 +197,9 @@ export const UpdateClientForm = () => {
             id: customerData.id, // Append the customer ID to the context
         };
 
+        console.log(data);
+
+
         createAPIEndpoint(ENDPOINTS.clients,
         ).putCustomer(updatedcontext, {}).then((
                 res) => {
@@ -193,10 +211,6 @@ export const UpdateClientForm = () => {
             err => console.log(err)
         )
     };
-
-    function handleSearch(e) {
-        e.preventDefault();
-    }
 
     const style = {
         position: "absolute",
@@ -273,13 +287,9 @@ export const UpdateClientForm = () => {
     // Function to add a new phone number field
 
     return (
-
-
         <DashboardLayout>
             <DashboardNavbar/>
-
             <Grid container spacing={4}>
-
                 <Grid item xs={12}>
                     <SoftBox
                         display="flex"
@@ -287,7 +297,6 @@ export const UpdateClientForm = () => {
                         alignItems="center"
                         minHeight="90vh"
                     >
-
                         <Grid item xs={6.3}>
                             <Stack gap={5}>
                                 <Stack spacing={2} alignItems="center">
@@ -438,14 +447,20 @@ export const UpdateClientForm = () => {
                                                     <Controller
                                                         control={control}
                                                         name="birthDate"
-                                                        render={({field}) => (
-                                                            <DatePicker
-                                                                slotProps={{textField: {fullWidth: true}}}
-                                                                onChange={(date) => field.onChange(date)}
-                                                                selected={field.value}
-                                                                label="Fecha de Nacimiento"
-                                                            />
-                                                        )}
+
+                                                        render={({field}) => {
+                                                            return (
+                                                                <DatePicker
+                                                                    slotProps={{textField: {fullWidth: true}}}
+                                                                    defaultValue={dayjs(field.value)} // Set your default date here
+                                                                    onChange={(date) => field.onChange(date)}
+                                                                    selected={field.value}
+                                                                    label="Fecha de Nacimiento"
+                                                                />
+
+
+                                                            );
+                                                        }}
                                                     />
                                                 </LocalizationProvider>
                                             </Grid>
@@ -495,8 +510,9 @@ export const UpdateClientForm = () => {
                                                                 value === undefined || value === "" || option.uniqueKey === value.uniqueKey
                                                             }
                                                             isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
-                                                            getOptionLabel={(option) => option.name || ''}
+                                                            getOptionLabel={(option) => option.name || Branch}
                                                             fullWidth
+                                                            defaultValue={customerData?.branchId || ''} // Set the default value here
                                                             options={options}
                                                             loading={loading}
                                                             renderInput={(params) => (

@@ -89,6 +89,7 @@ export const createAPIEndpoint = endpoint => {
         fetchGroupCompany: (token) => axios.get(businessurl + 'all', token),
         fetchByName: (name, token) => axios.get(url + "countries/" + name, token),
         fetchBranches: (id, token) => axios.get(adminurl + 'branch-list/' + id, token),
+        fetchBranchByUQ: (id, token) => axios.get(adminurl + 'branch-unique/64b1892b9c2c3b03c33a736F/' + id, token),
         fetchGroupRoles: (token) => axios.get(businessRouteurl, token),
         fetchByTypeDocumentAndDocumentId: (typeDocument, documentId, token) => axios.get(clientUrl + 'typeanddocument?typeDocument=' + typeDocument + '&document=' + documentId, token),
         fetchProvinceByCountry: (id, levelcode, token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' + levelcode, token),

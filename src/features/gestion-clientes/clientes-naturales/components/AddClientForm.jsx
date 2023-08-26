@@ -387,9 +387,6 @@ export const AddClientForm = () => {
     const [openAddress, setOpenAddress] = React.useState(false);
     const handleOpenAddress = () => setOpenAddress(true);
 
-    const {secondary} = colors;
-    const {borderWidth} = borders;
-
     const handleCloseAddress = () => setOpenAddress(false);
 
     const [open, setOpen] = React.useState(false);
@@ -397,18 +394,6 @@ export const AddClientForm = () => {
     const handleClose = () => setOpen(false);
     const [deleteIndex, setDeleteIndex] = useState(null);
 
-    const handleDeleteConfirmation = () => {
-        // Perform the delete operation here using the deleteIndex
-        const updatedAddresses = context.addresses.filter((_, i) => i !== deleteIndex);
-        const updatedContext = {
-            ...context,
-            addresses: updatedAddresses,
-        };
-        setContext(updatedContext);
-        setDeleteIndex(null); // Clear deleteIndex after successful deletion
-    };
-
-    // Function to add a new phone number field
 
     const [includeGroupCompany, setIncludeGroupCompany] = useState(false);
     const [includeAccount, setIncludeAccount] = useState(false);
