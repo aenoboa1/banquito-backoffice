@@ -210,7 +210,19 @@ export const UpdateClientForm = () => {
                 setSnackbarSeverity("success");
             }
         ).catch(
-            err => console.log(err)
+            err => {console.log(err)
+                if (err.response.data === "El telefono ya se encuentra en uso") {
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("El telefono ya se encuentra en uso");
+                    setSnackbarSeverity("error");
+                }
+                else if ( err.response.data === "El correo electrónico ya se encuentra en uso"){
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("El correo electrónico ya se encuentra en uso");
+                    setSnackbarSeverity("error");
+                }
+
+            }
         )
     };
 
