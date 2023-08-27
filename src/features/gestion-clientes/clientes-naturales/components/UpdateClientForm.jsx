@@ -190,14 +190,16 @@ export const UpdateClientForm = () => {
 
     const onSubmit = (data) => {
 
-        const updatedcontext = {
-            addresses: Array.isArray(context.addresses) ? [...context.addresses] : [],
-            phones: Array.isArray(context.phones) ? [...context.phones] : [],
-            ...data,
-            id: customerData.id, // Append the customer ID to the context
-        };
 
-        console.log(data);
+        const updatedcontext = {
+            ...data,
+            addresses: Array.isArray(context.addresses)
+                ? context.addresses.map((address) => ({ ...address, state: "ACT" }))
+                : [],
+            phones: Array.isArray(context.phones) ? [...context.phones] : [],
+            id: customerData.id, // Append the customer ID to the data
+        };
+        console.log(updatedcontext);
 
 
         createAPIEndpoint(ENDPOINTS.clients,
@@ -768,7 +770,6 @@ export const UpdateClientForm = () => {
                                                                                     <DeleteIcon fontSize="small"/>
                                                                                 </IconButton>
                                                                             </Box>
-                                                                            {/* Optionally add more details here */}
                                                                         </AccordionDetails>
                                                                     </Accordion>
                                                                 </div>

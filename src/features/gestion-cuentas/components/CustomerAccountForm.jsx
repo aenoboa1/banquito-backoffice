@@ -14,6 +14,9 @@ import {InputAdornment, Snackbar} from "@mui/material";
 import {createAPIEndpoint, createAPIEndpointProducts, ENDPOINTS} from "../../../api";
 import Divider from "@mui/material/Divider";
 import MuiAlert from "@mui/material/Alert";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 const schema = yup.object().shape({
     documentId: yup.string().required('Campo requerido'),
@@ -40,6 +43,7 @@ const CustomerAccountForm = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // or "error"
+    const [createdAccount, setCreatedAccount] = useState(null);
 
     function sleep(delay = 0) {
         return new Promise((resolve) => {
@@ -93,6 +97,7 @@ const CustomerAccountForm = () => {
                 setOpenSnackbar(true);
                 setSnackbarMessage("Cuenta creada correctamente");
                 setSnackbarSeverity("success");
+                setCreatedAccount(response.data); // Update the state with the created account data
             })
             .catch((error) => {
                 console.log(error.response.data);
@@ -105,7 +110,7 @@ const CustomerAccountForm = () => {
                     setSnackbarMessage("El usuario ya tiene una cuenta de este tipo");
                     setSnackbarSeverity("error");
                 }
-
+                setCreatedAccount(null);
             });
     };
 
@@ -269,6 +274,56 @@ const CustomerAccountForm = () => {
                     {snackbarMessage}
                 </MuiAlert>
             </Snackbar>
+
+            {createdAccount && (
+            <Box
+                display="flex"
+                justifyContent="center"
+                sx={{ m: 4 }}
+            >
+                <SoftBox
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    sx={{
+                        flexDirection: "column",
+                        p: "1rem",
+                    }}
+                    shadow="lg"
+                    borderRadius="lg"
+                    width="fit-content"
+                    variant="gradient"
+                >
+                        <Grid container spacing={0} sx={{mt: 1}}>
+                            <Grid item xs={12}>
+                                <SoftTypography variant="h6" fontWeight="bold">
+                                    Detalles de la Cuenta Creada
+                                </SoftTypography>
+                                <SoftTypography component="p">
+                                    <span>Código Interno de la Cuenta:</span> {createdAccount.codeInternalAccount}
+                                </SoftTypography>
+                                <SoftTypography component="p">
+                                    <span>Tipo de Titular de la Cuenta:</span> {createdAccount.accountHolderType}
+                                </SoftTypography>
+                                <SoftTypography component="p">
+                                    <span>Estado:</span> {createdAccount.state}
+                                </SoftTypography>
+                                <SoftTypography component="p">
+                                    <span>Permitir Transacciones:</span> {createdAccount.allowTransactions ? 'Sí' : 'No'}
+                                </SoftTypography>
+                                <SoftTypography component="p">
+                                    <span>Monto Máximo  :</span> {createdAccount.maxAmountTransactions}
+                                </SoftTypography>
+                                <SoftTypography component="p">
+                                    <span>Tasa de Interés:</span> {createdAccount.interestRate}%
+                                </SoftTypography>
+                            </Grid>
+                        </Grid>
+
+                </SoftBox>
+            </Box>
+
+            )}
         </>
     );
 };

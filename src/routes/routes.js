@@ -112,15 +112,6 @@ const routes = [
 
     {
         type: "collapse",
-        name: "Entidad Bancaria",
-        key: "entidad",
-        route: "/entidad",
-        icon: <Folder size="12px"/>,
-        component: <EntidadBancaria/>,
-        noCollapse: true,
-    },
-    {
-        type: "collapse",
         name: "Gest. Clientes Naturales",
         key: "clientesnaturales",
         route: "/clientesnaturales",
