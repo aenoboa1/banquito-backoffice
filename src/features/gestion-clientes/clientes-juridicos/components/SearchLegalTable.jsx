@@ -117,21 +117,15 @@ export const LegalDataGrid = ({data}) => {
     const {context, setContext} = useStateContext();
     const [customerData, setCustomerData] = useState();
     const handleEdit = (rowId) => {
-        // Implement your edit logic here using the rowId
-
         setSelectedCustomer(rowId);
         setIsEditModalOpen(true);
-
         setContext({
-            addresses: null,
-            phones: null,
+            groupMembers: null,
         });
-        createAPIEndpoint(ENDPOINTS.clients).fetchById(
+        createAPIEndpoint(ENDPOINTS.groupCompany).fetchGroupCompanyById(
             rowId
         ).then(res => {
-
-            navigate("/clientesnaturales/results/edit", { state: { data: res.data } });
-
+            navigate("/clientesjuridicos/results/edit", { state: { data: res.data } });
         }).catch(err => console.log(err)
         )
     };
@@ -142,9 +136,21 @@ export const LegalDataGrid = ({data}) => {
     };
 
     const columns = [
-        {field: 'firstName', headerName: 'Nombre de Grupo', width: 200}, // Use Spanish name for First Name
-        {field: 'emailAddress', headerName: 'Correo Electrónico', width: 200}, // Use Spanish name for Email Address
-        {field: 'phone', headerName: 'Teléfono', width: 150}, // Use Spanish name for Last Name
+        {
+            field: 'groupName',
+            headerName: 'Nombre de Grupo',
+            width: 200,
+        },
+        {
+            field: 'emailAddress',
+            headerName: 'Correo Electrónico',
+            width: 200,
+        },
+        {
+            field: 'phoneNumber',
+            headerName: 'Teléfono',
+            width: 150,
+        },
         {
             field: 'state',
             headerName: 'Estado',
@@ -153,67 +159,61 @@ export const LegalDataGrid = ({data}) => {
                 const stateOption = stateOptions.find((option) => option.value === params.value);
                 return stateOption ? stateOption.label : '';
             },
-        }, // Use Spanish name for State
+        },
         {
-            field: 'addresses',
-            headerName: 'Direcciones',
-            width: 250,
-            renderCell: (params) => {
-                const addresses = params.value;
-                if (!addresses || addresses.length === 0) {
-                    return 'No hay direcciones';
-                }
-                const formattedAddresses = addresses
-                    .map(
-                        (address) =>
-                            `${address.line1}${address.line2 ? ', ' + address.line2 : ''}, ${address.state}`
-                    )
-                    .join('\n');
-                return <div style={{whiteSpace: 'pre-wrap'}}>{formattedAddresses}</div>;
+            field: 'line1',
+            headerName: 'Línea 1',
+            width: 200,
+        },
+        {
+            field: 'line2',
+            headerName: 'Línea 2',
+            width: 200,
+        },
+        {
+            field: 'latitude',
+            headerName: 'Latitud',
+            width: 120,
+        },
+        {
+            field: 'longitude',
+            headerName: 'Longitud',
+            width: 120,
+        },
+        {
+            field: 'creationDate',
+            headerName: 'Fecha de Creación',
+            width: 200,
+            valueGetter: (params) => {
+                const creationDate = new Date(params.value);
+                return creationDate.toLocaleString();
             },
         },
         {
-            field: 'members',
-            headerName: 'Miembros',
-            width: 250,
-            renderCell: (params) => {
-                const members = params.value;
-                if (!members || members.length === 0) {
-                    return 'No hay miembros';
-                }
-                const formattedMembers = members
-                    .map(
-                        (member) =>
-                            `${member.firstName}${member.lastName ? ', ' + member.firstName : ''}, ${member.state}`
-                    )
-                    .join('\n');
-                return <div style={{whiteSpace: 'pre-wrap'}}>{formattedMembers}</div>;
-            },
+            field: 'comments',
+            headerName: 'Comentarios',
+            width: 200,
         },
         {
             field: 'actions',
             headerName: 'Acciones',
             width: 150,
             renderCell: (params) => {
-
                 const rowId = params.row.id; // Get the ID of the current row
-
-                // Return the JSX with the edit and delete icons as actions
                 return (
                     <div>
                         <IconButton
-                            onClick={() => handleEdit(rowId)} // Add your edit function here
+                            onClick={() => handleEdit(rowId)}
                             size="small"
                             color="primary"
                         >
-                            <EditIcon/>
+                            <EditIcon />
                         </IconButton>
                     </div>
                 );
             },
-        }
+        },
     ];
-
     return (
         <>
             <div style={{height: 400, width: '100%'}}>

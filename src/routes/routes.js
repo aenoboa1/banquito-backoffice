@@ -55,6 +55,7 @@ import {UpdateClientForm} from "../features/gestion-clientes/clientes-naturales/
 import SearchLegalTable from "features/gestion-clientes/clientes-juridicos/components/SearchLegalTable";
 import CustomerAccount from "../features/gestion-cuentas/pages/CustomerAccount";
 import AccountsCompany from "../features/gestion-cuentas/pages/CompanyAccount";
+import {UpdateLegalClientForm} from "../features/gestion-clientes/clientes-juridicos/components/UpdateLegalClientForm";
 
 const routes = [
     {
@@ -169,8 +170,14 @@ const routes = [
         key: "legalResults",
         route: "/clientesjuridicos/results",
         component: <SearchLegalTable/>
-    }
+    },
 
+    {
+        name: "LegalEdit",
+        key: "legalEdit",
+        route: "/clientesjuridicos/results/edit",
+        component: <UpdateLegalClientForm/>
+    }
 ];
 
 export default routes;

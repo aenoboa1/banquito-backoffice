@@ -39,13 +39,11 @@ import {
     ChatBubble,
     Email,
     ExpandMore,
-    Map,
+    LocationOn,
     Phone
 } from "@mui/icons-material";
 import Grid from "@mui/material/Grid";
 import MuiAlert from "@mui/material/Alert";
-import colors from "assets/theme/base/colors";
-import borders from "assets/theme/base/borders";
 import SoftButton from "../../../../components/SoftButton";
 import FormControl from "@mui/material/FormControl";
 
@@ -75,11 +73,6 @@ export const AddClientForm = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // or "error"
-    function sleep(delay = 0) {
-        return new Promise((resolve) => {
-            setTimeout(resolve, delay);
-        });
-    }
 
     const [expanded, setExpanded] = useState(false);
 
@@ -287,7 +280,7 @@ export const AddClientForm = () => {
             groupMember: includeGroupCompany
                 ? [
                     {
-                        groupRoleId: data.groupRoleId,
+                        grId: data.groupRoleId,
                         groupCompanyId: data.groupCompanyId,
                     },
                     ...groupMember,
@@ -392,9 +385,6 @@ export const AddClientForm = () => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const [deleteIndex, setDeleteIndex] = useState(null);
-
-
     const [includeGroupCompany, setIncludeGroupCompany] = useState(false);
     const [includeAccount, setIncludeAccount] = useState(false);
 
@@ -770,7 +760,7 @@ export const AddClientForm = () => {
                                                                  sx={{position: 'relative'}}>
                                                                 <SoftTypography align="center"
                                                                                 sx={{fontWeight: 'bold'}}>
-                                                                    <Map/> Dirección {index + 1}
+                                                                    <LocationOn/> Dirección {index + 1}
                                                                 </SoftTypography>
                                                             </Box>
                                                         </Box>

@@ -13,8 +13,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { Business } from "@mui/icons-material";
 
 const validationSchema = yup.object({
-    clientList: yup.string().required('El cliente es necesario'),
-    roleType: yup.string().required('El rol es necesario'),
+    customerId: yup.string(),
+    groupRoleId: yup.string(),
 });
 
 const AddMemberForm = ({ setIsActive }) => {
@@ -103,39 +103,25 @@ const AddMemberForm = ({ setIsActive }) => {
     } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
-            roleType: '',
-            clientList: '',
+            groupRoleId: '',
+            customerId: '',
         },
     });
 
-    const onSubmit = (data, event) => {
-        if (context.members && Array.isArray(context.members)) {
-            const membersExists = context.members.some(
-                (member) => member.roleType && member.roleType === data.roleType
-            );
-            if (membersExists) {
-                setShowErrorSnackbar(true);
-                return; // Exit the function if the phone number already exists
-            } else {
-                const updatedMembers = Array.isArray(context.members)
-                    ? [...context.members, data]
-                    : [data];
-                setContext({
-                    ...context.members,
-                    members: updatedMembers,
-                });
-            }
-        } else {
-            setContext({
-                ...context.members,
-                members: [data],
-            });
-        }
+    const onSubmit = (data) => {
+        console.log(data);
+
+        const updatedMembers = Array.isArray(context.groupMembers)
+            ? [...context.groupMembers, data]
+            : [data];
+
+        setContext({
+            ...context.groupMembers,
+            groupMembers: updatedMembers,
+
+        });
     };
 
-    const handleOpen = () => {
-        setIsActive(false);
-    }
 
     return (
         <div>
@@ -150,7 +136,7 @@ const AddMemberForm = ({ setIsActive }) => {
                     <Box gridColumn="span 12">
                         <Grid item xs={12}>
                             <Controller
-                                name="clientList"
+                                name="customerId"
                                 control={control}
                                 render={({ field }) => (
                                     <Autocomplete
@@ -204,7 +190,7 @@ const AddMemberForm = ({ setIsActive }) => {
                     <Box gridColumn="span 12">
                         <Grid item xs={12}>
                             <Controller
-                                name="roleType"
+                                name="groupRoleId"
                                 control={control}
                                 render={({ field }) => (
                                     <Autocomplete
@@ -242,8 +228,8 @@ const AddMemberForm = ({ setIsActive }) => {
                                                         </InputAdornment>
                                                     ),
                                                 }}
-                                                error={Boolean(errors.roleType)}
-                                                helperText={errors.roleType?.message}
+                                                error={Boolean(errors.groupRoleId)}
+                                                helperText={errors.groupRoleId?.message}
                                             />
                                         )}
                                         onChange={(_event, data) => field.onChange(data?.id ?? '')}
@@ -254,8 +240,8 @@ const AddMemberForm = ({ setIsActive }) => {
                     </Box>
 
                     <Box gridColumn="span 12">
-                        <Button color="primary" variant="contained" fullWidth type="submit"
-                            onClick={handleOpen}>
+                        <Button color="primary" variant="contained" fullWidth type="button"
+                            onClick={handleSubmit(onSubmit)}>
                             Agregar Miembro
                         </Button>
                     </Box>

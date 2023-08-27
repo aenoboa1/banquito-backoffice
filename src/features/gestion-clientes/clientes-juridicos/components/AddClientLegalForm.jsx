@@ -5,7 +5,7 @@ import {
     AccordionDetails,
     AccordionSummary,
     Autocomplete,
-    ButtonGroup,
+    ButtonGroup, Checkbox, FormControlLabel, FormGroup,
     IconButton,
     InputAdornment,
     Modal,
@@ -16,10 +16,12 @@ import Box from '@mui/material/Box';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
-import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
+import {createAPIEndpoint, createAPIEndpointProducts, ENDPOINTS} from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
 import AddMemberForm from './AddMembers';
 import {
+    AccountBalanceWallet,
+    AccountCircle,
     AddCircleOutline,
     AddLocation,
     Business,
@@ -35,9 +37,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SoftButton from 'components/SoftButton';
+import Grid from "@mui/material/Grid";
+import FormControl from "@mui/material/FormControl";
 
 const validationSchema = yup.object({
-    groupName: yup.string().required('Primer Nombre es requerido'),
+    groupName: yup.string().required('Nombre del Grupo es requerido'),
     emailAddress: yup
         .string()
         .email('Introduzca un email válido')
@@ -47,25 +51,28 @@ const validationSchema = yup.object({
     phoneNumber: yup.string().required('Número telefónico requerido'),
     line1: yup.string().required('Línea 1 es requerido'),
     line2: yup.string().required('Línea 2 es requerido'),
+    documentId: yup
+        .string()
+        .required('Documento de identidad es requerido')
+        .length(13, 'Documento de identidad debe tener 13 caracteres'),
     latitude: yup.string().required('Latitud es requerida'),
     longitude: yup.string().required('Longitud es requerida'),
     comments: yup.string().required('Agregue un comentario'),
-    roleType: yup.string().required('Seleccione un rol'),
-    clientId: yup.string().required('Seleccione un cliente'),
 });
-
 export const AddClientLegalForm = () => {
     const [isActive, setIsActive] = useState(true);
     const {context, setContext} = useStateContext();
-
     const [openBranches, setOpenBranches] = useState(false);
     const [optionsBranches, setOptionsBranches] = useState([]);
     const loadingSelectBranches = openBranches && optionsBranches.length === 0;
-
     const [openLocations, setOpenLocations] = useState(false);
     const [options, setOptions] = useState([]);
     const loading = openLocations && options.length === 0;
-
+    const [includeAccount, setIncludeAccount] = useState(false);
+    // ACCOUNT PART
+    const [productOptions, setProductOptions] = useState([]);
+    const [openProducts, setOpenProducts] = useState(false);
+    const loadingProducts = openProducts && options.length === 0;
     function sleep(delay = 0) {
         return new Promise((resolve) => {
             setTimeout(resolve, delay);
@@ -133,6 +140,36 @@ export const AddClientLegalForm = () => {
         }
     }, [openLocations]);
 
+    // PRODUCT ACCOUNT USE EFFECT
+
+    useEffect(() => {
+        let active = true;
+        if (!loadingProducts) {
+            return undefined;
+        }
+
+        (async () => {
+            await sleep(1e3);
+            if (active) {
+                createAPIEndpointProducts(ENDPOINTS.productAccount).fetchAll(
+                    {}
+                ).then(
+                    res => {
+                        console.log(res.data);
+                        setProductOptions(res.data);
+                    }).then(
+                    err => console.log(err)
+                )
+            }
+        })()
+    });
+
+    useEffect(() => {
+        if (!openProducts) {
+            setProductOptions([]);
+        }
+    }, [openProducts]);
+
     const {
         control,
         handleSubmit,
@@ -150,36 +187,29 @@ export const AddClientLegalForm = () => {
             latitude: '',
             longitude: '',
             comments: '',
-            roleType: '',
-            clientId: '',
         },
     });
 
     const onSubmit = (data) => {
+
+        if (includeAccount) {
+            data.hasAccount = true;
+        } else {
+            data.hasAccount = false; // Optionally set it to false if checkbox is not checked
+        }
         const updatedcontext = {
-            members: Array.isArray(context.members) ? [...context.members] : [],
+            groupMembers: Array.isArray(context.groupMembers) ? [...context.groupMembers] : [],
             ...data
         };
+
         createAPIEndpoint(ENDPOINTS.groupCompany,
-        ).post(updatedcontext, {}).then(
+        ).postCompany(updatedcontext, {}).then(
 
         ).catch(
             err => console.log(err)
         )
     };
 
-    const getPhoneTypeLabel = (value) => {
-        switch (value) {
-            case 'ACCTA':
-                return 'Accionista';
-            case 'APDRD':
-                return 'Apoderado';
-            case 'REPLG':
-                return 'Representante legal';
-            default:
-                return 'Desconocido';
-        }
-    };
 
     const style = {
         position: "absolute",
@@ -201,10 +231,10 @@ export const AddClientLegalForm = () => {
     const handleClose = () => setOpen(false);
 
     const handleDeleteMember = (index) => {
-        const updatedMembers = context.members.filter((_, i) => i !== index);
+        const updatedMembers = context.groupMembers.filter((_, i) => i !== index);
         const updatedContext = {
             ...context,
-            members: updatedMembers,
+            groupMembers: updatedMembers,
         };
         setContext(updatedContext);
     };
@@ -213,7 +243,7 @@ export const AddClientLegalForm = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
             <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
                 <Box gridColumn="span 12"></Box>
-                <Box gridColumn="span 6">
+                <Box gridColumn="span 12">
                     <Controller
                         name="branchId"
                         control={control}
@@ -263,7 +293,7 @@ export const AddClientLegalForm = () => {
                     />
                 </Box>
 
-                <Box gridColumn="span 6">
+                <Box gridColumn="span 12">
                     <Controller
                         name="locationId"
                         control={control}
@@ -356,6 +386,32 @@ export const AddClientLegalForm = () => {
                                     startAdornment: (
                                         <InputAdornment position="start">
                                             <Email/>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        )}
+                    />
+                </Box>
+
+                <Box gridColumn="span 6">
+                    {/* Document ID */}
+                    <Controller
+                        name="documentId"
+                        control={control}
+                        render={({field}) => (
+                            <TextField
+                                fullWidth
+                                type="text"
+                                id="documentId"
+                                label="Documento de Identidad"
+                                {...field}
+                                error={Boolean(errors.documentId)}
+                                helperText={errors.documentId?.message}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <AccountCircle/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -535,9 +591,9 @@ export const AddClientLegalForm = () => {
                 </Box>
 
                 <Box gridColumn="span 12">
-                    {context.members && (
+                    {context.groupMembers && (
                         <>
-                            {context.members.map((member, index) => (
+                            {context.groupMembers.map((member, index) => (
                                 <Box gridColumn="span 6">
                                     <div>
                                         <Accordion key={index}>
@@ -566,7 +622,7 @@ export const AddClientLegalForm = () => {
                                                         {`Cliente: ${member.clientList}`}
                                                     </SoftTypography>
                                                     <SoftTypography>
-                                                        {`Rol: ${getPhoneTypeLabel(member.roleType)}`}
+                                                        {`Rol: `}
                                                     </SoftTypography>
                                                 </Box>
                                                 <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
@@ -594,8 +650,99 @@ export const AddClientLegalForm = () => {
                 </Box>
 
                 <Box gridColumn="span 12">
+                    <FormControl component="fieldset">
+                        <FormGroup>
+                            <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={includeAccount}
+                                            onChange={(e) => setIncludeAccount(e.target.checked)}
+                                            color="primary"
+                                        />
+                                    }
+                                    label="¿Desea asignar una cuenta al Cliente?"
+                                />
+                            </Grid>
+                            {includeAccount && (
+                                <>
+                                    <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                        <Controller
+                                            name="accountAlias"
+                                            control={control}
+                                            render={({field}) => (
+                                                <TextField
+                                                    fullWidth
+                                                    type="text"
+                                                    id="accountAlias"
+                                                    label="Alias de la cuenta"
+                                                    {...field}
+                                                    error={Boolean(errors.accountAlias)}
+                                                    helperText={errors.accountAlias?.message}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+
+                                    <Grid item xs={12}>
+                                        <Controller
+                                            name="productAccountId"
+                                            control={control}
+                                            render={({field}) => (
+                                                <Autocomplete
+                                                    id="productAccountId"
+                                                    open={openProducts}
+                                                    onOpen={() => {
+                                                        setOpenProducts(true);
+                                                    }}
+                                                    onClose={() => {
+                                                        setOpenProducts(false);
+                                                    }}
+
+                                                    isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
+                                                    getOptionLabel={(option) => option.name || ''}
+                                                    fullWidth
+                                                    options={productOptions}
+                                                    loading={loadingProducts}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Seleccione el tipo de cuenta"
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                endAdornment: (
+                                                                    <React.Fragment>
+                                                                        {loadingProducts ?
+                                                                            <CircularProgress color="inherit"
+                                                                                              size={20}/> : null}
+                                                                        {params.InputProps.endAdornment}
+                                                                    </React.Fragment>
+                                                                ),
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <AccountBalanceWallet/>
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            error={Boolean(errors.uniqueKey)}
+                                                            helperText={errors.uniqueKey?.message}
+                                                        />
+                                                    )}
+                                                    onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                </>
+                            )
+
+                            }
+                        </FormGroup>
+                    </FormControl>
+                </Box>
+
+                <Box gridColumn="span 12">
                     <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"}
-                                disabled={isActive}
                     >
                         Crear Empresa
                     </SoftButton>

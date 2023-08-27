@@ -285,7 +285,7 @@ export const CustomerDataGrid = ({data}) => {
         {
             field: 'addresses',
             headerName: 'Direcciones',
-            width: 200,
+            width: 220,
             renderCell: (params) => {
                 const addresses = params.value;
                 if (!addresses || addresses.length === 0) {

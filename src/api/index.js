@@ -82,11 +82,15 @@ export const createAPIEndpoint = endpoint => {
         fetchCustomerById: (id, token) => axios.get(clientUrl + id, token),
         // Update a customer
         putCustomer: (updatedRecord, token) => axios.put(clientPostUrl, updatedRecord, token),
-        fetchByBranchAndLocationAndState: (branch, location, state, token) => axios.get(clientUrl + 'branchandlocationandstate?branch=' + branch + '&location=' + location + '&state=' + state, token),
+        putCompany: (updatedRecord, token) => axios.put(businessRouteurl, updatedRecord, token),
+        fetchByBranchAndLocationAndState: (branch, location, state, token) => axios.get(clientUrl + 'branchandlocationandstate?branch=' + branch + '&locationId=' + location + '&state=' + state, token),
+        // ================================================================= COMPANY METHODS =================================================================
+        postCompany : (newRecord, token) => axios.post(businessRouteurl, newRecord, token),
 
 
         fetchById: (id, token) => axios.get(url + id, token),
         fetchGroupCompany: (token) => axios.get(businessurl + 'all', token),
+        fetchGroupCompanyById : (id, token) => axios.get(businessurl + id, token),
         fetchByName: (name, token) => axios.get(url + "countries/" + name, token),
         fetchBranches: (id, token) => axios.get(adminurl + 'branch-list/' + id, token),
         fetchBranchByUQ: (id, token) => axios.get(adminurl + 'branch-unique/64b1892b9c2c3b03c33a736F/' + id, token),

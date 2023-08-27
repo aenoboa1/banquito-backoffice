@@ -26,7 +26,7 @@ import {
     Business,
     ChatBubble,
     Email,
-    ExpandMore,
+    ExpandMore, LocationOn,
     Map,
     Phone
 } from "@mui/icons-material";
@@ -108,8 +108,6 @@ export const UpdateClientForm = () => {
                 addresses: addresses,
             }
         );
-
-
         createAPIEndpoint(ENDPOINTS.bankEntity).fetchBranchByUQ(customerData.branchId,
             {}
         ).then(
@@ -721,7 +719,7 @@ export const UpdateClientForm = () => {
                                                                                      sx={{position: 'relative'}}>
                                                                                     <SoftTypography align="center"
                                                                                                     sx={{fontWeight: 'bold'}}>
-                                                                                        <Map/> Dirección {index + 1}
+                                                                                        <LocationOn/> Dirección {index + 1}
                                                                                     </SoftTypography>
                                                                                 </Box>
                                                                             </Box>
