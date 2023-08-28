@@ -6,6 +6,7 @@ import Collapse from "@mui/material/Collapse";
 import useStateContext from "../../../../context/custom/useStateContext";
 import { AddClientLegalForm } from "./AddClientLegalForm";
 import StyledSearch from "../../clientes-naturales/components/StyledSearch";
+import { AddCircleOutline } from "@mui/icons-material";
 
 export const LegalClientFinder = () => {
     const [isFormVisible, setIsFormVisible] = useState(false);
@@ -16,9 +17,7 @@ export const LegalClientFinder = () => {
         setIsFormVisible((prev) => !prev);
 
         setContext({
-            phoneNumber: null,
-            phoneType: null,
-            isDefault: null,
+            members: null,
         });
     };
 
@@ -30,7 +29,7 @@ export const LegalClientFinder = () => {
                 </Grid>
                 <Grid item xs={4}>
                     <div>
-                        <Button onClick={handleToggleForm} variant="contained">
+                        <Button onClick={handleToggleForm} variant="contained" startIcon={<AddCircleOutline />}>
                             {isFormVisible ? "Cancelar" : "Añadir Empresa"}
                         </Button>
                     </div>
