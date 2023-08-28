@@ -70,7 +70,11 @@ export default function BranchesList() {
             .then(response => {
                 console.log(response.data);
                 const branchesData = response.data.branches;
-                const rowsWithId = branchesData.map((branch, index) => ({
+
+                // Filtrar las sucursales con estado "ACTIVO"
+                const activeBranches = branchesData.filter(branch => branch.state === 'ACT');
+
+                const rowsWithId = activeBranches.map((branch, index) => ({
                     id: index, // Asignar el índice como id temporal
                     name: branch.name,
                     emailAddress: branch.emailAddress,
@@ -78,7 +82,6 @@ export default function BranchesList() {
                     line1: branch.line1,
                     state: branch.state === 'ACT' ? 'ACTIVO' : 'INACTIVO',
                     uniqueKey: branch.uniqueKey
-
                 }));
                 setRows(rowsWithId);
             })
