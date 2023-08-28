@@ -1,11 +1,8 @@
 import axios from 'axios'
 
-
-// CLOUD URL
+/// DEFINE URLS GCLOUD
 export const BASE_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
 export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-ntsumodxxq-uc.a.run.app/api/v1/';
-
-// LOCAL URLS
 export const CLIENTS_URL = 'https://banquito-ws-clientes-ntsumodxxq-uc.a.run.app/api/v1/';
 export const ACCOUNTS_URL = 'https://banquito-ws-cuentas-ntsumodxxq-uc.a.run.app/api/v1/';
 export const PASSIVE_PRODUCTS_URL = 'https://banquito-ws-productos-pasivos-ntsumodxxq-uc.a.run.app/api/v1/';
@@ -19,6 +16,7 @@ export const ENDPOINTS = {
     bankEntity: 'bankEntity',
     groupRole: 'group-role',
     groupCompany: 'group-company',
+    groupCompanyMember: 'group-company-member',
     productAccount: 'product-account',
 }
 
@@ -46,6 +44,10 @@ export const createAPIEndpoint = endpoint => {
     let clientUrl = CLIENTS_URL + endpoint + '/';
     let businessurl = CLIENTS_URL + endpoint + '/';
     let businessRouteurl = CLIENTS_URL + endpoint;
+
+    //GROUP COMPANY URL
+    let groupMember = CLIENTS_URL + endpoint ;
+
     let clientPostUrl = CLIENTS_URL + endpoint;
     let groupRolesUrl = CLIENTS_URL + endpoint;
     let posturl = BASE_URL + endpoint;
@@ -85,13 +87,22 @@ export const createAPIEndpoint = endpoint => {
         fetchCustomerById: (id, token) => axios.get(clientUrl + id, token),
         // Update a customer
         putCustomer: (updatedRecord, token) => axios.put(clientPostUrl, updatedRecord, token),
-        fetchByBranchAndLocationAndState: (branch, location, state, token) => axios.get(clientUrl + 'branchandlocationandstate?branch=' + branch + '&location=' + location + '&state=' + state, token),
+        putCompany: (updatedRecord, token) => axios.put(businessRouteurl, updatedRecord, token),
+        fetchByBranchAndLocationAndState: (branch, location, state, token) => axios.get(clientUrl + 'branchandlocationandstate?branch=' + branch + '&locationId=' + location + '&state=' + state, token),
 
+
+        // ================================================================= COMPANY METHODS =================================================================
+        postCompany : (newRecord, token) => axios.post(businessRouteurl, newRecord, token),
+        fetchCompanyByTypeDocumentAndDocumentId: (type, documentId, token) => axios.get(businessRouteurl + '/typedocumentanddocument?typeDocument=' + type + '&document=' + documentId, token),
+        assignMemberToCompany : (newRecord, token) => axios.post(groupMember , newRecord, token),
+        updateMemberToCompany : (newRecord, token) => axios.put(groupMember , newRecord, token),
 
         fetchById: (id, token) => axios.get(url + id, token),
         fetchGroupCompany: (token) => axios.get(businessurl + 'all', token),
+        fetchGroupCompanyById : (id, token) => axios.get(businessurl + id, token),
         fetchByName: (name, token) => axios.get(url + "countries/" + name, token),
         fetchBranches: (id, token) => axios.get(adminurl + 'branch-list/' + id, token),
+        fetchBranchByUQ: (id, token) => axios.get(adminurl + 'branch-unique/64b1892b9c2c3b03c33a736F/' + id, token),
         fetchGroupRoles: (token) => axios.get(businessRouteurl, token),
         fetchByTypeDocumentAndDocumentId: (typeDocument, documentId, token) => axios.get(clientUrl + 'typeanddocument?typeDocument=' + typeDocument + '&document=' + documentId, token),
         fetchProvinceByCountry: (id, levelcode, token) => axios.get(adminurl + 'locations/' + id + '?levelCode=' + levelcode, token),

@@ -5,14 +5,21 @@ import DashboardNavbar from '../../../../examples/Navbars/DashboardNavbar';
 import DashboardLayout from '../../../../examples/LayoutContainers/DashboardLayout';
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
 import {Modal, Typography} from "@mui/material";
-import {UpdateClientForm} from "./UpdateClientForm";
 import useStateContext from "../../../../context/custom/useStateContext";
-import {Email, LocationCity, Person, Phone} from "@mui/icons-material";
+import {
+    BlockOutlined,
+    Call,
+    CardMembership,
+    CheckCircleOutline,
+    Email, ErrorOutline,
+    LocationCity, LocationOn,
+    Person
+} from "@mui/icons-material";
+import Chip from "@mui/material/Chip";
 
 
 const stateOptions = [
@@ -33,20 +40,30 @@ const genderTypes = [
     {label: 'Femenino', value: 'F'},
 ];
 
+const getStateChipColor = (stateValue) => {
+    switch (stateValue) {
+        case 'ACT':
+            return 'success';
+        case 'INA':
+        case 'SUS':
+        case 'BLO':
+            return 'error';
+        default:
+            return 'default';
+    }
+};
 const getColumnIcon = (field) => {
     switch (field) {
         case 'firstName':
-            return <Person />;
+            return <Person/>;
         case 'emailAddress':
-            return <Email />;
+            return <Email/>;
         case 'addresses':
-            return <LocationCity />;
+            return <LocationCity/>;
         default:
             return null;
     }
 };
-
-
 
 
 const StyledGridOverlay = styled('div')(({theme}) => ({
@@ -73,6 +90,29 @@ const StyledGridOverlay = styled('div')(({theme}) => ({
     },
 }));
 
+
+const phoneTypeTranslations = {
+    'HOM': 'Casa',
+    'MOB': 'Móvil',
+    'OFF': 'Oficina',
+    'OTH': 'Otro',
+};
+
+
+// Helper function to get the appropriate icon based on the state
+const getStateIcon = (stateValue) => {
+    switch (stateValue) {
+        case 'ACT':
+            return <CheckCircleOutline />;
+        case 'INA':
+        case 'SUS':
+        case 'BLO':
+            return <BlockOutlined />;
+        default:
+            return <ErrorOutline />;
+    }
+};
+
 const style = {
     position: "absolute",
     top: "50%",
@@ -84,6 +124,7 @@ const style = {
     borderRadius: '3px',
     p: 4
 };
+
 function CustomNoRowsOverlay() {
 
 
@@ -135,6 +176,18 @@ function CustomNoRowsOverlay() {
 
 export const CustomerDataGrid = ({data}) => {
 
+// Inside CustomerDataGrid component
+    const [selectedAddress, setSelectedAddress] = useState([]);
+    const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+
+    const handleAddressClick = (address) => {
+        setSelectedAddress(address);
+        setIsAddressModalOpen(true);
+    };
+
+    const handleCloseAddressModal = () => {
+        setIsAddressModalOpen(false);
+    };
     const [selectedPhones, setSelectedPhones] = useState([]);
     const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
 
@@ -171,20 +224,18 @@ export const CustomerDataGrid = ({data}) => {
             rowId
         ).then(res => {
 
-            navigate("/clientesnaturales/results/edit", { state: { data: res.data } });
+            navigate("/clientesnaturales/results/edit", {state: {data: res.data}});
 
         }).catch(err => console.log(err)
         )
     };
 
-    const handleDelete = (rowId) => {
-        // Implement your delete logic here using the rowId
-        console.log('Delete row with ID:', rowId);
-    };
 
     const columns = [
-        {field: 'firstName', headerName: 'Nombres', width: 150}, // Use Spanish name for First Name
-        {field: 'lastName', headerName: 'Apellidos', width: 150}, // Use Spanish name for Last Name
+        {field: 'firstName', headerName: 'Nombres', width: 100
+
+        }, // Use Spanish name for First Name
+        {field: 'lastName', headerName: 'Apellidos', width: 100}, // Use Spanish name for Last Name
         {
             field: 'typeDocumentId',
             headerName: 'Tipo de Documento',
@@ -194,7 +245,9 @@ export const CustomerDataGrid = ({data}) => {
                 return typeOptions ? typeOptions.label : '';
             },
         }, // Use Spanish name for State
-        {field: 'documentId', headerName: 'Identificacion', width: 150}, //
+        {field: 'documentId', headerName: 'Identificación', width: 150,
+
+        }, //
         {
             field: 'gender',
             headerName: 'Género',
@@ -206,63 +259,89 @@ export const CustomerDataGrid = ({data}) => {
         }, // Use Spanish name for Gender
         {field: 'emailAddress', headerName: 'Correo Electrónico', width: 200}, // Use Spanish name for Email Address
         {
+            field: 'birthDate',
+            headerName: 'Fecha de Nacimiento',
+            width: 150,
+        },
+        {
             field: 'state',
             headerName: 'Estado',
             width: 120,
-            valueGetter: (params) => {
+
+            renderCell: (params) => {
                 const stateOption = stateOptions.find((option) => option.value === params.value);
-                return stateOption ? stateOption.label : '';
+                const chipColor = getStateChipColor(params.value);
+                const stateIcon = getStateIcon(params.value);
+
+                return stateOption ? (
+                    <Chip label={stateOption.label} size="small" color={chipColor} icon={stateIcon}/>
+                ) : null;
             },
         }, // Use Spanish name for State
+        {field: 'comments', headerName: 'Comentario', width: 120}, // Use Spanish name for Email Address
+
+
+
         {
             field: 'addresses',
             headerName: 'Direcciones',
-            width: 250,
+            width: 220,
             renderCell: (params) => {
                 const addresses = params.value;
                 if (!addresses || addresses.length === 0) {
                     return 'No hay direcciones';
                 }
-                const formattedAddresses = addresses
-                    .map(
-                        (address) =>
-                            `${address.line1}${address.line2 ? ', ' + address.line2 : ''}`
-                    )
-                    .join('\n');
-                return <div style={{whiteSpace: 'pre-wrap'}}>{formattedAddresses}</div>;
+
+                return (
+                    <div>
+                        {addresses.map((address, index) => (
+                            <Chip
+                                key={index}
+                                label={`${index + 1}. ${address.line1}${address.line2 ? ', ' + address.line2 : ''}`}
+                                icon={<LocationOn />}
+                                onClick={() => handleAddressClick(address)}
+                                style={{
+                                    cursor: 'pointer',
+                                    margin: '4px',
+                                }}
+                            />
+                        ))}
+                    </div>
+                );
             },
         },
         {
             field: 'phones',
             headerName: 'Teléfonos',
-            width: 250,
+            width: 150,
             renderCell: (params) => {
                 const phones = params.value;
                 if (!phones || phones.length === 0) {
                     return 'No hay teléfonos';
                 }
-                const formattedPhones = phones.map((phone) => `${phone.phoneNumber}`).join(', ');
+
                 return (
-                    <div
-                        style={{ whiteSpace: 'pre-wrap', cursor: 'pointer' }}
-                        onClick={() => handlePhoneClick(phones)}
-                    >
-                        {formattedPhones}
-                        <Phone style={{ marginLeft: '0.5rem' }} />
+                    <div>
+                        {phones.map((phone, index) => (
+                            <Chip
+                                key={index}
+                                label={`${phone.phoneNumber}`}
+                                icon={<Call />}
+                                onClick={() => handlePhoneClick([phone])}
+                                style={{
+                                    cursor: 'pointer',
+                                    margin: '4px',
+                                }}
+                            />
+                        ))}
                     </div>
                 );
             },
         },
         {
             field: 'actions',
-            headerName: 'Acciones',
-            width: 100,
-            headerRenderer: (params) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {getColumnIcon('addresses')}
-                    Direcciones
-                </div>
-            ),
+            headerName: '',
+            width: 10,
             renderCell: (params) => {
 
                 const rowId = params.row.id; // Get the ID of the current row
@@ -281,6 +360,7 @@ export const CustomerDataGrid = ({data}) => {
         }
     ];
 
+
     return (
         <>
             <div style={{height: 400, width: '100%'}}>
@@ -288,9 +368,17 @@ export const CustomerDataGrid = ({data}) => {
                     rows={state.data}
                     columns={columns}
                     pageSize={5}
+                    hideFooterPagination={true}
                     slots={{
+
                         noRowsOverlay: CustomNoRowsOverlay,
                     }}
+                    sx={{
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            textOverflow: "clip",
+                            whiteSpace: "break-spaces",
+                            lineHeight: 1
+                        }}}
                     getRowHeight={() => 'auto'}
                     rowsPerPageOptions={[5, 10, 20]}
                     disableRowSelectionOnClick
@@ -311,31 +399,74 @@ export const CustomerDataGrid = ({data}) => {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        p: 4,
-                        maxWidth: '80vw',
-                        maxHeight: '80vh',
-                        overflow: 'auto',
+                        width: '300px', // Adjust the width to your preference
+                        bgcolor: '#f0f0f0', // Phone-like color
+                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Phone-like shadow
+                        borderRadius: '20px', // Phone-like rounded corners
+                        p: 3, // Padding inside the phone box
+                        textAlign: 'center', // Center the content
+                        overflow: 'hidden', // Hide any overflowing content
                     }}
                 >
                     <Typography variant="h6" component="h2" id="phone-modal-title">
-                        Información de Teléfonos
+                        Información de Teléfonos <Call/>
                     </Typography>
                     {selectedPhones.map((phone, index) => (
                         <div key={index}>
                             <Typography variant="subtitle1" gutterBottom>
                                 <strong>Teléfono {index + 1}:</strong> {phone.phoneNumber}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" gutterBottom>
-                                <strong>Tipo de Teléfono:</strong> {phone.phoneType}
+                            <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+                                <strong>Tipo de Teléfono:</strong> {phoneTypeTranslations[phone.phoneType]}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                            <Typography variant="subtitle1" color="textSecondary" gutterBottom>
                                 <strong>Es Predeterminado:</strong> {phone.phoneIsDefault ? 'Sí' : 'No'}
                             </Typography>
                         </div>
                     ))}
                 </Box>
+
+            </Modal>
+
+
+            <Modal
+                open={isAddressModalOpen}
+                onClose={handleCloseAddressModal}
+                aria-labelledby="address-modal-title"
+                aria-describedby="address-modal-description"
+            >
+                {selectedAddress && (
+
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '300px', // Adjust the width to your preference
+                            bgcolor: '#f0f0f0', // Phone-like color
+                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Phone-like shadow
+                            borderRadius: '20px', // Phone-like rounded corners
+                            p: 3, // Padding inside the phone box
+                            textAlign: 'center', // Center the content
+                            overflow: 'hidden', // Hide any overflowing content
+                        }}
+                    >
+                        <Typography variant="h6" component="h2" id="address-modal-title">
+                            Detalles de la Dirección
+                        </Typography>
+                        <Typography variant="subtitle1" gutterBottom>
+                            <strong>Dirección:</strong> {selectedAddress.line1}
+                        </Typography>
+                        <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+                            {selectedAddress.line2}
+                        </Typography>
+                        <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+                            <strong>Ciudad:</strong> {selectedAddress.city}
+                        </Typography>
+                        {/* Add more address details as needed */}
+                    </Box>
+                )}
             </Modal>
         </>
     );

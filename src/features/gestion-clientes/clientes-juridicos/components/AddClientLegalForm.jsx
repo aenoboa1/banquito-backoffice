@@ -1,28 +1,51 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React, {Fragment, useEffect, useState} from 'react';
+import {Controller, useForm} from 'react-hook-form';
 import {
-    Accordion, AccordionDetails, AccordionSummary, Autocomplete, ButtonGroup,
-    IconButton, InputAdornment, Modal, TextField
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Autocomplete,
+    ButtonGroup,
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    IconButton,
+    InputAdornment,
+    Modal,
+    Snackbar,
+    TextField
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import SoftTypography from '../../../../components/SoftTypography';
 import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
+import {yupResolver} from '@hookform/resolvers/yup';
+import {createAPIEndpoint, createAPIEndpointProducts, ENDPOINTS} from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
 import AddMemberForm from './AddMembers';
 import {
-    AddCircleOutline, Email, ContactPhone, Comment, Group, AddLocation, ExpandMore,
-    Business, LocationOn, GpsFixed,
+    AccountBalanceWallet,
+    AccountCircle,
+    AddCircleOutline,
+    AddLocation,
+    Business,
+    Comment,
+    ContactPhone,
+    Email,
+    ExpandMore,
+    GpsFixed,
+    Group,
+    LocationOn,
 } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import SoftButton from 'components/SoftButton';
+import Grid from "@mui/material/Grid";
+import FormControl from "@mui/material/FormControl";
+import MuiAlert from "@mui/material/Alert";
 
 const validationSchema = yup.object({
-    groupName: yup.string().required('Primer Nombre es requerido'),
+    groupName: yup.string().required('Nombre del Grupo es requerido'),
     emailAddress: yup
         .string()
         .email('Introduzca un email válido')
@@ -32,24 +55,33 @@ const validationSchema = yup.object({
     phoneNumber: yup.string().required('Número telefónico requerido'),
     line1: yup.string().required('Línea 1 es requerido'),
     line2: yup.string().required('Línea 2 es requerido'),
+    documentId: yup
+        .string()
+        .required('Documento de identidad es requerido')
+        .length(13, 'Documento de identidad debe tener 13 caracteres'),
     latitude: yup.string().required('Latitud es requerida'),
     longitude: yup.string().required('Longitud es requerida'),
     comments: yup.string().required('Agregue un comentario'),
-    roleType: yup.string().required('Seleccione un rol'),
-    clientId: yup.string().required('Seleccione un cliente'),
 });
-
 export const AddClientLegalForm = () => {
     const [isActive, setIsActive] = useState(true);
-    const { context, setContext } = useStateContext();
-
+    const {context, setContext} = useStateContext();
     const [openBranches, setOpenBranches] = useState(false);
     const [optionsBranches, setOptionsBranches] = useState([]);
     const loadingSelectBranches = openBranches && optionsBranches.length === 0;
-
     const [openLocations, setOpenLocations] = useState(false);
     const [options, setOptions] = useState([]);
     const loading = openLocations && options.length === 0;
+    const [includeAccount, setIncludeAccount] = useState(false);
+    // ACCOUNT PART
+    const [productOptions, setProductOptions] = useState([]);
+    const [openProducts, setOpenProducts] = useState(false);
+    const loadingProducts = openProducts && options.length === 0;
+
+    // error codes
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // or "error"
 
     function sleep(delay = 0) {
         return new Promise((resolve) => {
@@ -72,8 +104,8 @@ export const AddClientLegalForm = () => {
                     res => {
                         setOptionsBranches(res.data);
                     }).then(
-                        err => console.log(err)
-                    )
+                    err => console.log(err)
+                )
             }
         })();
         return () => {
@@ -97,8 +129,8 @@ export const AddClientLegalForm = () => {
                     (res) => {
                         setOptions(res.data.locations)
                     }).then(
-                        err => console.log(err)
-                    )
+                    err => console.log(err)
+                )
             }
         })();
         return () => {
@@ -118,10 +150,40 @@ export const AddClientLegalForm = () => {
         }
     }, [openLocations]);
 
+    // PRODUCT ACCOUNT USE EFFECT
+
+    useEffect(() => {
+        let active = true;
+        if (!loadingProducts) {
+            return undefined;
+        }
+
+        (async () => {
+            await sleep(1e3);
+            if (active) {
+                createAPIEndpointProducts(ENDPOINTS.productAccount).fetchAll(
+                    {}
+                ).then(
+                    res => {
+                        console.log(res.data);
+                        setProductOptions(res.data);
+                    }).then(
+                    err => console.log(err)
+                )
+            }
+        })()
+    });
+
+    useEffect(() => {
+        if (!openProducts) {
+            setProductOptions([]);
+        }
+    }, [openProducts]);
+
     const {
         control,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
@@ -135,37 +197,57 @@ export const AddClientLegalForm = () => {
             latitude: '',
             longitude: '',
             comments: '',
-            roleType: '',
-            clientId: '',
         },
     });
 
     const onSubmit = (data) => {
-        console.log("DATA --> ", data);
+
+        if (includeAccount) {
+            data.hasAccount = true;
+        } else {
+            data.hasAccount = false; // Optionally set it to false if checkbox is not checked
+        }
         const updatedcontext = {
-            members: Array.isArray(context.members) ? [...context.members] : [],
+            groupMembers: Array.isArray(context.groupMembers) ? [...context.groupMembers] : [],
             ...data
         };
-        createAPIEndpoint(ENDPOINTS.groupCompany,
-        ).post(updatedcontext, {}).then(
 
-        ).catch(
-            err => console.log(err)
+        createAPIEndpoint(ENDPOINTS.groupCompany,
+        ).postCompany(updatedcontext, {}).then(() => {
+            setOpenSnackbar(true);
+            setSnackbarMessage("Compañía creada correctamente");
+            setSnackbarSeverity("success");
+        }).catch(
+            err => {
+                console.log(err);
+                if (err.response.data === "El ruc/correo ya fue registrado") {
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("El ruc/correo ya fue registrado");
+                    setSnackbarSeverity("error");
+                } else if (err.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("El usuario ya tiene una cuenta de este tipo");
+                    setSnackbarSeverity("error");
+                }
+            }
         )
     };
 
-    const getPhoneTypeLabel = (value) => {
-        switch (value) {
-            case 'ACCTA':
-                return 'Accionista';
-            case 'APDRD':
-                return 'Apoderado';
-            case 'REPLG':
-                return 'Representante legal';
-            default:
-                return 'Desconocido';
-        }
-    };
+    const [roleOptions, setRoleOptions] = useState([]);
+
+    useEffect(() => {
+        // Fetch group company roles
+        createAPIEndpoint(ENDPOINTS.groupRole)
+            .fetchAllRoles({})
+            .then((res) => {
+                console.log(res.data);
+                setRoleOptions(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+
+            });
+    }, []);
 
     const style = {
         position: "absolute",
@@ -187,10 +269,10 @@ export const AddClientLegalForm = () => {
     const handleClose = () => setOpen(false);
 
     const handleDeleteMember = (index) => {
-        const updatedMembers = context.members.filter((_, i) => i !== index);
+        const updatedMembers = context.groupMembers.filter((_, i) => i !== index);
         const updatedContext = {
             ...context,
-            members: updatedMembers,
+            groupMembers: updatedMembers,
         };
         setContext(updatedContext);
     };
@@ -199,11 +281,11 @@ export const AddClientLegalForm = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
             <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
                 <Box gridColumn="span 12"></Box>
-                <Box gridColumn="span 6">
+                <Box gridColumn="span 12">
                     <Controller
                         name="branchId"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Autocomplete
                                 id="branchId"
                                 open={openBranches}
@@ -213,9 +295,6 @@ export const AddClientLegalForm = () => {
                                 onClose={() => {
                                     setOpenBranches(false);
                                 }}
-                                // getOptionSelected={(option, value) =>
-                                //     value === undefined || value === "" || option.uniqueKey === value.uniqueKey
-                                // }
                                 isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
                                 getOptionLabel={(option) => option.name || ''}
                                 fullWidth
@@ -232,13 +311,13 @@ export const AddClientLegalForm = () => {
                                                 <Fragment>
                                                     {loadingSelectBranches ?
                                                         <CircularProgress color="inherit"
-                                                            size={20} /> : null}
+                                                                          size={20}/> : null}
                                                     {params.InputProps.endAdornment}
                                                 </Fragment>
                                             ),
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Business />
+                                                    <Business/>
                                                 </InputAdornment>
                                             ),
                                         }}
@@ -252,11 +331,11 @@ export const AddClientLegalForm = () => {
                     />
                 </Box>
 
-                <Box gridColumn="span 6">
+                <Box gridColumn="span 12">
                     <Controller
                         name="locationId"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Autocomplete
                                 id="locationId"
                                 open={openLocations}
@@ -283,13 +362,13 @@ export const AddClientLegalForm = () => {
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {loading ? <CircularProgress color="inherit" size={20}/> : null}
                                                     {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <AddLocation />
+                                                    <AddLocation/>
                                                 </InputAdornment>
                                             ),
                                         }}
@@ -307,7 +386,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="groupName"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -319,7 +398,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Group />
+                                            <Group/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -332,7 +411,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="emailAddress"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -344,7 +423,33 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Email />
+                                            <Email/>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        )}
+                    />
+                </Box>
+
+                <Box gridColumn="span 6">
+                    {/* Document ID */}
+                    <Controller
+                        name="documentId"
+                        control={control}
+                        render={({field}) => (
+                            <TextField
+                                fullWidth
+                                type="text"
+                                id="documentId"
+                                label="Documento de Identidad"
+                                {...field}
+                                error={Boolean(errors.documentId)}
+                                helperText={errors.documentId?.message}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <AccountCircle/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -357,7 +462,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="phoneNumber"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -369,7 +474,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <ContactPhone />
+                                            <ContactPhone/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -382,7 +487,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="line1"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -394,7 +499,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LocationOn />
+                                            <LocationOn/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -407,7 +512,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="line2"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -419,7 +524,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LocationOn />
+                                            <LocationOn/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -432,7 +537,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="latitude"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -444,7 +549,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <GpsFixed />
+                                            <GpsFixed/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -457,7 +562,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="longitude"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -469,7 +574,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <GpsFixed />
+                                            <GpsFixed/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -482,7 +587,7 @@ export const AddClientLegalForm = () => {
                     <Controller
                         name="comments"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 fullWidth
                                 type="text"
@@ -494,7 +599,7 @@ export const AddClientLegalForm = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Comment />
+                                            <Comment/>
                                         </InputAdornment>
                                     ),
                                 }}
@@ -506,7 +611,7 @@ export const AddClientLegalForm = () => {
                 <Box gridColumn="span 12">
                     <div>
                         <Button onClick={handleOpen} variant="contained"
-                            startIcon={<AddCircleOutline />}>
+                                startIcon={<AddCircleOutline/>}>
                             Agregar miembros
                         </Button>
                         <Modal
@@ -514,24 +619,24 @@ export const AddClientLegalForm = () => {
                             onClose={handleClose}
                             aria-labelledby="modal-modal-title"
                             aria-describedby="modal-modal-description"
-                            style={{ backdropFilter: "blur(5px)" }}
+                            style={{backdropFilter: "blur(5px)"}}
                         >
                             <Box sx={style}>
-                                <AddMemberForm setIsActive={setIsActive} />
+                                <AddMemberForm setIsActive={setIsActive}/>
                             </Box>
                         </Modal>
                     </div>
                 </Box>
 
                 <Box gridColumn="span 12">
-                    {context.members && (
+                    {context.groupMembers && (
                         <>
-                            {context.members.map((member, index) => (
+                            {context.groupMembers.map((member, index) => (
                                 <Box gridColumn="span 6">
                                     <div>
                                         <Accordion key={index}>
                                             <AccordionSummary
-                                                expandIcon={<ExpandMore />}
+                                                expandIcon={<ExpandMore/>}
                                                 aria-controls="panel1a-content"
                                                 id="panel1a-header"
                                             >
@@ -541,9 +646,9 @@ export const AddClientLegalForm = () => {
                                                     gap: 4
                                                 }}>
                                                     <Box gridColumn="span 6"
-                                                        sx={{ position: 'relative' }}>
+                                                         sx={{position: 'relative'}}>
                                                         <SoftTypography align="center"
-                                                            sx={{ fontWeight: 'bold' }}>
+                                                                        sx={{fontWeight: 'bold'}}>
                                                             Miembro {index + 1}
                                                         </SoftTypography>
                                                     </Box>
@@ -552,24 +657,21 @@ export const AddClientLegalForm = () => {
                                             <AccordionDetails>
                                                 <Box>
                                                     <SoftTypography>
-                                                        {`Cliente: ${member.clientList}`}
+                                                        {`Cliente: ${member.clientName}`}
                                                     </SoftTypography>
+
                                                     <SoftTypography>
-                                                        {`Rol: ${getPhoneTypeLabel(member.roleType)}`}
+                                                        {`Rol: ${roleOptions.find(option => option.id === member.groupRoleId)?.groupRoleName || 'Sin rol'}`}
                                                     </SoftTypography>
                                                 </Box>
-                                                <Box sx={{ position: 'absolute', bottom: 0, right: 0 }}>
+                                                <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
 
                                                     <ButtonGroup variant="outlined"
-                                                        aria-label="outlined button group">
+                                                                 aria-label="outlined button group">
 
                                                         <IconButton aria-label="delete"
-                                                            onClick={() => handleDeleteMember(index)}>
-                                                            <DeleteIcon fontSize="small" />
-                                                        </IconButton>
-
-                                                        <IconButton aria-label="edit">
-                                                            <EditIcon fontSize="small" />
+                                                                    onClick={() => handleDeleteMember(index)}>
+                                                            <DeleteIcon fontSize="small"/>
                                                         </IconButton>
                                                     </ButtonGroup>
                                                 </Box>
@@ -583,14 +685,131 @@ export const AddClientLegalForm = () => {
                 </Box>
 
                 <Box gridColumn="span 12">
-                    <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"}
-                        disabled={isActive}
-                    >
-                        Crear Empresa
-                    </SoftButton>
+                    <FormControl component="fieldset">
+                        <FormGroup>
+                            <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={includeAccount}
+                                            onChange={(e) => setIncludeAccount(e.target.checked)}
+                                            color="primary"
+                                        />
+                                    }
+                                    label="¿Desea asignar una cuenta a la Empresa?"
+                                />
+                            </Grid>
+                            {includeAccount && (
+                                <>
+                                    <Grid item xs="12" style={{marginBottom: '20px'}}>
+                                        <Controller
+                                            name="accountAlias"
+                                            control={control}
+                                            render={({field}) => (
+                                                <TextField
+                                                    fullWidth
+                                                    type="text"
+                                                    id="accountAlias"
+                                                    label="Alias de la cuenta"
+                                                    {...field}
+                                                    error={Boolean(errors.accountAlias)}
+                                                    helperText={errors.accountAlias?.message}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+
+                                    <Grid item xs={12}>
+                                        <Controller
+                                            name="productAccountId"
+                                            control={control}
+                                            render={({field}) => (
+                                                <Autocomplete
+                                                    id="productAccountId"
+                                                    open={openProducts}
+                                                    onOpen={() => {
+                                                        setOpenProducts(true);
+                                                    }}
+                                                    onClose={() => {
+                                                        setOpenProducts(false);
+                                                    }}
+
+                                                    isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
+                                                    getOptionLabel={(option) => option.name || ''}
+                                                    fullWidth
+                                                    options={productOptions}
+                                                    loading={loadingProducts}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Seleccione el tipo de cuenta"
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                endAdornment: (
+                                                                    <React.Fragment>
+                                                                        {loadingProducts ?
+                                                                            <CircularProgress color="inherit"
+                                                                                              size={20}/> : null}
+                                                                        {params.InputProps.endAdornment}
+                                                                    </React.Fragment>
+                                                                ),
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <AccountBalanceWallet/>
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            error={Boolean(errors.uniqueKey)}
+                                                            helperText={errors.uniqueKey?.message}
+                                                        />
+                                                    )}
+                                                    onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                </>
+                            )
+
+                            }
+                        </FormGroup>
+                    </FormControl>
                 </Box>
+
+                {/* Check if context.groupMembers has at least one member */}
+
+                {context.groupMembers && context.groupMembers.length > 0 ? (
+                    <Box gridColumn="span 12">
+                        <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"}>
+                            Crear Empresa
+                        </SoftButton>
+                    </Box>
+                ) : (
+                    <Box gridColumn="span 12">
+                        <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"} disabled>
+                            Crear Empresa
+                        </SoftButton>
+                    </Box>
+                )}
             </Box>
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={6000}
+                onClose={() => setOpenSnackbar(false)}
+            >
+                <MuiAlert
+                    elevation={6}
+                    variant="filled"
+                    onClose={() => setOpenSnackbar(false)}
+                    severity={snackbarSeverity}
+                >
+                    {snackbarMessage}
+                </MuiAlert>
+            </Snackbar>
         </form>
-    );
+
+
+    )
+        ;
 };
 

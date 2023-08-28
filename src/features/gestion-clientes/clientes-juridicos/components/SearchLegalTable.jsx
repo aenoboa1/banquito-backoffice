@@ -9,6 +9,8 @@ import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
+import Chip from "@mui/material/Chip";
+import {BlockOutlined, CheckCircleOutline, ErrorOutline} from "@mui/icons-material";
 
 const stateOptions = [
     {value: 'ACT', label: 'Activo'},
@@ -22,6 +24,32 @@ const genderTypes = [
     {label: 'Femenino', value: 'F'},
 ];
 
+const getStateChipColor = (stateValue) => {
+    switch (stateValue) {
+        case 'ACT':
+            return 'success';
+        case 'INA':
+        case 'SUS':
+        case 'BLO':
+            return 'error';
+        default:
+            return 'default';
+    }
+};
+
+// Helper function to get the appropriate icon based on the state
+const getStateIcon = (stateValue) => {
+    switch (stateValue) {
+        case 'ACT':
+            return <CheckCircleOutline />;
+        case 'INA':
+        case 'SUS':
+        case 'BLO':
+            return <BlockOutlined />;
+        default:
+            return <ErrorOutline />;
+    }
+};
 
 const StyledGridOverlay = styled('div')(({theme}) => ({
     display: 'flex',
@@ -117,21 +145,15 @@ export const LegalDataGrid = ({data}) => {
     const {context, setContext} = useStateContext();
     const [customerData, setCustomerData] = useState();
     const handleEdit = (rowId) => {
-        // Implement your edit logic here using the rowId
-
         setSelectedCustomer(rowId);
         setIsEditModalOpen(true);
-
         setContext({
-            addresses: null,
-            phones: null,
+            groupMembers: null,
         });
-        createAPIEndpoint(ENDPOINTS.clients).fetchById(
+        createAPIEndpoint(ENDPOINTS.groupCompany).fetchGroupCompanyById(
             rowId
         ).then(res => {
-
-            navigate("/clientesnaturales/results/edit", { state: { data: res.data } });
-
+            navigate("/clientesjuridicos/results/edit", { state: { data: res.data } });
         }).catch(err => console.log(err)
         )
     };
@@ -142,52 +164,79 @@ export const LegalDataGrid = ({data}) => {
     };
 
     const columns = [
-        {field: 'firstName', headerName: 'Nombre de Grupo', width: 200}, // Use Spanish name for First Name
-        {field: 'emailAddress', headerName: 'Correo Electrónico', width: 200}, // Use Spanish name for Email Address
-        {field: 'phone', headerName: 'Teléfono', width: 150}, // Use Spanish name for Last Name
+        {
+            field: 'groupName',
+            headerName: 'Nombre de Grupo',
+            width: 200,
+        },
+        {
+            field: 'emailAddress',
+            headerName: 'Correo Electrónico',
+            width: 200,
+        },
+        {
+            field: 'phoneNumber',
+            headerName: 'Teléfono',
+            width: 150,
+        },
+
         {
             field: 'state',
             headerName: 'Estado',
             width: 120,
-            valueGetter: (params) => {
+
+            renderCell: (params) => {
                 const stateOption = stateOptions.find((option) => option.value === params.value);
-                return stateOption ? stateOption.label : '';
+                const chipColor = getStateChipColor(params.value);
+                const stateIcon = getStateIcon(params.value);
+
+                return stateOption ? (
+                    <Chip label={stateOption.label} size="small" color={chipColor} icon={stateIcon}/>
+                ) : null;
             },
         }, // Use Spanish name for State
         {
-            field: 'addresses',
-            headerName: 'Direcciones',
-            width: 250,
-            renderCell: (params) => {
-                const addresses = params.value;
-                if (!addresses || addresses.length === 0) {
-                    return 'No hay direcciones';
-                }
-                const formattedAddresses = addresses
-                    .map(
-                        (address) =>
-                            `${address.line1}${address.line2 ? ', ' + address.line2 : ''}, ${address.state}`
-                    )
-                    .join('\n');
-                return <div style={{whiteSpace: 'pre-wrap'}}>{formattedAddresses}</div>;
+            field: 'line1',
+            headerName: 'Línea 1',
+            width: 100,
+        },
+        {
+            field: 'line2',
+            headerName: 'Línea 2',
+            width: 100,
+        },
+        {
+            field: 'latitude',
+            headerName: 'Latitud',
+            width: 80,
+        },
+        {
+            field: 'longitude',
+            headerName: 'Longitud',
+            width: 80,
+        },
+        {
+            field: 'creationDate',
+            headerName: 'Fecha de Creación',
+            width: 200,
+            valueGetter: (params) => {
+                const creationDate = new Date(params.value);
+                return creationDate.toLocaleString();
             },
         },
         {
-            field: 'members',
-            headerName: 'Miembros',
-            width: 250,
+            field: 'comments',
+            headerName: 'Comentarios',
+            width: 120,
+        },
+
+        {
+            field: "groupMembers",
+            headerName: "N° de Miembros de Grupo",
+            width: 100,
             renderCell: (params) => {
-                const members = params.value;
-                if (!members || members.length === 0) {
-                    return 'No hay miembros';
-                }
-                const formattedMembers = members
-                    .map(
-                        (member) =>
-                            `${member.firstName}${member.lastName ? ', ' + member.firstName : ''}, ${member.state}`
-                    )
-                    .join('\n');
-                return <div style={{whiteSpace: 'pre-wrap'}}>{formattedMembers}</div>;
+                const membersWithActState = params.value?.filter(member => member.state === 'ACT');
+                return membersWithActState?.length || 0; // Display the count of group members with "ACT" state
             },
         },
         {
@@ -195,25 +244,22 @@ export const LegalDataGrid = ({data}) => {
             headerName: 'Acciones',
             width: 150,
             renderCell: (params) => {
-
                 const rowId = params.row.id; // Get the ID of the current row
-
-                // Return the JSX with the edit and delete icons as actions
                 return (
                     <div>
                         <IconButton
-                            onClick={() => handleEdit(rowId)} // Add your edit function here
+                            onClick={() => handleEdit(rowId)}
                             size="small"
                             color="primary"
                         >
-                            <EditIcon/>
+                            <EditIcon />
                         </IconButton>
                     </div>
                 );
             },
-        }
-    ];
+        },
 
+    ];
     return (
         <>
             <div style={{height: 400, width: '100%'}}>
@@ -224,6 +270,12 @@ export const LegalDataGrid = ({data}) => {
                     slots={{
                         noRowsOverlay: CustomNoRowsOverlay,
                     }}
+                    sx={{
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            textOverflow: "clip",
+                            whiteSpace: "break-spaces",
+                            lineHeight: 1
+                        }}}
                     getRowHeight={() => 'auto'}
                     rowsPerPageOptions={[5, 10, 20]}
                     disableRowSelectionOnClick

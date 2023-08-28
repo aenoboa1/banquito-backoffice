@@ -6,7 +6,7 @@ import CustomerAccountForm from "../../components/CustomerAccountForm";
 function CustomerAccount() {
     return (
         <DashboardLayout>
-            <DashboardNavbar />
+            <DashboardNavbar/>
             <CustomerAccountForm/>
         </DashboardLayout>
     );

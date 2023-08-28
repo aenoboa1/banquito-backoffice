@@ -55,6 +55,7 @@ import {UpdateClientForm} from "../features/gestion-clientes/clientes-naturales/
 import SearchLegalTable from "features/gestion-clientes/clientes-juridicos/components/SearchLegalTable";
 import CustomerAccount from "../features/gestion-cuentas/pages/CustomerAccount";
 import AccountsCompany from "../features/gestion-cuentas/pages/CompanyAccount";
+import {UpdateLegalClientForm} from "../features/gestion-clientes/clientes-juridicos/components/UpdateLegalClientForm";
 
 const routes = [
     {
@@ -112,15 +113,6 @@ const routes = [
 
     {
         type: "collapse",
-        name: "Entidad Bancaria",
-        key: "entidad",
-        route: "/entidad",
-        icon: <Folder size="12px"/>,
-        component: <EntidadBancaria/>,
-        noCollapse: true,
-    },
-    {
-        type: "collapse",
         name: "Gest. Clientes Naturales",
         key: "clientesnaturales",
         route: "/clientesnaturales",
@@ -150,13 +142,13 @@ const routes = [
     {
         name: "ClientResults",
         key: "clientResults",
-        route: "/cuentascliente",
+        route: "/cuentas/cliente",
         component: <CustomerAccount/>
     },
     {
         name: "CustomerAccounts",
         key: "customerAccounts",
-        route: "/cuentascompania",
+        route: "/cuentas/compania",
         component: <AccountsCompany/>
     },
 
@@ -178,8 +170,14 @@ const routes = [
         key: "legalResults",
         route: "/clientesjuridicos/results",
         component: <SearchLegalTable/>
-    }
+    },
 
+    {
+        name: "LegalEdit",
+        key: "legalEdit",
+        route: "/clientesjuridicos/results/edit",
+        component: <UpdateLegalClientForm/>
+    }
 ];
 
 export default routes;

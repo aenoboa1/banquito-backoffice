@@ -18,7 +18,7 @@ export const LegalClientFinder = () => {
         setIsFormVisible((prev) => !prev);
 
         setContext({
-            members: null,
+            groupMembers: null,
         });
     };
 

@@ -106,9 +106,9 @@ export const ContainedGroup = () => {
                             // Define the new href based on the conditions
                             let newHref = image.title;
                             if (containsClientesNaturales) {
-                                newHref = "/cuentascliente";
+                                newHref = "/cuentas/cliente";
                             } else if (containsEmpresas) {
-                                newHref = "/cuentascompania";
+                                newHref = "/cuentas/compania";
                             }
                             return (
                                 <ImageButton

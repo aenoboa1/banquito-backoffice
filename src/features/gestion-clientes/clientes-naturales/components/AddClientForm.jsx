@@ -39,13 +39,11 @@ import {
     ChatBubble,
     Email,
     ExpandMore,
-    Map,
+    LocationOn,
     Phone
 } from "@mui/icons-material";
 import Grid from "@mui/material/Grid";
 import MuiAlert from "@mui/material/Alert";
-import colors from "assets/theme/base/colors";
-import borders from "assets/theme/base/borders";
 import SoftButton from "../../../../components/SoftButton";
 import FormControl from "@mui/material/FormControl";
 
@@ -66,7 +64,9 @@ const validationSchema = yup.object({
     groupCompanyId: yup.string().optional(),
     accountAlias: yup.string(),
     productAccountId: yup.string().optional('Seleccione un tipo de cuenta'),
+
 });
+
 export const AddClientForm = () => {
 
 
@@ -75,11 +75,6 @@ export const AddClientForm = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // or "error"
-    function sleep(delay = 0) {
-        return new Promise((resolve) => {
-            setTimeout(resolve, delay);
-        });
-    }
 
     const [expanded, setExpanded] = useState(false);
 
@@ -272,6 +267,8 @@ export const AddClientForm = () => {
         },
     });
 
+
+
     const onSubmit = (data) => {
 
         if (includeAccount) {
@@ -287,7 +284,7 @@ export const AddClientForm = () => {
             groupMember: includeGroupCompany
                 ? [
                     {
-                        groupRoleId: data.groupRoleId,
+                        grId: data.groupRoleId,
                         groupCompanyId: data.groupCompanyId,
                     },
                     ...groupMember,
@@ -387,29 +384,11 @@ export const AddClientForm = () => {
     const [openAddress, setOpenAddress] = React.useState(false);
     const handleOpenAddress = () => setOpenAddress(true);
 
-    const {secondary} = colors;
-    const {borderWidth} = borders;
-
     const handleCloseAddress = () => setOpenAddress(false);
 
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const [deleteIndex, setDeleteIndex] = useState(null);
-
-    const handleDeleteConfirmation = () => {
-        // Perform the delete operation here using the deleteIndex
-        const updatedAddresses = context.addresses.filter((_, i) => i !== deleteIndex);
-        const updatedContext = {
-            ...context,
-            addresses: updatedAddresses,
-        };
-        setContext(updatedContext);
-        setDeleteIndex(null); // Clear deleteIndex after successful deletion
-    };
-
-    // Function to add a new phone number field
-
     const [includeGroupCompany, setIncludeGroupCompany] = useState(false);
     const [includeAccount, setIncludeAccount] = useState(false);
 
@@ -785,7 +764,7 @@ export const AddClientForm = () => {
                                                                  sx={{position: 'relative'}}>
                                                                 <SoftTypography align="center"
                                                                                 sx={{fontWeight: 'bold'}}>
-                                                                    <Map/> Dirección {index + 1}
+                                                                    <LocationOn/> Dirección {index + 1}
                                                                 </SoftTypography>
                                                             </Box>
                                                         </Box>
@@ -1086,21 +1065,24 @@ export const AddClientForm = () => {
                             </SoftButton>
                         </Grid>
                     </Grid>
-                </form>
-                <Snackbar
-                    open={openSnackbar}
-                    autoHideDuration={6000}
-                    onClose={() => setOpenSnackbar(false)}
-                >
-                    <MuiAlert
-                        elevation={6}
-                        variant="filled"
+
+                    <Snackbar
+                        open={openSnackbar}
+                        autoHideDuration={6000}
                         onClose={() => setOpenSnackbar(false)}
-                        severity={snackbarSeverity}
                     >
-                        {snackbarMessage}
-                    </MuiAlert>
-                </Snackbar>
+                        <MuiAlert
+                            elevation={6}
+                            variant="filled"
+                            onClose={() => setOpenSnackbar(false)}
+                            severity={snackbarSeverity}
+                        >
+                            {snackbarMessage}
+                        </MuiAlert>
+                    </Snackbar>
+                </form>
+
+
             </Stack>
         </Stack>
     );

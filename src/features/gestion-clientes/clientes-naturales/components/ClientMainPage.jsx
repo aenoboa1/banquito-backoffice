@@ -7,7 +7,7 @@ import useStateContext from "../../../../context/custom/useStateContext";
 import SoftBox from "../../../../components/SoftBox";
 import CustomDeleteIconChips from "./StyledSearch";
 
-export const ClientFinder = () => {
+export const ClientMainPage = () => {
     const [isFormVisible, setIsFormVisible] = useState(false);
     const {context, setContext} = useStateContext();
 
