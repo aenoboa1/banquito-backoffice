@@ -16,6 +16,7 @@ export const ENDPOINTS = {
     bankEntity: 'bankEntity',
     groupRole: 'group-role',
     groupCompany: 'group-company',
+    groupCompanyMember: 'group-company-member',
     productAccount: 'product-account',
 }
 
@@ -43,6 +44,10 @@ export const createAPIEndpoint = endpoint => {
     let clientUrl = CLIENTS_URL + endpoint + '/';
     let businessurl = CLIENTS_URL + endpoint + '/';
     let businessRouteurl = CLIENTS_URL + endpoint;
+
+    //GROUP COMPANY URL
+    let groupMember = CLIENTS_URL + endpoint ;
+
     let clientPostUrl = CLIENTS_URL + endpoint;
     let groupRolesUrl = CLIENTS_URL + endpoint;
     let posturl = BASE_URL + endpoint;
@@ -84,9 +89,11 @@ export const createAPIEndpoint = endpoint => {
         putCustomer: (updatedRecord, token) => axios.put(clientPostUrl, updatedRecord, token),
         putCompany: (updatedRecord, token) => axios.put(businessRouteurl, updatedRecord, token),
         fetchByBranchAndLocationAndState: (branch, location, state, token) => axios.get(clientUrl + 'branchandlocationandstate?branch=' + branch + '&locationId=' + location + '&state=' + state, token),
+
         // ================================================================= COMPANY METHODS =================================================================
         postCompany : (newRecord, token) => axios.post(businessRouteurl, newRecord, token),
-
+        fetchCompanyByTypeDocumentAndDocumentId: (type, documentId, token) => axios.get(businessRouteurl + '/typedocumentanddocument?typeDocument=' + type + '&document=' + documentId, token),
+        assignMemberToCompany : (newRecord, token) => axios.post(groupMember , newRecord, token),
 
         fetchById: (id, token) => axios.get(url + id, token),
         fetchGroupCompany: (token) => axios.get(businessurl + 'all', token),

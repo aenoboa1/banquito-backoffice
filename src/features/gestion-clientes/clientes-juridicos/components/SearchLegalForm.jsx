@@ -1,37 +1,55 @@
-
-import { Box, Button, MenuItem, Select, TextField, Popover, IconButton, InputAdornment, FormControlLabel, Checkbox, Autocomplete } from "@mui/material";
+import {
+    Autocomplete,
+    Box,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    InputAdornment,
+    MenuItem,
+    Tab,
+    Tabs,
+    TextField
+} from "@mui/material";
 import SoftTypography from "../../../../components/SoftTypography";
-import React, { Fragment, useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, {Fragment, useEffect, useState} from "react";
+import {Controller, useForm} from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
+import {yupResolver} from "@hookform/resolvers/yup";
 import SearchIcon from "@mui/icons-material/Search";
-import { createAPIEndpoint, ENDPOINTS } from "../../../../api";
-import { useNavigate } from "react-router-dom";
+import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
+import {useNavigate} from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
-import { AddLocation, Business } from "@mui/icons-material";
+import {AddLocation, Business} from "@mui/icons-material";
 
-const schema = yup.object().shape({
-    // Define your validation rules for each field here
-    stateType: yup.string().optional("State is required"),
-    locationId: yup.string().optional("Location is required"),
-    branchId: yup.string().optional("Branch is required"),
+
+// Schema for the state search form
+const stateSchema = yup.object().shape({
+    stateType: yup.string().optional("Estado es requerido"),
+    locationId: yup.string().optional("Ubicación es requerida"),
+    branchId: yup.string().optional("Sucursal es requerida"),
 });
 
+// Schema for the document search form
+const documentSchema = yup.object().shape({
+    typeDocumentId: yup.string().required("Tipo de Documento es requerido"),
+    documentId: yup.string().required("Documento es requerido"),
+});
 const stateOptions = [
-    { value: "ACT", label: "Activo" },
-    { value: "INA", label: "Inactivo" },
-    { value: "SUS", label: "Suspendido" },
-    { value: "BLO", label: "Bloqueado" },
+    {value: "ACT", label: "Activo"},
+    {value: "INA", label: "Inactivo"},
+    {value: "SUS", label: "Suspendido"},
+    {value: "BLO", label: "Bloqueado"},
 ];
 
 export const SearchLegalForm = () => {
+
+
     const {
-        handleSubmit,
-        control,
-        formState: { errors },
+        handleSubmit: handleSubmitComplete,
+        control: controlComplete,
+        formState: {errors: errorsComplete},
     } = useForm({
-        resolver: yupResolver(schema),
+        resolver: yupResolver(stateSchema),
         defaultValues: {
             stateType: '',
             locationId: '',
@@ -39,16 +57,27 @@ export const SearchLegalForm = () => {
         },
     });
 
+    const {
+        handleSubmit: handleSubmitDocument,
+        control: controlDocument,
+        formState: {errors: errorsDocument},
+    } = useForm({
+        resolver: yupResolver(documentSchema), // Reuse the same schema
+        defaultValues: {
+            typeDocumentId: '',
+            documentId: '',
+        },
+    });
 
     const navigate = useNavigate();
     const [ClientResponse, setClientResponse] = useState([]);
-
     const [isStateFieldEnabled, setStateFieldEnabled] = useState(true);
     const [isDocumentIdFieldEnabled, setDocumentIdFieldEnabled] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const [searchByState, setSearchByState] = useState(false);
     const [searchByLocation, setSearchByLocation] = useState(false);
     const [searchByBranch, setSearchByBranch] = useState(false);
+    const [activeTab, setActiveTab] = useState(0);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -78,7 +107,6 @@ export const SearchLegalForm = () => {
     const loadingLocation = openLocations && optionsLocations.length === 0;
 
 
-
     useEffect(() => {
         let active = true;
         if (!loadingBranches) {
@@ -95,8 +123,8 @@ export const SearchLegalForm = () => {
                         console.log(res.data);
                         setOptionsBranches(res.data);
                     }).then(
-                        err => console.log(err)
-                    )
+                    err => console.log(err)
+                )
             }
         })();
 
@@ -121,8 +149,8 @@ export const SearchLegalForm = () => {
                     (res) => {
                         setOptionsLocations(res.data.locations)
                     }).then(
-                        err => console.log(err)
-                    )
+                    err => console.log(err)
+                )
             }
         })();
         return () => {
@@ -147,12 +175,14 @@ export const SearchLegalForm = () => {
         handleClose();
     };
 
-    const onSubmit = (data) => {
+    const onSubmitState = (data) => {
+
         console.log("-->", data);
+
         createAPIEndpoint(ENDPOINTS.groupCompany)
-            .fetchByBranchAndLocationAndState(data.branchId ,data.locationId, data.stateType)
+            .fetchByBranchAndLocationAndState(data.branchId, data.locationId, data.stateType)
             .then((res) => {
-                navigate("/clientesjuridicos/results", { state: { data: res.data } });
+                navigate("/clientesjuridicos/results", {state: {data: res.data}});
             })
             .catch((error) => {
                 console.error(error);
@@ -162,188 +192,282 @@ export const SearchLegalForm = () => {
         // console.log(ClientResponse)
     };
 
+    const onSubmitDocument = (data) => {
+        console.log("-->", data);
+        createAPIEndpoint(ENDPOINTS.groupCompany)
+            .fetchCompanyByTypeDocumentAndDocumentId(data.typeDocumentId, data.documentId)
+            .then((res) => {
+                navigate("/clientesjuridicos/results", {state: {data: res.data}});
+            })
+            .catch((error) => {
+                console.error(error);
+                return [];
+            });
+
+        // console.log(ClientResponse)
+    };
+    const documentTypes = [
+        {label: 'RUC', value: 'RUC'},
+    ];
+
     return (
         <div>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
-                    <Box gridColumn="span 12">
-                        <SoftTypography align="center" sx={{ fontWeight: 'bold' }}>
-                            Búsqueda de Empresas <SearchIcon />
-                        </SoftTypography>
-                    </Box>
 
-                    <Box gridColumn="span 11">
-                        {/* Type of Document */}
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={searchByState}
-                                    onChange={(e) => setSearchByState(e.target.checked)}
-                                    color="primary"
-                                />
-                            }
-                            label="Estado"
-                        />
-                        {searchByState && (
-                            <>
-                                <Controller
-                                    name="stateType"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            // label="Estado"
-                                            select
-                                            fullWidth
-                                            error={Boolean(errors.stateType)}
-                                            helperText={errors.stateType?.message}
-                                        >
-                                            {stateOptions.map((type) => (
-                                                <MenuItem key={type.value} value={type.value}>
-                                                    {type.label}
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
-                                    )}
-                                />
-                            </>
-                        )}
-                    </Box>
-                    <Box gridColumn="span 12">
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={searchByLocation}
-                                    onChange={(e) => setSearchByLocation(e.target.checked)}
-                                    color="primary"
-                                />
-                            }
-                            label="Localizacion"
-                        />
-                        {searchByLocation && (
-                            <>
-                                <Controller
-                                    name="locationId"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Autocomplete
-                                            id="locationId"
-                                            open={openLocations}
-                                            onOpen={() => {
-                                                setOpenLocations(true);
-                                            }}
-                                            onClose={() => {
-                                                setOpenLocations(false);
-                                            }}
-                                            isOptionEqualToValue={(option, value) => option.id === value?.id}
-                                            getOptionLabel={(option) => option.name || ''}
-                                            groupBy={(option) => option.firstLetter}
-                                            fullWidth
-                                            options={optionsLocations}
-                                            loading={loadingLocation}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Selecciona un cantón"
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        endAdornment: (
-                                                            <Fragment>
-                                                                {loadingLocation ? <CircularProgress color="inherit" size={20} /> : null}
-                                                                {params.InputProps.endAdornment}
-                                                            </Fragment>
-                                                        ),
-                                                        startAdornment: (
-                                                            <InputAdornment position="start">
-                                                                <AddLocation />
-                                                            </InputAdornment>
-                                                        ),
-                                                    }}
-                                                    error={Boolean(errors.locationId)}
-                                                    helperText={errors.locationId?.message}
-                                                />
-                                            )}
-                                            onChange={(_event, data) => field.onChange(data?.id ?? '')}
-                                        />
-                                    )}
-                                />
-                            </>
-                        )}
-                    </Box>
-                    <Box gridColumn="span 12">
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={searchByBranch}
-                                    onChange={(e) => setSearchByBranch(e.target.checked)}
-                                    color="primary"
-                                />
-                            }
-                            label="Sucursal"
-                        />
-                        {searchByBranch && (
-                            <>
-                                <Controller
-                                    name="branchId"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Autocomplete
-                                            id="branchId"
-                                            open={openBranches}
-                                            onOpen={() => {
-                                                setOpenBranches(true);
-                                            }}
-                                            onClose={() => {
-                                                setOpenBranches(false);
-                                            }}
-                                            // getOptionSelected={(option, value) =>
-                                            //     value === undefined || value === "" || option.uniqueKey === value.uniqueKey
-                                            // }
-                                            isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
-                                            getOptionLabel={(option) => option.name || ''}
-                                            fullWidth
-                                            options={optionsBranches}
-                                            loading={loadingBranches}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Seleccione una sucursal"
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        endAdornment: (
-                                                            <Fragment>
-                                                                {loadingBranches ?
-                                                                    <CircularProgress color="inherit"
-                                                                        size={20} /> : null}
-                                                                {params.InputProps.endAdornment}
-                                                            </Fragment>
-                                                        ),
-                                                        startAdornment: (
-                                                            <InputAdornment position="start">
-                                                                <Business />
-                                                            </InputAdornment>
-                                                        ),
-                                                    }}
-                                                    error={Boolean(errors.branchId)}
-                                                    helperText={errors.branchId?.message}
-                                                />
-                                            )}
-                                            onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
-                                        />
-                                    )}
-                                />
-                            </>
-                        )}
-                    </Box>
+            <Tabs
+                value={activeTab}
+                onChange={(event, newValue) => setActiveTab(newValue)}
+                indicatorColor="primary"
+                textColor="primary"
+                centered
+            >
+                <Tab label="Busqueda por Sucursales"/>
+                <Tab label="Busqueda por Documento"/>
+            </Tabs>
+
+            {/* Content of the first tab */}
+            {activeTab === 0 && (
+                <form onSubmit={handleSubmitComplete(onSubmitState)}>
+                    <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
+                        <Box gridColumn="span 12">
+                            <SoftTypography align="center" sx={{fontWeight: 'bold'}}>
+                                Búsqueda de Empresas <SearchIcon/>
+                            </SoftTypography>
+                        </Box>
+
+                        <Box gridColumn="span 11">
+                            {/* Type of Document */}
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={searchByState}
+                                        onChange={(e) => setSearchByState(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Estado"
+                            />
+                            {searchByState && (
+                                <>
+                                    <Controller
+                                        name="stateType"
+                                        control={controlComplete}
+                                        render={({field}) => (
+                                            <TextField
+                                                {...field}
+                                                // label="Estado"
+                                                select
+                                                fullWidth
+                                                error={Boolean(errorsComplete.stateType)}
+                                                helperText={errorsComplete.stateType?.message}
+                                            >
+                                                {stateOptions.map((type) => (
+                                                    <MenuItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        )}
+                                    />
+                                </>
+                            )}
+                        </Box>
+                        <Box gridColumn="span 12">
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={searchByLocation}
+                                        onChange={(e) => setSearchByLocation(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Localizacion"
+                            />
+                            {searchByLocation && (
+                                <>
+                                    <Controller
+                                        name="locationId"
+                                        control={controlComplete}
+                                        render={({field}) => (
+                                            <Autocomplete
+                                                id="locationId"
+                                                open={openLocations}
+                                                onOpen={() => {
+                                                    setOpenLocations(true);
+                                                }}
+                                                onClose={() => {
+                                                    setOpenLocations(false);
+                                                }}
+                                                isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                getOptionLabel={(option) => option.name || ''}
+                                                groupBy={(option) => option.firstLetter}
+                                                fullWidth
+                                                options={optionsLocations}
+                                                loading={loadingLocation}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Selecciona un cantón"
+                                                        InputProps={{
+                                                            ...params.InputProps,
+                                                            endAdornment: (
+                                                                <Fragment>
+                                                                    {loadingLocation ? <CircularProgress color="inherit"
+                                                                                                         size={20}/> : null}
+                                                                    {params.InputProps.endAdornment}
+                                                                </Fragment>
+                                                            ),
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <AddLocation/>
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                        error={Boolean(errorsComplete.locationId)}
+                                                        helperText={errorsComplete.locationId?.message}
+                                                    />
+                                                )}
+                                                onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                            />
+                                        )}
+                                    />
+                                </>
+                            )}
+                        </Box>
+                        <Box gridColumn="span 12">
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={searchByBranch}
+                                        onChange={(e) => setSearchByBranch(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Sucursal"
+                            />
+                            {searchByBranch && (
+                                <>
+                                    <Controller
+                                        name="branchId"
+                                        control={controlComplete}
+                                        render={({field}) => (
+                                            <Autocomplete
+                                                id="branchId"
+                                                open={openBranches}
+                                                onOpen={() => {
+                                                    setOpenBranches(true);
+                                                }}
+                                                onClose={() => {
+                                                    setOpenBranches(false);
+                                                }}
+                                                // getOptionSelected={(option, value) =>
+                                                //     value === undefined || value === "" || option.uniqueKey === value.uniqueKey
+                                                // }
+                                                isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
+                                                getOptionLabel={(option) => option.name || ''}
+                                                fullWidth
+                                                options={optionsBranches}
+                                                loading={loadingBranches}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Seleccione una sucursal"
+                                                        InputProps={{
+                                                            ...params.InputProps,
+                                                            endAdornment: (
+                                                                <Fragment>
+                                                                    {loadingBranches ?
+                                                                        <CircularProgress color="inherit"
+                                                                                          size={20}/> : null}
+                                                                    {params.InputProps.endAdornment}
+                                                                </Fragment>
+                                                            ),
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <Business/>
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                        error={Boolean(errorsComplete.branchId)}
+                                                        helperText={errorsComplete.branchId?.message}
+                                                    />
+                                                )}
+                                                onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
+                                            />
+                                        )}
+                                    />
+                                </>
+                            )}
+                        </Box>
 
 
-                    <Box gridColumn="span 12" sx={{ textAlign: 'center' }}>
-                        <Button type="submit" variant="contained" color="primary">
-                            Enviar
-                        </Button>
+                        <Box gridColumn="span 12" sx={{textAlign: 'center'}}>
+                            <Button type="submit" variant="contained" color="primary">
+                                Enviar
+                            </Button>
+                        </Box>
                     </Box>
-                </Box>
-            </form>
+                </form>
+            )}
+            {/* Content of the second tab */}
+            {activeTab === 1 && (
+                <form onSubmit={handleSubmitDocument(onSubmitDocument)}>
+                    <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={4}>
+                        <Box gridColumn="span 12">
+                            <SoftTypography align="center" sx={{fontWeight: 'bold'}}>
+                                Busqueda de Empresas <SearchIcon/>
+                            </SoftTypography>
+                        </Box>
+
+                        <Box gridColumn="span 12">
+                            {/* Type of Document */}
+                            <Controller
+                                name="typeDocumentId"
+                                control={controlDocument}
+                                render={({field}) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="Tipo de Documento"
+                                        error={Boolean(errorsDocument.typeDocumentId)}
+                                        helperText={errorsDocument.typeDocumentId?.message}
+                                    >
+                                        {documentTypes.map((type) => (
+                                            <MenuItem key={type.value} value={type.value}>
+                                                {type.label}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                )}
+                            />
+                        </Box>
+                        <Box gridColumn="span 12">
+                            <Controller
+                                name="documentId"
+                                control={controlDocument}
+                                defaultValue=""
+                                render={({field}) => (
+                                    <TextField
+                                        fullWidth
+                                        label="Documento de Identidad"
+                                        variant="outlined"
+                                        disabled={!isDocumentIdFieldEnabled}
+                                        {...field}
+                                        error={!!errorsDocument.documentId}
+                                        helperText={errorsDocument.documentId?.message}
+                                    />
+                                )}
+                            />
+                        </Box>
+
+                        <Box gridColumn="span 12" sx={{textAlign: 'center'}}>
+                            <Button type="submit" variant="contained" color="primary">
+                                Enviar
+                            </Button>
+                        </Box>
+                    </Box>
+                </form>
+            )}
         </div>
     );
 };

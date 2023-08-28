@@ -1062,20 +1062,6 @@ export const AddClientForm = () => {
                         </Grid>
                     </Grid>
                 </form>
-                <Snackbar
-                    open={openSnackbar}
-                    autoHideDuration={6000}
-                    onClose={() => setOpenSnackbar(false)}
-                >
-                    <MuiAlert
-                        elevation={6}
-                        variant="filled"
-                        onClose={() => setOpenSnackbar(false)}
-                        severity={snackbarSeverity}
-                    >
-                        {snackbarMessage}
-                    </MuiAlert>
-                </Snackbar>
             </Stack>
         </Stack>
     );

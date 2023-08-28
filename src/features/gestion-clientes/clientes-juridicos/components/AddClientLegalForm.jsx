@@ -5,7 +5,10 @@ import {
     AccordionDetails,
     AccordionSummary,
     Autocomplete,
-    ButtonGroup, Checkbox, FormControlLabel, FormGroup,
+    ButtonGroup,
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
     IconButton,
     InputAdornment,
     Modal,
@@ -73,6 +76,7 @@ export const AddClientLegalForm = () => {
     const [productOptions, setProductOptions] = useState([]);
     const [openProducts, setOpenProducts] = useState(false);
     const loadingProducts = openProducts && options.length === 0;
+
     function sleep(delay = 0) {
         return new Promise((resolve) => {
             setTimeout(resolve, delay);
@@ -210,6 +214,20 @@ export const AddClientLegalForm = () => {
         )
     };
 
+    const [roleOptions, setRoleOptions] = useState([]);
+
+    useEffect(() => {
+        // Fetch group company roles
+        createAPIEndpoint(ENDPOINTS.groupRole)
+            .fetchAllRoles({})
+            .then((res) => {
+                console.log(res.data);
+                setRoleOptions(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     const style = {
         position: "absolute",
@@ -619,10 +637,11 @@ export const AddClientLegalForm = () => {
                                             <AccordionDetails>
                                                 <Box>
                                                     <SoftTypography>
-                                                        {`Cliente: ${member.clientList}`}
+                                                        {`Cliente: ${member.clientName}`}
                                                     </SoftTypography>
+
                                                     <SoftTypography>
-                                                        {`Rol: `}
+                                                        {`Rol: ${roleOptions.find(option => option.id === member.groupRoleId)?.groupRoleName || 'Sin rol'}`}
                                                     </SoftTypography>
                                                 </Box>
                                                 <Box sx={{position: 'absolute', bottom: 0, right: 0}}>
@@ -661,7 +680,7 @@ export const AddClientLegalForm = () => {
                                             color="primary"
                                         />
                                     }
-                                    label="¿Desea asignar una cuenta al Cliente?"
+                                    label="¿Desea asignar una cuenta a la Empresa?"
                                 />
                             </Grid>
                             {includeAccount && (
