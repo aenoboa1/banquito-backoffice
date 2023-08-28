@@ -69,7 +69,7 @@ export default function BranchForm({ isOpen, onClose, onSubmit, handleAddBranch 
                 <Formik
                     initialValues={{
                         name: '',
-                        code: '',
+
                         emailAddress: '',
                         phoneNumber: '',
                         locationId: '',
@@ -80,7 +80,7 @@ export default function BranchForm({ isOpen, onClose, onSubmit, handleAddBranch 
                     validate={(values) => {
                         let errors = {};
                         if (!values.name) errors.name = 'Debe ingresar el nombre de la Sucursal';
-                        if (!values.code) errors.code = 'Debe ingresar un código para la Sucursal';
+
                         if (!values.emailAddress) errors.emailAddress = 'Debe ingresar un correo para la Sucursal';
                         if (!values.phoneNumber) errors.phoneNumber = 'Debe ingresar un teléfono para la Sucursal';
                         if (!values.locationId) errors.locationId = 'Debe ingresar una localización para la Sucursal';
@@ -108,18 +108,7 @@ export default function BranchForm({ isOpen, onClose, onSubmit, handleAddBranch 
                                 />
                                 <ErrorMessage name="name" component={ErrorText} />
                             </div>
-                            <div className="form-group">
-                                <label>Código:</label>
-                                <Field
-                                    type="text"
-                                    name="code"
-                                    as={TextField}
-                                    onChange={handleChange}
-                                    value={values.code}
-                                    fullWidth
-                                />
-                                <ErrorMessage name="code" component={ErrorText} />
-                            </div>
+
                             <div className="form-group">
                                 <label>Correo:</label>
                                 <Field

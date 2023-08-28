@@ -2,8 +2,8 @@ import axios from 'axios'
 
 
 // URL LOCAL
-export const BASE_URL = 'https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/';
-export const BASE_ADMIN_URL = 'https://banquito-ws-gestion-admin-production.up.railway.app/api/v1/';
+export const BASE_URL = 'http://localhost:8080/api/v1/';
+export const BASE_ADMIN_URL = 'http://localhost:8080/api/v1/';
 export const ENDPOINTS = {
     accounts: 'customers',
     geoStructure: 'geo-structure',

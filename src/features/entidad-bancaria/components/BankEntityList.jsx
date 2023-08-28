@@ -110,6 +110,7 @@ export default function BankEntityList() {
             <StyledDataGrid
                 rows={rows}
                 columns={columns}
+                autoHeight // Ajusta la altura automáticamente
                 initialState={{
                     pagination: {
                         paginationModel: {
@@ -118,7 +119,7 @@ export default function BankEntityList() {
                     },
                 }}
                 pageSizeOptions={[5]}
-                rowHeight={200}
+                rowHeight={300}
             />
         </Box>
     );
