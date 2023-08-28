@@ -1,6 +1,18 @@
 import React, {Fragment, useEffect, useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
-import {Autocomplete, ButtonGroup, IconButton, InputAdornment, Modal, Snackbar, TextField} from '@mui/material';
+import {
+    Autocomplete,
+    ButtonGroup,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    InputAdornment,
+    Modal,
+    Snackbar,
+    TextField
+} from '@mui/material';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import * as yup from 'yup';
@@ -8,7 +20,6 @@ import {yupResolver} from '@hookform/resolvers/yup';
 import {createAPIEndpoint, createAPIEndpointProducts, ENDPOINTS} from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
 import {
-    AccountCircle,
     AddCircleOutline,
     AddLocation,
     BlockOutlined,
@@ -37,6 +48,7 @@ import {useRefresh} from "../../../../context/custom/useRefreshContext";
 import Chip from "@mui/material/Chip";
 import MuiAlert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
+import SoftTypography from "../../../../components/SoftTypography";
 
 const validationSchema = yup.object({
     groupName: yup.string().required('Nombre del Grupo es requerido'),
@@ -49,14 +61,16 @@ const validationSchema = yup.object({
     phoneNumber: yup.string().required('Número telefónico requerido'),
     line1: yup.string().required('Línea 1 es requerido'),
     line2: yup.string().required('Línea 2 es requerido'),
-    documentId: yup
-        .string()
-        .required('Documento de identidad es requerido')
-        .length(13, 'Documento de identidad debe tener 13 caracteres'),
     latitude: yup.string().required('Latitud es requerida'),
     longitude: yup.string().required('Longitud es requerida'),
     comments: yup.string().required('Agregue un comentario'),
     state: yup.string().required('Seleccione un estado'),
+});
+
+
+const memberValidationSchema = yup.object({
+    customerId: yup.string().required('Cliente es requerido'),
+    groupRoleId: yup.string().required('Rol es requerido'),
 });
 export const UpdateLegalClientForm = () => {
     const [isActive, setIsActive] = useState(true);
@@ -77,6 +91,7 @@ export const UpdateLegalClientForm = () => {
     const refresh = useRefresh();
 
     const [Branch, setBranch] = useState();
+    const [cantons, setCantons] = useState([]);
     const [groupMembers, setGroupMembers] = useState([]);
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -136,8 +151,9 @@ export const UpdateLegalClientForm = () => {
         setContext({
             ...context, groupCompanyId: companyData.id,
         });
+        console.log(companyData.branchId);
         createAPIEndpoint(ENDPOINTS.bankEntity).fetchBranchByUQ(companyData.branchId, {}).then(res => {
-            console.log(res.data);
+
             setBranch(res.data.name)
         }).then(err => console.log(err))
 
@@ -148,6 +164,42 @@ export const UpdateLegalClientForm = () => {
             setTimeout(resolve, delay);
         });
     }
+
+    const [openRoles, setOpenRoles] = useState(false);
+    const [rolOptions, setRolOptions] = useState([]);
+    const loadingRoles = openRoles && options.length === 0;
+
+    useEffect(() => {
+        let active = true;
+        if (!loadingRoles) {
+            return undefined;
+        }
+        (async () => {
+            await sleep(1e3);
+
+            if (active) {
+                createAPIEndpoint(ENDPOINTS.groupRole).fetchAllRoles({})
+                    .then(
+                        (res) => {
+                            console.log(res.data);
+                            setRolOptions(res.data)
+                        }).then(
+                    err => console.log(err)
+                )
+            }
+        })();
+        return () => {
+            active = false;
+        };
+    }, [loadingRoles]);
+
+
+    useEffect(() => {
+        createAPIEndpoint(ENDPOINTS.geoStructure).fetchProvinceByCountry('ECU', '2').then((res) => {
+            setCantons(res.data.locations);
+        }).then(err => console.log(err))
+    }, []);
+
 
     useEffect(() => {
         let active = true;
@@ -242,6 +294,15 @@ export const UpdateLegalClientForm = () => {
         },
     });
 
+    const {
+        control: controlUpdate,
+        handleSubmit: handleSubmitMember,
+        setValue,
+        formState: {errors: errorsMember},
+    } = useForm({
+        resolver: yupResolver(memberValidationSchema),
+    });
+
     const [roleOptions, setRoleOptions] = useState([]);
     const [customerOptions, setCustomerOptions] = useState([]);
 
@@ -271,13 +332,28 @@ export const UpdateLegalClientForm = () => {
             });
     }, []);
     const onSubmit = (data) => {
-        console.log(context.groupMembers);
         const updatedcontext = {
-            groupMembers: Array.isArray(context.groupMembers) ? [...context.groupMembers] : [], ...data,
+            ... data,
             id: companyData.id, // Append the company ID to the data
         };
         createAPIEndpoint(ENDPOINTS.groupCompany,).putCompany(updatedcontext, {}).then(
+            () => {
+                setOpenSnackbar(true);
+                setSnackbarMessage("Empresa actualizada correctamente");
+                setSnackbarSeverity("success");
+
+            }
         ).catch(err => console.log(err))
+    };
+
+    const onSubmitUpdateMembers = (data) => {
+        console.log(data);
+        createAPIEndpoint(ENDPOINTS.groupCompanyMember,).updateMemberToCompany(data, {}).then(
+            () => {
+                refresh.refreshTable();
+
+
+            }).catch(err => console.log(err))
     };
 
 
@@ -293,6 +369,27 @@ export const UpdateLegalClientForm = () => {
         p: 4
     };
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedRowData, setSelectedRowData] = useState(null); // Change null to your desired default value
+
+    // ... other code ...
+
+    const handleEditClick = (rowData) => {
+        console.log(rowData);
+        setSelectedRowData(rowData);
+
+        setValue('customerId', rowData?.customerId || ''); // Set customerId field value
+        setValue('groupRoleId', rowData?.groupRoleId || ''); // Set groupRoleId field value
+        setValue('groupCompanyId', rowData?.groupCompanyId || ''); // Set groupRoleId field value
+        setValue('state', rowData?.state || ''); // Set groupRoleId field value
+        setIsModalOpen(true);    // Open the modal
+        setIsModalOpen(true);
+    };
+
+    const handleModalClose = () => {
+        setSelectedRowData(null);
+        setIsModalOpen(false);
+    };
     const [open, setOpen] = useState(false);
     const handleOpen = () => {
         setOpen(true);
@@ -333,90 +430,115 @@ export const UpdateLegalClientForm = () => {
                                     <form onSubmit={handleSubmit(onSubmit)}>
                                         <Grid container spacing={4}>
                                             <Grid item xs={12}>
+
                                                 <Controller
                                                     name="branchId"
                                                     control={control}
-                                                    render={({field}) => (<Autocomplete
-                                                        id="branchId"
-                                                        open={openBranches}
-                                                        onOpen={() => {
-                                                            setOpenBranches(true);
-                                                        }}
-                                                        onClose={() => {
-                                                            setOpenBranches(false);
-                                                        }}
-                                                        isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
-                                                        getOptionSelected={(option, value) => value === undefined || value === "" || option.uniqueKey === value.uniqueKey}
-                                                        getOptionLabel={(option) => option.name || Branch}
-                                                        fullWidth
-                                                        options={optionsBranches}
-                                                        loading={loadingSelectBranches}
-                                                        loadingText={"Cargando sucursales..."}
-                                                        renderInput={(params) => (<TextField
-                                                            {...params}
-                                                            label="Seleccione una Sucursal"
-                                                            InputProps={{
-                                                                ...params.InputProps,
-                                                                endAdornment: (<Fragment>
-                                                                    {loadingSelectBranches ?
-                                                                        <CircularProgress color="inherit"
-                                                                                          size={20}/> : null}
-                                                                    {params.InputProps.endAdornment}
-                                                                </Fragment>),
-                                                                startAdornment: (<InputAdornment position="start">
-                                                                    <Business/>
-                                                                </InputAdornment>),
+                                                    render={({field}) => (
+                                                        <Autocomplete
+                                                            id="branchId"
+                                                            open={openBranches}
+                                                            onOpen={() => {
+                                                                setOpenBranches(true);
                                                             }}
-                                                            error={Boolean(errors.branchId)}
-                                                            helperText={errors.branchId?.message}
-                                                        />)}
-                                                        onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
-                                                    />)}
+                                                            onClose={() => {
+                                                                setOpenBranches(false);
+                                                            }}
+                                                            getOptionSelected={(option, value) =>
+                                                                value === undefined || value === "" || option.uniqueKey === value.uniqueKey
+                                                            }
+                                                            isOptionEqualToValue={(option, value) => option.uniqueKey === value?.uniqueKey}
+                                                            getOptionLabel={(option) => option.name || Branch}
+                                                            fullWidth
+                                                            defaultValue={companyData?.branchId || ''} // Set the default value here
+                                                            options={optionsBranches}
+                                                            loading={loadingSelectBranches}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label="Seleccione una Sucursal"
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                        endAdornment: (
+                                                                            <React.Fragment>
+                                                                                {loadingSelectBranches ?
+                                                                                    <CircularProgress color="inherit"
+                                                                                                      size={20}/> : null}
+                                                                                {params.InputProps.endAdornment}
+                                                                            </React.Fragment>
+                                                                        ),
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <Business/>
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                    }}
+                                                                    error={Boolean(errors.branchId)}
+                                                                    helperText={errors.branchId?.message}
+                                                                />
+                                                            )}
+                                                            onChange={(_event, data) => field.onChange(data?.uniqueKey ?? '')}
+                                                        />
+                                                    )}
                                                 />
                                             </Grid>
 
 
                                             <Grid item xs={12}>
+
                                                 <Controller
                                                     name="locationId"
                                                     control={control}
-                                                    render={({field}) => (<Autocomplete
-                                                        id="locationId"
-                                                        open={openLocations}
-                                                        onOpen={() => {
-                                                            setOpenLocations(true);
-                                                        }}
-                                                        onClose={() => {
-                                                            setOpenLocations(false);
-                                                        }}
+                                                    render={({field}) => {
+                                                        const selectedCanton = cantons.find((option) => option.id === field.value);
 
-                                                        isOptionEqualToValue={(option, value) => option.id === value?.id}
-                                                        getOptionLabel={(option) => option.name || ''}
-                                                        groupBy={(option) => option.firstLetter}
-
-                                                        fullWidth
-                                                        options={options}
-                                                        loading={loading}
-                                                        loadingText={"Cargando localizaciones..."}
-                                                        renderInput={(params) => (<TextField
-                                                            {...params}
-                                                            label="Selecciona un cantón"
-                                                            InputProps={{
-                                                                ...params.InputProps,
-                                                                endAdornment: (<React.Fragment>
-                                                                    {loading ? <CircularProgress color="inherit"
-                                                                                                 size={20}/> : null}
-                                                                    {params.InputProps.endAdornment}
-                                                                </React.Fragment>),
-                                                                startAdornment: (<InputAdornment position="start">
-                                                                    <AddLocation/>
-                                                                </InputAdornment>),
-                                                            }}
-                                                            error={Boolean(errors.locationId)}
-                                                            helperText={errors.locationId?.message}
-                                                        />)}
-                                                        onChange={(_event, data) => field.onChange(data?.id ?? '')}
-                                                    />)}
+                                                        return (
+                                                            <Autocomplete
+                                                                id="locationId"
+                                                                open={openLocations}
+                                                                onOpen={() => {
+                                                                    setOpenLocations(true);
+                                                                }}
+                                                                onClose={() => {
+                                                                    setOpenLocations(false);
+                                                                }}
+                                                                isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                                getOptionLabel={(option) => option.name || 'Cantons'}
+                                                                groupBy={(option) => option.firstLetter}
+                                                                defaultValue={companyData?.locationId || ''} // Set the default value here
+                                                                fullWidth
+                                                                options={options}
+                                                                loading={loading}
+                                                                loadingText={"Cargando localizaciones..."}
+                                                                renderInput={(params) => (
+                                                                    <TextField
+                                                                        {...params}
+                                                                        label="Selecciona un cantón"
+                                                                        InputProps={{
+                                                                            ...params.InputProps,
+                                                                            endAdornment: (
+                                                                                <React.Fragment>
+                                                                                    {loading ? <CircularProgress
+                                                                                        color="inherit"
+                                                                                        size={20}/> : null}
+                                                                                    {params.InputProps.endAdornment}
+                                                                                </React.Fragment>
+                                                                            ),
+                                                                            startAdornment: (
+                                                                                <InputAdornment position="start">
+                                                                                    <AddLocation/>
+                                                                                </InputAdornment>
+                                                                            ),
+                                                                        }}
+                                                                        error={Boolean(errors.locationId)}
+                                                                        helperText={errors.locationId?.message}
+                                                                    />
+                                                                )}
+                                                                onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                                                value={selectedCanton || null} // Preselect the selectedCanton based on field value
+                                                            />
+                                                        );
+                                                    }}
                                                 />
                                             </Grid>
 
@@ -457,29 +579,6 @@ export const UpdateLegalClientForm = () => {
                                                         InputProps={{
                                                             startAdornment: (<InputAdornment position="start">
                                                                 <Email/>
-                                                            </InputAdornment>),
-                                                        }}
-                                                    />)}
-                                                />
-                                            </Grid>
-
-
-                                            <Grid item xs={12}>
-                                                {/* Document ID */}
-                                                <Controller
-                                                    name="documentId"
-                                                    control={control}
-                                                    render={({field}) => (<TextField
-                                                        fullWidth
-                                                        type="text"
-                                                        id="documentId"
-                                                        label="Documento de Identidad"
-                                                        {...field}
-                                                        error={Boolean(errors.documentId)}
-                                                        helperText={errors.documentId?.message}
-                                                        InputProps={{
-                                                            startAdornment: (<InputAdornment position="start">
-                                                                <AccountCircle/>
                                                             </InputAdornment>),
                                                         }}
                                                     />)}
@@ -720,8 +819,10 @@ export const UpdateLegalClientForm = () => {
                                                                 flex: 1,
                                                                 renderCell: (params) => (<ButtonGroup variant="outlined"
                                                                                                       aria-label="outlined button group">
-                                                                    <IconButton aria-label="edit">
+                                                                    <IconButton aria-label="edit"
+                                                                                onClick={() => handleEditClick(params.row)}>
                                                                         <EditIcon fontSize="small"/>
+
                                                                     </IconButton>
                                                                 </ButtonGroup>),
                                                             },
@@ -740,6 +841,120 @@ export const UpdateLegalClientForm = () => {
                         </Grid>
                     </SoftBox>
 
+                    {/* Modal */}
+                    <Dialog open={isModalOpen} onClose={handleModalClose}>
+                        <DialogTitle>Editar Miembro</DialogTitle>
+                        <DialogContent>
+                            <form onSubmit={handleSubmitMember(onSubmitUpdateMembers)}>
+
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12}>
+                                        <SoftTypography variant="h6">
+                                            {selectedRowData && (
+                                                <>
+                                                    {customerOptions.map((customer) => {
+                                                        if (customer.id === selectedRowData.customerId) {
+                                                            return `${customer.firstName} ${customer.lastName}`;
+                                                        }
+                                                        return null;
+                                                    })}
+                                                </>
+                                            )}
+                                        </SoftTypography>
+                                    </Grid>
+
+
+                                    <Grid item xs={12}>
+                                        <Controller
+                                            name="customerId"
+                                            control={controlUpdate}
+                                            defaultValue={selectedRowData?.customerId}
+                                            render={() => null} // Omit the rendering part
+                                        />
+                                        <Controller
+                                            name="groupRoleId"
+                                            control={controlUpdate}
+                                            render={({field}) => {
+                                                const selectedRole = roleOptions.find((role) => role.id === field.value);
+                                                return (
+                                                    <Autocomplete
+                                                        id="groupRoleId"
+                                                        open={openRoles}
+                                                        onOpen={() => {
+                                                            setOpenRoles(true);
+                                                        }}
+                                                        onClose={() => {
+                                                            setOpenRoles(false);
+                                                        }}
+                                                        isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                        getOptionLabel={(option) => option.groupRoleName || ''}
+                                                        groupBy={(option) => option.firstLetter}
+                                                        fullWidth
+                                                        options={roleOptions}
+                                                        loading={loadingRoles}
+                                                        loadingText={"Cargando roles..."}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                label="Selecciona un rol"
+                                                                InputProps={{
+                                                                    ...params.InputProps,
+                                                                    endAdornment: (
+                                                                        <Fragment>
+                                                                            {loadingRoles ?
+                                                                                <CircularProgress color="inherit"
+                                                                                                  size={20}/> : null}
+                                                                            {params.InputProps.endAdornment}
+                                                                        </Fragment>
+                                                                    ),
+                                                                    startAdornment: (
+                                                                        <InputAdornment position="start">
+                                                                            <Business/>
+                                                                        </InputAdornment>
+                                                                    ),
+                                                                }}
+                                                            />
+                                                        )}
+                                                        onChange={(_event, data) => field.onChange(data?.id ?? '')}
+                                                        value={selectedRole || null} // Preselect the role based on field value
+                                                    />
+                                                );
+                                            }}
+                                        />
+                                    </Grid>
+
+                                    <Grid item xs={12}>
+                                        <Controller
+                                            name="state"
+                                            control={controlUpdate}
+                                            render={({field}) => (<TextField
+                                                {...field}
+                                                fullWidth
+                                                select // tell TextField to render select
+                                                label="Estado"
+                                            >
+                                                {stateTypes.map((type) => (
+                                                    <MenuItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </MenuItem>))}
+                                            </TextField>)}
+                                        />
+                                    </Grid>
+
+                                </Grid>
+
+                                <DialogActions>
+                                    <Button onClick={handleModalClose}>Cancelar</Button>
+                                    <Button type="submit" variant="contained" color="primary">
+                                        Actualizar
+                                    </Button>
+                                </DialogActions>
+                            </form>
+
+
+                        </DialogContent>
+
+                    </Dialog>
 
                     <Snackbar
                         open={openSnackbar}
@@ -758,6 +973,7 @@ export const UpdateLegalClientForm = () => {
                 </Grid>
             </Grid>
         </DashboardLayout>
-    );
+    )
+        ;
 };
 

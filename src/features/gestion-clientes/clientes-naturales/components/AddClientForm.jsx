@@ -64,7 +64,9 @@ const validationSchema = yup.object({
     groupCompanyId: yup.string().optional(),
     accountAlias: yup.string(),
     productAccountId: yup.string().optional('Seleccione un tipo de cuenta'),
+
 });
+
 export const AddClientForm = () => {
 
 
@@ -264,6 +266,8 @@ export const AddClientForm = () => {
             comments: '',
         },
     });
+
+
 
     const onSubmit = (data) => {
 

@@ -17,6 +17,8 @@ import MuiAlert from "@mui/material/Alert";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import {getStateLabel} from "../../../utils/getStateLabel";
+import {getAccountHolderTypeLabel} from "../../../utils/getAccountLabel";
 
 const schema = yup.object().shape({
     documentId: yup.string().required('Campo requerido'),
@@ -51,6 +53,11 @@ const CustomerAccountForm = () => {
         });
     }
 
+    const stateTypes = [{label: 'Activo', value: 'ACT'}, {label: 'Inactivo', value: 'INA'}, {
+        label: 'Suspendido',
+        value: 'SUS'
+    }];
+
     useEffect(() => {
         let active = true;
         if (!loading) {
@@ -78,6 +85,7 @@ const CustomerAccountForm = () => {
             setOptions([]);
         }
     }, [openProducts]);
+
 
 
     function removeEmptyFields(data) {
@@ -303,16 +311,18 @@ const CustomerAccountForm = () => {
                                     <span>Código Interno de la Cuenta:</span> {createdAccount.codeInternalAccount}
                                 </SoftTypography>
                                 <SoftTypography component="p">
-                                    <span>Tipo de Titular de la Cuenta:</span> {createdAccount.accountHolderType}
+
+                                    <span>Tipo de Titular de la Cuenta:</span> {getAccountHolderTypeLabel(createdAccount.accountHolderType)}
                                 </SoftTypography>
                                 <SoftTypography component="p">
-                                    <span>Estado:</span> {createdAccount.state}
+
+                                    <span>Estado:</span> {getStateLabel(createdAccount.state)}
                                 </SoftTypography>
                                 <SoftTypography component="p">
-                                    <span>Permitir Transacciones:</span> {createdAccount.allowTransactions ? 'Sí' : 'No'}
+                                    <span>Permite Transacciones:</span> {createdAccount.allowTransactions ? 'Sí' : 'No'}
                                 </SoftTypography>
                                 <SoftTypography component="p">
-                                    <span>Monto Máximo  :</span> {createdAccount.maxAmountTransactions}
+                                    <span>Monto Máximo  :</span> {createdAccount.maxAmountTransactions} $
                                 </SoftTypography>
                                 <SoftTypography component="p">
                                     <span>Tasa de Interés:</span> {createdAccount.interestRate}%

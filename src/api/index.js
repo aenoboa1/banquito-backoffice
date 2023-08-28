@@ -90,10 +90,12 @@ export const createAPIEndpoint = endpoint => {
         putCompany: (updatedRecord, token) => axios.put(businessRouteurl, updatedRecord, token),
         fetchByBranchAndLocationAndState: (branch, location, state, token) => axios.get(clientUrl + 'branchandlocationandstate?branch=' + branch + '&locationId=' + location + '&state=' + state, token),
 
+
         // ================================================================= COMPANY METHODS =================================================================
         postCompany : (newRecord, token) => axios.post(businessRouteurl, newRecord, token),
         fetchCompanyByTypeDocumentAndDocumentId: (type, documentId, token) => axios.get(businessRouteurl + '/typedocumentanddocument?typeDocument=' + type + '&document=' + documentId, token),
         assignMemberToCompany : (newRecord, token) => axios.post(groupMember , newRecord, token),
+        updateMemberToCompany : (newRecord, token) => axios.put(groupMember , newRecord, token),
 
         fetchById: (id, token) => axios.get(url + id, token),
         fetchGroupCompany: (token) => axios.get(businessurl + 'all', token),

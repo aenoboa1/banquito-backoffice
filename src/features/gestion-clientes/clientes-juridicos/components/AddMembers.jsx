@@ -152,20 +152,25 @@ const AddMemberForm = ({setIsActive}) => {
         {label: 'Pasaporte', value: 'PASS'},
         {label: 'RUC', value: 'RUC'},
     ];
+
     const onSubmit = (data) => {
         if (activeStep === 0) {
             handleNext();
         }
-
+        console.log("selectedClient:", selectedClient); // Debug: Check the value of selectedClient
         const updatedMembers = Array.isArray(context.groupMembers)
-
             ? [...context.groupMembers, {
+                clientName: `${selectedClient?.firstName} ${selectedClient?.lastName}`,
+                customerId: selectedClient?.id,
+                ...data,
+            }]
+            : [{
                 ...data,
                 customerId: selectedClient?.id,
                 clientName: `${selectedClient?.firstName} ${selectedClient?.lastName}`
-            }]
-            : [{...data, clientId: selectedClient?.id}];
+            }];
 
+        console.log("updatedMembers:", updatedMembers); // Debug: Check the value of updatedMembers
         setContext({
             ...context,
             groupMembers: updatedMembers,
@@ -200,6 +205,7 @@ const AddMemberForm = ({setIsActive}) => {
                 console.error(error);
             });
     };
+
 
     return (
         <div>

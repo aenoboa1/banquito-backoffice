@@ -9,6 +9,8 @@ import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {createAPIEndpoint, ENDPOINTS} from "../../../../api";
 import useStateContext from "../../../../context/custom/useStateContext";
+import Chip from "@mui/material/Chip";
+import {BlockOutlined, CheckCircleOutline, ErrorOutline} from "@mui/icons-material";
 
 const stateOptions = [
     {value: 'ACT', label: 'Activo'},
@@ -22,6 +24,32 @@ const genderTypes = [
     {label: 'Femenino', value: 'F'},
 ];
 
+const getStateChipColor = (stateValue) => {
+    switch (stateValue) {
+        case 'ACT':
+            return 'success';
+        case 'INA':
+        case 'SUS':
+        case 'BLO':
+            return 'error';
+        default:
+            return 'default';
+    }
+};
+
+// Helper function to get the appropriate icon based on the state
+const getStateIcon = (stateValue) => {
+    switch (stateValue) {
+        case 'ACT':
+            return <CheckCircleOutline />;
+        case 'INA':
+        case 'SUS':
+        case 'BLO':
+            return <BlockOutlined />;
+        default:
+            return <ErrorOutline />;
+    }
+};
 
 const StyledGridOverlay = styled('div')(({theme}) => ({
     display: 'flex',
@@ -151,34 +179,41 @@ export const LegalDataGrid = ({data}) => {
             headerName: 'Teléfono',
             width: 150,
         },
+
         {
             field: 'state',
             headerName: 'Estado',
             width: 120,
-            valueGetter: (params) => {
+
+            renderCell: (params) => {
                 const stateOption = stateOptions.find((option) => option.value === params.value);
-                return stateOption ? stateOption.label : '';
+                const chipColor = getStateChipColor(params.value);
+                const stateIcon = getStateIcon(params.value);
+
+                return stateOption ? (
+                    <Chip label={stateOption.label} size="small" color={chipColor} icon={stateIcon}/>
+                ) : null;
             },
-        },
+        }, // Use Spanish name for State
         {
             field: 'line1',
             headerName: 'Línea 1',
-            width: 200,
+            width: 100,
         },
         {
             field: 'line2',
             headerName: 'Línea 2',
-            width: 200,
+            width: 100,
         },
         {
             field: 'latitude',
             headerName: 'Latitud',
-            width: 120,
+            width: 80,
         },
         {
             field: 'longitude',
             headerName: 'Longitud',
-            width: 120,
+            width: 80,
         },
         {
             field: 'creationDate',
@@ -192,7 +227,17 @@ export const LegalDataGrid = ({data}) => {
         {
             field: 'comments',
             headerName: 'Comentarios',
-            width: 200,
+            width: 120,
+        },
+
+        {
+            field: "groupMembers",
+            headerName: "N° de Miembros de Grupo",
+            width: 100,
+            renderCell: (params) => {
+                const membersWithActState = params.value?.filter(member => member.state === 'ACT');
+                return membersWithActState?.length || 0; // Display the count of group members with "ACT" state
+            },
         },
         {
             field: 'actions',
@@ -213,6 +258,7 @@ export const LegalDataGrid = ({data}) => {
                 );
             },
         },
+
     ];
     return (
         <>
@@ -224,6 +270,12 @@ export const LegalDataGrid = ({data}) => {
                     slots={{
                         noRowsOverlay: CustomNoRowsOverlay,
                     }}
+                    sx={{
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            textOverflow: "clip",
+                            whiteSpace: "break-spaces",
+                            lineHeight: 1
+                        }}}
                     getRowHeight={() => 'auto'}
                     rowsPerPageOptions={[5, 10, 20]}
                     disableRowSelectionOnClick

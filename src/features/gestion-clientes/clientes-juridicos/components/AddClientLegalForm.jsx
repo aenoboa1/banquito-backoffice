@@ -12,6 +12,7 @@ import {
     IconButton,
     InputAdornment,
     Modal,
+    Snackbar,
     TextField
 } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -38,10 +39,10 @@ import {
 } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import SoftButton from 'components/SoftButton';
 import Grid from "@mui/material/Grid";
 import FormControl from "@mui/material/FormControl";
+import MuiAlert from "@mui/material/Alert";
 
 const validationSchema = yup.object({
     groupName: yup.string().required('Nombre del Grupo es requerido'),
@@ -76,6 +77,11 @@ export const AddClientLegalForm = () => {
     const [productOptions, setProductOptions] = useState([]);
     const [openProducts, setOpenProducts] = useState(false);
     const loadingProducts = openProducts && options.length === 0;
+
+    // error codes
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // or "error"
 
     function sleep(delay = 0) {
         return new Promise((resolve) => {
@@ -207,10 +213,23 @@ export const AddClientLegalForm = () => {
         };
 
         createAPIEndpoint(ENDPOINTS.groupCompany,
-        ).postCompany(updatedcontext, {}).then(
-
-        ).catch(
-            err => console.log(err)
+        ).postCompany(updatedcontext, {}).then(() => {
+            setOpenSnackbar(true);
+            setSnackbarMessage("Compañía creada correctamente");
+            setSnackbarSeverity("success");
+        }).catch(
+            err => {
+                console.log(err);
+                if (err.response.data === "El ruc/correo ya fue registrado") {
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("El ruc/correo ya fue registrado");
+                    setSnackbarSeverity("error");
+                } else if (err.response.data === "400 : \"El usuario/compania ya tiene una cuenta de este tipo\"") {
+                    setOpenSnackbar(true);
+                    setSnackbarMessage("El usuario ya tiene una cuenta de este tipo");
+                    setSnackbarSeverity("error");
+                }
+            }
         )
     };
 
@@ -226,6 +245,7 @@ export const AddClientLegalForm = () => {
             })
             .catch((err) => {
                 console.log(err);
+
             });
     }, []);
 
@@ -653,10 +673,6 @@ export const AddClientLegalForm = () => {
                                                                     onClick={() => handleDeleteMember(index)}>
                                                             <DeleteIcon fontSize="small"/>
                                                         </IconButton>
-
-                                                        <IconButton aria-label="edit">
-                                                            <EditIcon fontSize="small"/>
-                                                        </IconButton>
                                                     </ButtonGroup>
                                                 </Box>
                                             </AccordionDetails>
@@ -760,14 +776,40 @@ export const AddClientLegalForm = () => {
                     </FormControl>
                 </Box>
 
-                <Box gridColumn="span 12">
-                    <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"}
-                    >
-                        Crear Empresa
-                    </SoftButton>
-                </Box>
+                {/* Check if context.groupMembers has at least one member */}
+
+                {context.groupMembers && context.groupMembers.length > 0 ? (
+                    <Box gridColumn="span 12">
+                        <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"}>
+                            Crear Empresa
+                        </SoftButton>
+                    </Box>
+                ) : (
+                    <Box gridColumn="span 12">
+                        <SoftButton color={"primary"} variant={"contained"} fullWidth type={"submit"} disabled>
+                            Crear Empresa
+                        </SoftButton>
+                    </Box>
+                )}
             </Box>
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={6000}
+                onClose={() => setOpenSnackbar(false)}
+            >
+                <MuiAlert
+                    elevation={6}
+                    variant="filled"
+                    onClose={() => setOpenSnackbar(false)}
+                    severity={snackbarSeverity}
+                >
+                    {snackbarMessage}
+                </MuiAlert>
+            </Snackbar>
         </form>
-    );
+
+
+    )
+        ;
 };
 
